@@ -415,6 +415,31 @@ tr.row:hover .sticky{background:#141b27}
 .nav-btn{line-height:1.25;padding:clamp(3px,.8vh,9px) 10px}
 .lg-list .lg-btn{line-height:1.2;padding:clamp(3px,.75vh,8px) 7px;font-size:13px;gap:7px}
 .side-title{padding-bottom:clamp(1px,.5vh,6px)}
+
+/* ---------- lateral ocupa a altura toda ---------- */
+.side{display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
+.side-group{display:flex;flex-direction:column;flex:var(--n,1) 1 auto;min-height:0}
+.side-group > .nav-btn{flex:1 1 auto;min-height:28px;max-height:54px}
+.nav-btn{font-size:clamp(14px,2vh,16px);padding:0 12px}
+.nav-btn svg{width:clamp(17px,2.3vh,20px);height:clamp(17px,2.3vh,20px)}
+.lg-list{flex:1 1 auto;grid-auto-rows:minmax(28px,54px);align-content:start}
+.lg-list .lg-btn{padding:0 8px;font-size:clamp(13px,1.9vh,15px)}
+.lg-list .lg-logo{width:clamp(18px,2.8vh,24px);height:clamp(18px,2.8vh,24px)}
+.side-title{font-size:clamp(11px,1.5vh,12.5px);padding-bottom:clamp(2px,.6vh,6px)}
+.side-foot{margin-top:0;flex:none}
+.brand{flex:none;gap:12px}
+.brand-mark{width:clamp(36px,5.4vh,46px);height:clamp(36px,5.4vh,46px);border-radius:13px}
+.brand-mark svg{width:58%;height:58%}
+.brand b{font-size:clamp(22px,3.3vh,28px)}
+.brand span{font-size:clamp(11.5px,1.6vh,13.5px)}
+.side-group{min-height:auto}
+.side-group.lg-group{flex:none}
+.lg-list{flex:none;grid-auto-rows:clamp(28px,4.8vh,44px)}
+.side-group > .nav-btn{min-height:24px;max-height:50px}
+.brand b{font-size:clamp(20px,3vh,25px);white-space:nowrap}
+@media (max-height:600px){.brand-mark{width:32px;height:32px}.side{gap:4px}}
+.nav-btn{font-size:clamp(14px,2.2vh,17px)}
+.nav-btn svg{width:clamp(17px,2.5vh,21px);height:clamp(17px,2.5vh,21px)}
 </style>
 </head>
 <body>
@@ -640,10 +665,10 @@ function renderSide(){
   $('#side').innerHTML = `
     <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 19V11M10 19V6M16 19v-5M21 19H3"/></svg></div>
       <div><b>Radar das Seis</b><span>by Enzo Monteiro</span></div></div>
-    <div class="side-group"><div class="side-title">Ligas</div>
+    <div class="side-group lg-group"><div class="side-title">Ligas</div>
       <div class="lg-list">${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}" title="${LEAGUES[k].name} ${LEAGUES[k].season}">${lgDot(k)}<span class="lg-n">${LG_SHORT[k]}</span></button>`).join('')}</div>
     </div>
-    ${NAV.map(([g,items])=>`<nav class="side-group" aria-label="${g}"><div class="side-title">${g}</div>
+    ${NAV.map(([g,items])=>`<nav class="side-group" style="--n:${items.length}" aria-label="${g}"><div class="side-title">${g}</div>
       ${items.map(([v,l,ic])=>`<button class="nav-btn" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}${l}</button>`).join('')}</nav>`).join('')}
     ${SOON.length?`<div class="side-group"><div class="side-title">Próximas etapas</div>
       ${SOON.map(([l,ic])=>`<button class="nav-btn" disabled>${icon(ic)}${l}<span class="soon">em breve</span></button>`).join('')}</div>`:''}
