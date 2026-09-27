@@ -391,6 +391,30 @@ tr.row:hover .sticky{background:#141b27}
 .bt2 i.ag{background:#566074}
 .bt2 .bv{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:13px}
 @media (max-width:620px){.bchart{gap:4px;height:160px}.bt2 .bv{font-size:11px}}
+
+/* ---------- lateral fixa: todos os tópicos visíveis, sem barra de rolagem ---------- */
+.side{height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;
+  padding:clamp(12px,2.4vh,22px) 14px clamp(10px,1.8vh,18px);gap:clamp(6px,1.5vh,18px)}
+.side::-webkit-scrollbar{display:none;width:0;height:0}
+.brand-mark{width:clamp(30px,4.6vh,38px);height:clamp(30px,4.6vh,38px)}
+.brand b{font-size:clamp(17px,2.5vh,21px)}
+.brand span{font-size:clamp(11px,1.5vh,12.5px)}
+.side-title{font-size:11px;padding:0 10px clamp(2px,.6vh,7px)}
+.lg-list{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.lg-list .lg-btn{gap:8px;padding:clamp(4px,.85vh,9px) 8px;font-size:13.5px;min-width:0}
+.lg-list .lg-logo{width:clamp(18px,2.6vh,22px);height:clamp(18px,2.6vh,22px)}
+.nav-btn{padding:clamp(4px,.9vh,9px) 10px;font-size:clamp(13.5px,1.9vh,15px);gap:10px}
+.nav-btn svg{width:17px;height:17px}
+.nav-btn[aria-current="page"]::before{top:22%;bottom:22%}
+.side-foot{font-size:11px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-height:680px){.brand span{display:none}.side-foot{-webkit-line-clamp:1}}
+@media (max-height:600px){.side-foot{display:none}.soon{display:none}}
+@media (max-width:920px){.side{height:100dvh;padding-top:calc(clamp(12px,2.4vh,22px) + env(safe-area-inset-top,0px));padding-bottom:calc(clamp(10px,1.8vh,18px) + env(safe-area-inset-bottom,0px))}}
+
+.side{gap:clamp(4px,1.2vh,16px)}
+.nav-btn{line-height:1.25;padding:clamp(3px,.8vh,9px) 10px}
+.lg-list .lg-btn{line-height:1.2;padding:clamp(3px,.75vh,8px) 7px;font-size:13px;gap:7px}
+.side-title{padding-bottom:clamp(1px,.5vh,6px)}
 </style>
 </head>
 <body>
@@ -440,6 +464,7 @@ const LEAGUES = {
       zones:[[1,3,'Champions League','#3b82f6'],[4,4,'Qualificação Champions','#60a5fa'],[5,5,'Europa League','#f97316'],[6,6,'Conference League','#22c55e'],[16,16,'Playoff de rebaixamento','#eab308'],[17,18,'Rebaixamento','#ef4444']]},
 };
 const ORDER = ['br','en','es','it','de','fr'];
+const LG_SHORT = {br:'Brasileirão', en:'Premier', es:'La Liga', it:'Serie A', de:'Bundesliga', fr:'Ligue 1'};
 
 /* ---------- state ---------- */
 const S = {lg:'br', view:'home', team:{}, cmp:{}, mode:'geral', round:{}, metric:'pts', player:{}, squad:{}, pmetric:'g', pq:'', ref:{}, rsort:'j'};
@@ -609,14 +634,14 @@ const NAV_ALL = [
 ];
 const IS_GH = typeof GH!=='undefined' && GH === true;
 const NAV = IS_PUBLIC ? NAV_ALL.map(([g,items])=> g==='Jogadores' ? (IS_GH ? [g,[['scorers','Artilharia','user']]] : null) : [g, items.filter(([v])=>v!=='refs')]).filter(Boolean) : NAV_ALL;
-const SOON = IS_PUBLIC ? [] : [['Pós-jogo','doc']];
+const SOON = [];
 function renderSide(){
   const lastDate = ORDER.map(k=>league(k).byDate.slice(-1)[0]?.[1]||'').sort().pop();
   $('#side').innerHTML = `
     <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 19V11M10 19V6M16 19v-5M21 19H3"/></svg></div>
       <div><b>Radar das Seis</b><span>by Enzo Monteiro</span></div></div>
     <div class="side-group"><div class="side-title">Ligas</div>
-      ${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}">${lgDot(k)}<span class="lg-n">${LEAGUES[k].name}</span><small>${LEAGUES[k].season}</small></button>`).join('')}
+      <div class="lg-list">${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}" title="${LEAGUES[k].name} ${LEAGUES[k].season}">${lgDot(k)}<span class="lg-n">${LG_SHORT[k]}</span></button>`).join('')}</div>
     </div>
     ${NAV.map(([g,items])=>`<nav class="side-group" aria-label="${g}"><div class="side-title">${g}</div>
       ${items.map(([v,l,ic])=>`<button class="nav-btn" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}${l}</button>`).join('')}</nav>`).join('')}
