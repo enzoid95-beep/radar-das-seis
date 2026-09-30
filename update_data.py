@@ -293,6 +293,9 @@ def update_api_football(out, previous):
         return extra
     if now - af.get("last", 0) < AF_EVERY:
         return extra
+    # plano sem acesso à temporada atual: só tenta de novo uma vez por semana (caso o plano mude)
+    if af.get("blocked") and now - af.get("blockedAt", 0) < 7 * 24 * 3600:
+        return extra
     af["last"] = now
     af["errors"] = {}
     today = datetime.datetime.now(BRT).date()
@@ -368,10 +371,17 @@ def update_api_football(out, previous):
         except Exception as err:  # não derruba a atualização principal
             af["errors"][key] = str(err)[:300]
             print(f"  aviso API-Football {key}: {err}")
-    try:
-        update_af_players(out, extra, af)
-    except Exception as err:
-        print(f"  aviso API-Football jogadores: {err}")
+    plan_block = [e for e in af.get("errors", {}).values() if "do not have access to this season" in e or "plan" in e.lower() and "season" in e.lower()]
+    if plan_block and len(plan_block) >= len([k for k in AF_LEAGUES if out["leagues"].get(k)]):
+        af["blocked"] = True
+        af["blockedAt"] = now
+        print("  API-Football: o plano atual não cobre a temporada; nova tentativa em 7 dias.")
+    else:
+        af["blocked"] = False
+        try:
+            update_af_players(out, extra, af)
+        except Exception as err:
+            print(f"  aviso API-Football jogadores: {err}")
     extra["_af"] = af
     return extra
 

@@ -3309,7 +3309,7 @@ function viewPCompare(L){
   return head('Comparar jogadores',`${L.cfg.full} ${L.cfg.season} · indicadores escolhidos pela posição do primeiro jogador`)+`
   <div class="cmp-head fade">${card(A,'a')}<div class="vs">×</div>${card(B,'b')}</div>
   <div class="panel cmp-ind" style="--ca:${ca};--cb:${cb}"><h2>Indicadores de ${gname[grpA]?gname[grpA].toLowerCase():'jogador'}</h2><p class="sub">${hasA&&hasB?`${esc(A.n)} vence em ${wa} · ${esc(B.n)} vence em ${wb}. A barra mais forte indica o melhor dos dois.`:`${[!hasA?esc(A.n):'',!hasB?esc(B.n):''].filter(Boolean).join(' e ')} ${(!hasA&&!hasB)?'estão':'está'} fora da lista de artilheiros da liga, e a fonte não publica números para quem não está nela. Por isso aparece “—”.`}</p><div class="crows">${crows}</div>
-    <p class="src" style="margin-top:12px">${IS_GH ? (bothFull ? `Fonte: API-Football${(DATA[L.lg]||{}).plAt?`, atualizado em ${new Date(DATA[L.lg].plAt).toLocaleDateString('pt-BR')}`:''}. As estatísticas de cada liga são renovadas em rodízio a cada 5 ou 6 dias.` : 'Fonte: football-data.org. As estatísticas completas (minutos, passes, desarmes…) desta liga ainda estão chegando pela API-Football, em rodízio de 5 ou 6 dias.') : 'Fonte: eventos das partidas registrados pela Opta. Sem escalações, a fonte não informa minutos, desarmes nem passes.'}</p></div>`;
+    <p class="src" style="margin-top:12px">${IS_GH ? (bothFull ? `Fonte: API-Football${(DATA[L.lg]||{}).plAt?`, atualizado em ${new Date(DATA[L.lg].plAt).toLocaleDateString('pt-BR')}`:''}. As estatísticas de cada liga são renovadas em rodízio a cada 5 ou 6 dias.` : ((DATA._af||{}).blocked ? 'Fonte: football-data.org. Jogos, gols e assistências aparecem só para quem está na lista de artilheiros da liga.' : 'Fonte: football-data.org. As estatísticas completas (minutos, passes, desarmes…) desta liga ainda estão chegando pela API-Football, em rodízio de 5 ou 6 dias.')) : 'Fonte: eventos das partidas registrados pela Opta. Sem escalações, a fonte não informa minutos, desarmes nem passes.'}</p></div>`;
 }
 document.addEventListener('change', e=>{
   const ts = e.target.closest && e.target.closest('[data-pcteam]');
@@ -3390,6 +3390,7 @@ function ghTeamMarket(L, t){
   if(!IS_GH) return '';
   const D = DATA[L.lg] || {}, inj = (D.inj||{})[t.i], tr = (D.tr||{})[t.i];
   const af = DATA._af || {}, err = (af.errors||{})[L.lg];
+  if(!tr && !inj) return '';   // sem dados da API-Football para esta liga: a seção não aparece
   const note = err ? `<p class="src">A API-Football recusou a consulta desta liga (${esc(err.slice(0,140))}). Se aparecer menção a temporada ou plano, o plano grátis não cobre a temporada atual.</p>` : '';
   const season = L.cfg.season;
   let out = '';
