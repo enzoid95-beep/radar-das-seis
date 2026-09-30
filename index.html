@@ -918,6 +918,7 @@ body::after{background:
 tr.row.zoned td.sticky{background:color-mix(in srgb,var(--zc) 7%,transparent)!important}
 tr.row.zoned:hover td.sticky{background:color-mix(in srgb,var(--zc) 12%,transparent)!important}
 tr.row.mopen td.sticky{background:color-mix(in srgb,var(--g1) 10%,transparent)!important}
+.sq-num{font-style:normal;font:700 13px/1 "Barlow Condensed",sans-serif;color:var(--g2);margin-right:6px}
 </style>
 </head>
 <body>
@@ -973,13 +974,13 @@ const ORDER = ['br','en','es','it','de','fr'];
 const LG_SHORT = {br:'Brasileirão', en:'Premier', es:'La Liga', it:'Serie A', de:'Bundesliga', fr:'Ligue 1'};
 
 /* ---------- state ---------- */
-const S = {lg:'br', view:'home', team:{}, cmp:{}, mode:'geral', round:{}, metric:'pts', player:{}, squad:{}, pmetric:'g', pq:'', ref:{}, rsort:'j'};
+const S = {lg:'br', view:'home', team:{}, cmp:{}, mode:'geral', round:{}, metric:'pts', player:{}, squad:{}, pmetric:'g', pq:'', ref:{}, rsort:'j', gteam:{}, gplayer:{}, gref:{}, gq:''};
 try { Object.assign(S, JSON.parse(localStorage.getItem('cdl-state')||'{}')); } catch(e){}
 if(!LEAGUES[S.lg]) S.lg='br';
 if(typeof PUBLIC!=='undefined' && PUBLIC===true && ['player','squad','prank','refs'].includes(S.view)) S.view='home';
-if(!(typeof GH!=='undefined' && GH===true) && S.view==='scorers') S.view='home';
-['player','squad','ref'].forEach(k=>{ if(!S[k]||typeof S[k]!=='object') S[k]={}; }); S.pq='';
-const save = () => { try { const {pq,squadOur,mtab,...keep}=S; localStorage.setItem('cdl-state', JSON.stringify(keep)); } catch(e){} };
+if(!(typeof GH!=='undefined' && GH===true) && ['scorers','gsquad','gplayer','grefs'].includes(S.view)) S.view='home';
+['player','squad','ref','gteam','gplayer','gref'].forEach(k=>{ if(!S[k]||typeof S[k]!=='object') S[k]={}; }); S.pq='';
+const save = () => { try { const {pq,gq,squadOur,mtab,...keep}=S; localStorage.setItem('cdl-state', JSON.stringify(keep)); } catch(e){} };
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -1139,7 +1140,7 @@ const NAV_ALL = [
   ['Jogadores',[['player','Perfil do jogador','user'],['squad','Elencos','shirt'],['prank','Ranking de jogadores','rank']]],
 ];
 const IS_GH = typeof GH!=='undefined' && GH === true;
-const NAV = IS_PUBLIC ? NAV_ALL.map(([g,items])=> g==='Jogadores' ? (IS_GH ? [g,[['scorers','Artilharia','user']]] : null) : [g, items.filter(([v])=>v!=='refs')]).filter(Boolean) : NAV_ALL;
+const NAV = IS_PUBLIC ? NAV_ALL.map(([g,items])=> g==='Jogadores' ? (IS_GH ? [g,[['gplayer','Perfil do jogador','user'],['gsquad','Elencos','shirt'],['scorers','Artilharia','rank']]] : null) : [g, items.filter(([v])=>v!=='refs').concat(IS_GH && g==='Liga' ? [['grefs','Árbitros','whistle']] : [])]).filter(Boolean) : NAV_ALL;
 const SOON = [];
 /* ajusta a altura dos itens para toda a lateral caber na tela, sem rolagem */
 function fitSide(){
@@ -2002,7 +2003,7 @@ function adapt(raw){
     const teams = (L.teams||[]).map((t,i)=>{ const m = mm[i];
       return m ? {n:m.n, f:t.full||m.f, a:t.tla||m.a, c:m.h, h:m.h, col:m.col, hc:m.hc}
                : {n:t.name, f:t.full||t.name, a:t.tla||t.name.slice(0,3).toUpperCase(), c:t.crest, h:t.crest, col:LEAGUES[lg].g[0], hc:null}; });
-    D[lg] = {teams, matches:L.matches||[], scorers:L.scorers||[]};
+    D[lg] = {teams, matches:L.matches||[], scorers:L.scorers||[], squads:L.squads||[], refs:L.refs||[]};
   });
   return D;
 }
@@ -2191,7 +2192,7 @@ const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)'
 let lastPageKey = null, quietRender = false, spinLeague = false, indPos = null;
 const FRESH = new Map();
 const pageKey = () => [S.lg, S.view, S.view==='team'?S.team[S.lg]:'', S.view==='player'?S.player[S.lg]:'', S.view==='refs'?S.ref[S.lg]:'',
-  S.view==='matches'?S.round[S.lg]:'', S.view==='squad'?S.squad[S.lg]:'', S.view==='compare'?JSON.stringify(S.cmp[S.lg]||''):''].join('|');
+  S.view==='matches'?S.round[S.lg]:'', S.view==='squad'?S.squad[S.lg]:'', S.view==='compare'?JSON.stringify(S.cmp[S.lg]||''):'', S.view==='gsquad'?S.gteam[S.lg]:'', S.view==='gplayer'?S.gplayer[S.lg]:'', S.view==='grefs'?S.gref[S.lg]:''].join('|');
 
 /* troca de tabela/ranking: linhas deslizam até a nova posição */
 const FLIP_SEL = '#view tr.row[data-team], #view tr.row[data-ref], #view .ritem[data-team], #view .ritem[data-player]';
@@ -2354,6 +2355,115 @@ function afterRender(pageChanged, snap){
   } else playFlip(snap);
 }
 
+/* ================= VERSÃO GITHUB: elencos, jogadores e árbitros (football-data.org) ================= */
+const GPOS = [['Goleiros',['goalkeeper']],['Defensores',['defence','defender','centre-back','left-back','right-back','back']],
+  ['Meio-campistas',['midfield','midfielder','defensive midfield','central midfield','attacking midfield','left midfield','right midfield']],
+  ['Atacantes',['offence','attacker','forward','centre-forward','left winger','right winger','second striker','winger','striker']]];
+const gGroup = pos => { const p=(pos||'').toLowerCase(); const i=GPOS.findIndex(([,ks])=>ks.some(k=>p===k||p.includes(k))); return i<0?4:i; };
+function gData(L){ const D=DATA[L.lg]||{}; return {squads:D.squads||[], scorers:D.scorers||[], refs:D.refs||[]}; }
+function gIndex(L){
+  if(L._g) return L._g;
+  const {squads,scorers}=gData(L), players={}, byTeam={};
+  squads.forEach(sq=>{ byTeam[sq.t]=sq; (sq.players||[]).forEach(p=>{ players[p.id]={...p, t:sq.t}; }); });
+  scorers.forEach((s,i)=>{ const p = s.id!=null && players[s.id]; const st={mp:s.mp,g:s.g,a:s.a||0,p:s.p||0};
+    if(p) p.st=st; else if(s.id!=null) players[s.id]={id:s.id,n:s.n,pos:s.pos,nat:s.nat,t:s.t,st,stub:true}; });
+  return L._g={players, byTeam, list:Object.values(players)};
+}
+const gRank = (L,p) => { const sc=gData(L).scorers; if(!p.st) return null; return 1+sc.filter(s=>s.g>p.st.g).length; };
+const gEmpty = (t,s) => `<div class="panel empty-state"><h2>${t}</h2><p>${s}</p></div>`;
+function viewGSquad(L){
+  const G=gIndex(L); if(!Object.keys(G.byTeam).length) return head('Elencos',`${L.cfg.full} ${L.cfg.season}`)+gEmpty('Elencos aparecem na próxima atualização','Os jogadores de cada clube chegam junto com a próxima atualização automática dos dados.');
+  let sel = S.gteam[L.lg]; if(G.byTeam[sel]==null) sel = L.table[0].i; S.gteam[L.lg]=sel;
+  const t=L.T[sel], sq=G.byTeam[sel]||{players:[]};
+  const ps=(sq.players||[]).map(p=>G.players[p.id]||p).sort((a,b)=>gGroup(a.pos)-gGroup(b.pos)||(a.num??999)-(b.num??999)||a.n.localeCompare(b.n));
+  const ages=ps.map(p=>ageOf(p.dob)).filter(a=>a!=null), home={br:'Brazil',en:'England',es:'Spain',it:'Italy',de:'Germany',fr:'France'}[L.lg];
+  const groups=[0,1,2,3,4].map(g=>[g,ps.filter(p=>gGroup(p.pos)===g)]).filter(x=>x[1].length);
+  const gname = g => g<4 ? GPOS[g][0] : 'Outros';
+  return head('Elencos',`${L.cfg.full} ${L.cfg.season}`)+`
+  <div class="picker" role="group" aria-label="Escolher clube">${L.table.map(x=>`<button data-gteam="${x.i}" aria-pressed="${x.i===sel}" title="${esc(x.name)}" style="--tc:${x.col}"><img src="${x.hi}" alt="${esc(x.name)}"></button>`).join('')}</div>
+  <section class="thero fade" style="${heroVars(L.lg,t)}">
+    <img class="big" src="${t.hi}" alt="">
+    <div><div class="kick">${lgDot(L.lg)}Elenco ${L.cfg.season}</div><h1>${esc(t.name)}</h1>
+      <div class="line"><div><b class="num">${ps.length}</b><span>jogadores</span></div><div><b class="num">${ages.length?nf1.format(ages.reduce((a,b)=>a+b,0)/ages.length):'—'}</b><span>idade média</span></div>
+      <div><b class="num">${ps.filter(p=>p.nat&&p.nat!==home).length}</b><span>estrangeiros</span></div>${sq.coach?`<div><b>${esc(sq.coach)}</b><span>técnico</span></div>`:''}</div></div>
+    <button class="posbig" data-team="${t.i}"><b class="num">${t.pos}º</b><span>ver perfil do time</span></button>
+  </section>
+  ${ps.length?groups.map(([g,arr])=>`<div class="panel" style="margin-bottom:14px"><h2>${gname(g)}</h2><div class="sq-grid">
+    ${arr.map(p=>{const n=nat(p.nat),a=ageOf(p.dob);return `<button class="sq-card" data-gplayer="${p.id}"><span class="sq-main"><b>${p.num!=null?`<em class="sq-num">${p.num}</em>`:''}${esc(p.n)}</b><small>${n.f} ${esc(n.pt)}${a!=null?` · ${a} anos`:''}</small></span><span class="sq-st num">${p.st&&p.st.g?`<i>${p.st.g}</i><em>G</em>`:''}${p.st&&p.st.a?`<i>${p.st.a}</i><em>A</em>`:''}</span></button>`}).join('')}</div></div>`).join('')
+   : gEmpty('Elenco não informado','A fonte ainda não publicou os jogadores deste clube.')}
+  <p class="src">Fonte: football-data.org. Gols e assistências para jogadores que estão na lista de artilheiros da liga.</p>`;
+}
+function viewGPlayer(L){
+  const G=gIndex(L);
+  const search=`<div class="psearch"><input id="gq" type="search" placeholder="Buscar jogador pelo nome" autocomplete="off" value="${esc(S.gq||'')}" aria-label="Buscar jogador"><div id="gq-res" class="pq-res"></div></div>`;
+  if(!G.list.length) return head('Perfil do jogador','Dados da temporada')+gEmpty('Jogadores aparecem na próxima atualização','Os elencos chegam junto com a próxima atualização automática dos dados.');
+  const p=G.players[S.gplayer[L.lg]];
+  if(!p){
+    const top=gData(L).scorers.slice(0,8);
+    return head('Perfil do jogador','Busque um atleta ou comece pelos artilheiros')+search+`<div class="panel" style="margin-top:14px"><h2>Artilheiros</h2><div class="mini">${top.map((s,i)=>{const t=L.T[s.t];return `<div class="mini-row" ${s.id!=null?`data-gplayer="${s.id}"`:''}><span class="pos">${i+1}</span>${t?crest(t):''}<span class="nm">${esc(s.n)}<small class="tm">${t?esc(t.name):''}</small></span><span class="vl num">${s.g}<small>gols</small></span></div>`}).join('')||'<div class="empty">Sem artilharia ainda.</div>'}</div></div>`;
+  }
+  const t=L.T[p.t], n=nat(p.nat), age=ageOf(p.dob), st=p.st, rk=gRank(L,p), grp=gGroup(p.pos);
+  const posName = POSPT[p.pos] || (grp<4 ? GPOS[grp][0].replace(/s$/,'') : (p.pos||'—'));
+  const mates=(G.byTeam[p.t]?.players||[]).map(x=>G.players[x.id]).filter(x=>x&&x.id!==p.id&&x.st).sort((a,b)=>b.st.g-a.st.g).slice(0,5);
+  return search+`
+  <section class="thero phero fade" ${t?`style="${heroVars(L.lg,t)}"`:''}>
+    ${t?`<img class="big" src="${t.hi}" alt="Escudo do ${esc(t.name)}">`:'<span></span>'}
+    <div><div class="kick">${t?`<button class="chip" data-team="${t.i}">${crest(t,'xs')}${esc(t.name)}</button>`:''}<span class="chip">${esc(posName)}</span>${p.num!=null?`<span class="chip">camisa ${p.num}</span>`:''}</div>
+      <h1>${esc(p.n)}</h1>
+      <div class="pmeta">${n.f} ${esc(n.pt)}${age!=null?` · ${age} anos`:''}${p.dob?` · nasceu em ${p.dob.split('-').reverse().join('/')}`:''}</div>
+      ${st?`<div class="line"><div><b class="num">${st.mp??'—'}</b><span>jogos</span></div><div><b class="num">${st.g}</b><span>gols</span></div><div><b class="num">${st.a}</b><span>assistências</span></div><div><b class="num">${st.p}</b><span>de pênalti</span></div></div>`:''}</div>
+    <div class="posbig"><b class="num">${rk?ord(rk):'—'}</b><span>na artilharia</span></div>
+  </section>
+  ${st?`<div class="panel" style="margin-bottom:16px"><h2>Números na liga</h2><p class="sub">Temporada ${L.cfg.season}.</p><div class="tiles">
+    <div class="tile"><div class="v num">${st.mp??'—'}</div><div class="k">Jogos disputados</div></div>
+    <div class="tile"><div class="v num">${st.g}</div><div class="k">Gols</div><div class="rk"><span>${ord(rk)} na artilharia</span></div></div>
+    <div class="tile"><div class="v num">${st.a}</div><div class="k">Assistências</div></div>
+    <div class="tile"><div class="v num">${st.g+st.a}</div><div class="k">Gols + assistências</div></div>
+    <div class="tile"><div class="v num">${st.mp?nf2.format(st.g/st.mp):'—'}</div><div class="k">Gols por jogo</div></div>
+    <div class="tile"><div class="v num">${st.p}</div><div class="k">Gols de pênalti</div></div>
+  </div></div>`:`<div class="panel" style="margin-bottom:16px"><h2>Números na liga</h2><p class="sub">Este jogador ainda não aparece na lista de artilheiros da liga. Jogos, gols e assistências são publicados pela fonte só para quem está nessa lista.</p></div>`}
+  <div class="grid g2">
+    <div class="panel"><h2>Ficha</h2><div class="facts">
+      <div class="fact"><small>Posição</small><b class="sm">${esc(posName)}</b></div>
+      <div class="fact"><small>Nacionalidade</small><b class="sm">${n.f} ${esc(n.pt)}</b></div>
+      <div class="fact"><small>Nascimento</small><b class="sm">${p.dob?p.dob.split('-').reverse().join('/'):'—'}</b></div>
+      <div class="fact"><small>Idade</small><b class="sm">${age!=null?age+' anos':'—'}</b></div>
+    </div></div>
+    <div class="panel"><h2>Artilheiros do mesmo time</h2><div class="mini">${mates.map(x=>`<div class="mini-row" data-gplayer="${x.id}"><span class="nm">${esc(x.n)}</span><span class="vl num">${x.st.g}<small>gols</small></span></div>`).join('')||'<div class="empty">Nenhum companheiro na lista de artilheiros.</div>'}</div></div>
+  </div><p class="src">Fonte: football-data.org.</p>`;
+}
+function renderGSearch(){
+  const box=document.getElementById('gq-res'); if(!box) return; const q=(S.gq||'').trim(); if(q.length<2){ box.innerHTML=''; return; }
+  const L=league(S.lg), G=gIndex(L), norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const hits=G.list.filter(p=>norm(p.n).includes(norm(q))).sort((a,b)=>((b.st?.g||0)-(a.st?.g||0))).slice(0,8);
+  box.innerHTML = hits.length ? hits.map(p=>{const t=L.T[p.t];return `<button class="pq-item" data-gplayer="${p.id}">${t?crest(t):''}<span><b>${esc(p.n)}</b><small>${t?esc(t.name):''}</small></span></button>`}).join('') : `<div class="pq-none">Nenhum jogador com “${esc(q)}”.</div>`;
+}
+function viewGRefs(L){
+  const refs=gData(L).refs; const map={};
+  L.matches.forEach((m,i)=>{ const r=refs[i]; if(!r) return; const e=map[r]||(map[r]={name:r,games:[]}); e.games.push(m); });
+  const list=Object.values(map).filter(e=>e.games.some(isPlayed));
+  if(!list.length) return head('Árbitros',`${L.cfg.full} ${L.cfg.season}`)+gEmpty('Árbitros aparecem na próxima atualização','Os árbitros de cada jogo chegam junto com a próxima atualização automática dos dados.');
+  const stat=e=>{ const pl=e.games.filter(isPlayed), n=pl.length||1; return {j:pl.length, jp:pl.length, sched:e.games.length-pl.length, hw:pl.filter(m=>m[5]>m[6]).length/n, dr:pl.filter(m=>m[5]===m[6]).length/n, aw:pl.filter(m=>m[5]<m[6]).length/n, gpg:pl.reduce((s,m)=>s+m[5]+m[6],0)/n}; };
+  const sel=map[S.gref[L.lg]];
+  if(sel){
+    const s=stat(sel), games=[...sel.games].filter(isPlayed).sort((a,b)=>b[1].localeCompare(a[1]));
+    const teams={}; sel.games.filter(isPlayed).forEach(m=>[m[3],m[4]].forEach(t=>teams[t]=(teams[t]||0)+1));
+    return `<button class="back" data-gref="">‹ Todos os árbitros</button>
+    <section class="thero rhero fade"><span class="ref-big">${icon('whistle')}</span><div><div class="kick">${lgDot(L.lg)}${L.cfg.full} ${L.cfg.season}</div><h1>${esc(sel.name)}</h1>
+      <div class="line"><div><b class="num">${s.j}</b><span>jogos apitados</span></div><div><b class="num">${pct(s.hw)}</b><span>vitórias do mandante</span></div><div><b class="num">${nf2.format(s.gpg)}</b><span>gols por jogo</span></div></div></div></section>
+    <div class="grid g2">
+      <div class="panel"><h2>Resultados nos jogos dele</h2>${[['Mandante vence',s.hw,L.avg.hw],['Empate',s.dr,L.avg.dr],['Visitante vence',s.aw,L.avg.aw]].map(([l,v,a])=>`<div class="pbar"><div class="top"><span>${l}</span><b class="num">${pct(v)}</b></div><div class="tr"><i style="width:${v*100}%"></i><u style="left:calc(${a*100}% - 1px)" title="Média da liga ${pct(a)}"></u></div></div>`).join('')}<p class="src">O traço branco marca a média da liga.</p></div>
+      <div class="panel"><h2>Clubes que ele apitou</h2><div class="mini">${Object.entries(teams).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([ti,c])=>{const t=L.T[+ti];return `<div class="mini-row" data-team="${t.i}">${crest(t)}<span class="nm">${esc(t.name)}</span><span class="vl num">${c}<small>${c===1?'jogo':'jogos'}</small></span></div>`}).join('')}</div></div>
+      <div class="panel span2"><h2>Partidas</h2><div class="matches">${games.map(m=>matchCard(L,m)).join('')}</div></div>
+    </div><p class="src">Fonte: football-data.org. Cartões e faltas por árbitro exigem um plano pago da fonte.</p>`;
+  }
+  const rows=list.map(e=>({e,s:stat(e)})).sort((a,b)=>b.s.j-a.s.j||a.e.name.localeCompare(b.e.name));
+  return head('Árbitros',`${L.cfg.full} ${L.cfg.season} · ${list.length} árbitros`)+`<div class="panel fade"><div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th class="l">Árbitro</th><th>Jogos</th><th>Mandante vence</th><th class="mx">Empates</th><th class="mx">Visitante vence</th><th>Gols/jogo</th></tr></thead>
+    <tbody>${rows.map(({e,s},i)=>`<tr class="row" data-gref="${esc(e.name)}"><td class="pos">${i+1}</td><td class="l"><div class="club"><span class="ref-ic sm">${icon('whistle')}</span><span>${esc(e.name)}</span></div></td><td class="pts">${s.j}</td><td>${pct(s.hw)}</td><td class="mx">${pct(s.dr)}</td><td class="mx">${pct(s.aw)}</td><td>${nf2.format(s.gpg)}</td></tr>`).join('')}</tbody></table></div>
+    <p class="src" style="margin-top:12px">Fonte: football-data.org. Cartões e faltas por árbitro exigem um plano pago da fonte.</p></div>`;
+}
+
 /* ---------- render / events ---------- */
 function applyTheme(){
   const g=LEAGUES[S.lg].g, r=document.documentElement.style;
@@ -2366,7 +2476,7 @@ function render(){
   const L = league(S.lg);
   applyTheme(); renderSide();
   if(!L.T.length){ $('#topbar-title').innerHTML = `${lgDot(S.lg)}<b>${LEAGUES[S.lg].name}</b>`; $('#view').innerHTML = `<div class="panel empty-state"><h2>Sem dados da ${esc(LEAGUES[S.lg].name)} ainda</h2><p>Os jogos aparecem aqui assim que a próxima atualização automática trouxer a tabela da liga.</p></div>`; return; }
-  const V = {home:viewHome,table:viewTable,matches:viewMatches,team:viewTeam,rank:viewRank,compare:viewCompare,player:viewPlayer,squad:viewSquad,prank:viewPRank,refs:viewRefs,stats:viewStats,scorers:viewScorers}[S.view]||viewHome;
+  const V = {home:viewHome,table:viewTable,matches:viewMatches,team:viewTeam,rank:viewRank,compare:viewCompare,player:viewPlayer,squad:viewSquad,prank:viewPRank,refs:viewRefs,stats:viewStats,scorers:viewScorers,gsquad:viewGSquad,gplayer:viewGPlayer,grefs:viewGRefs}[S.view]||viewHome;
   $('#topbar-title').innerHTML = `${lgDot(S.lg)}<b>${LEAGUES[S.lg].name}</b>`;
   const key = pageKey(), wasLoading = !!document.querySelector('#view .empty-state .spinner, #view .empty .spinner');
   const pageChanged = key!==lastPageKey || wasLoading, snap = pageChanged ? null : captureFlip();
@@ -2374,13 +2484,14 @@ function render(){
   $('#view').innerHTML = V(L);
   document.title = `${LEAGUES[S.lg].name} · Radar das Seis`;
   if(S.view==='player') renderSearch();
+  if(S.view==='gplayer') renderGSearch();
   afterRender(pageChanged, snap);
   save();
 }
 function go(patch, top=true){ Object.assign(S,patch); document.body.classList.remove('nav-open'); render(); if(top) window.scrollTo({top:0,behavior:'instant'}); }
 
 document.addEventListener('click', e=>{
-  const b = e.target.closest('[data-league],[data-nav],[data-team],[data-mode],[data-round],[data-metric],[data-menu],[data-player],[data-squad],[data-squad-of],[data-pmetric],[data-reload-players],[data-ref],[data-rsort],[data-smet],.scrim');
+  const b = e.target.closest('[data-league],[data-nav],[data-team],[data-mode],[data-round],[data-metric],[data-menu],[data-player],[data-squad],[data-squad-of],[data-pmetric],[data-reload-players],[data-ref],[data-rsort],[data-smet],[data-gteam],[data-gplayer],[data-gref],.scrim');
   if(!b) return;
   if(b.matches('.scrim')) return document.body.classList.remove('nav-open');
   if(b.dataset.menu!==undefined) return document.body.classList.toggle('nav-open');
@@ -2391,6 +2502,9 @@ document.addEventListener('click', e=>{
   if(b.dataset.ref!==undefined){ S.ref[S.lg]=b.dataset.ref||null; return go({view:'refs'}); }
   if(b.dataset.rsort) return go({rsort:b.dataset.rsort},false);
   if(b.dataset.smet) return go({smet:b.dataset.smet},false);
+  if(b.dataset.gteam!==undefined){ S.gteam[S.lg]=+b.dataset.gteam; return go({view:'gsquad'},false); }
+  if(b.dataset.gplayer!==undefined){ S.gplayer[S.lg]=+b.dataset.gplayer; S.gq=''; return go({view:'gplayer'}); }
+  if(b.dataset.gref!==undefined){ S.gref[S.lg]=b.dataset.gref||null; return go({view:'grefs'}); }
   if(b.dataset.reloadPlayers!==undefined){ delete PL[S.lg]; getMcp().then(m=>m&&m.invalidate&&m.invalidate('Opta').catch(()=>{})); return go({},false); }
   if(b.dataset.league){ spinLeague = b.dataset.league!==S.lg; return go({lg:b.dataset.league}); }
   if(b.dataset.nav) return go({view:b.dataset.nav});
@@ -2404,7 +2518,7 @@ document.addEventListener('change', e=>{
   const L=league(S.lg); const c = S.cmp[S.lg] || [L.table[0].i, L.table[1].i];
   c[+s.dataset.cmp] = +s.value; S.cmp[S.lg]=[...c]; go({},false);
 });
-document.addEventListener('input', e=>{ if(e.target.id==='pq'){ S.pq=e.target.value; renderSearch(); } });
+document.addEventListener('input', e=>{ if(e.target.id==='pq'){ S.pq=e.target.value; renderSearch(); } if(e.target.id==='gq'){ S.gq=e.target.value; renderGSearch(); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') document.body.classList.remove('nav-open'); });
 if(IS_GH) boot(); else render();
 </script>

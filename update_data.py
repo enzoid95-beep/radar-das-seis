@@ -71,7 +71,7 @@ def build_league(code):
             })
         return index[tid]
 
-    rows, season = [], None
+    rows, refs, season = [], [], None
     for match in data.get("matches", []):
         if match.get("stage") not in (None, "REGULAR_SEASON"):
             continue
@@ -89,6 +89,8 @@ def build_league(code):
         elif status in ("POSTPONED", "SUSPENDED", "CANCELLED"):
             row.append("adiado")
         rows.append(row)
+        ref = next((r.get("name") for r in (match.get("referees") or []) if r.get("type") == "REFEREE" and r.get("name")), None)
+        refs.append(ref)
 
     scorers = []
     try:
@@ -98,6 +100,7 @@ def build_league(code):
             if not team.get("id"):
                 continue
             scorers.append({
+                "id": player.get("id"),
                 "n": player.get("name"),
                 "t": team_idx(team),
                 "pos": player.get("position") or player.get("section") or "",
@@ -110,9 +113,32 @@ def build_league(code):
     except Exception as err:  # artilharia é opcional: a tabela continua funcionando
         print(f"  aviso: artilharia de {code} indisponível ({err})")
 
+    squads = []
+    try:
+        data_teams = get(f"/competitions/{code}/teams")
+        for team in data_teams.get("teams", []):
+            if not team.get("id"):
+                continue
+            coach = (team.get("coach") or {}).get("name")
+            players = []
+            for p in team.get("squad") or []:
+                if p.get("role") not in (None, "PLAYER"):
+                    continue
+                players.append({
+                    "id": p.get("id"),
+                    "n": p.get("name"),
+                    "pos": p.get("position") or "",
+                    "dob": (p.get("dateOfBirth") or "")[:10],
+                    "nat": p.get("nationality") or "",
+                    "num": p.get("shirtNumber"),
+                })
+            squads.append({"t": team_idx(team), "coach": coach, "players": players})
+    except Exception as err:  # elencos são opcionais: a tabela continua funcionando
+        print(f"  aviso: elencos de {code} indisponíveis ({err})")
+
     for team in teams:
         team.pop("id", None)
-    return {"season": season_label(season), "teams": teams, "matches": rows, "scorers": scorers}
+    return {"season": season_label(season), "teams": teams, "matches": rows, "refs": refs, "scorers": scorers, "squads": squads}
 
 
 def digest(leagues):
