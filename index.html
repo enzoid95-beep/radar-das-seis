@@ -1220,6 +1220,18 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 .tk-wrap{grid-template-columns:auto minmax(0,1fr)}
 .tk-pitch{width:min(560px,calc((100vh - 200px) * .6476));width:min(560px,calc((100dvh - 200px) * .6476));min-width:280px}
 @media (max-width:900px){.tk-wrap{grid-template-columns:1fr}.tk-pitch{width:min(100%,520px);min-width:0}}
+
+/* ---------- páginas de um time: contornos e barras na cor predominante do time ---------- */
+#view.team-mode .panel,#view.team-mode .tile,#view.team-mode .fact,#view.team-mode .lcard,#view.team-mode .match,#view.team-mode .sq-card,
+#view.team-mode .hl-card,#view.team-mode .gi,#view.team-mode .posbig{border:1px solid color-mix(in srgb,var(--tm) 70%,transparent)!important}
+#view.team-mode .tile::before,#view.team-mode .panel h2::before{background:var(--tm);opacity:1}
+#view.team-mode .rkb i,#view.team-mode .pbar .tr i,#view.team-mode .ritem .b i,#view.team-mode .bt i,#view.team-mode .bt2 i.for,
+#view.team-mode .split .bar i[style*="--tc"],#view.team-mode .dist > div{background:var(--tm)!important}
+#view.team-mode .split .a .bar i.w,#view.team-mode .split .b .bar i.w{background:var(--tm)!important}
+#view.team-mode .rkb{background:color-mix(in srgb,var(--tm) 14%,rgba(255,255,255,.04))}
+#view.team-mode .pbar .tr{background:color-mix(in srgb,var(--tm) 12%,rgba(255,255,255,.04))}
+#view.team-mode .picker button[aria-pressed="true"]{border-color:var(--tm)}
+#view.team-mode .view-head h1::after{background:var(--tm)}
 </style>
 </head>
 <body>
@@ -1247,7 +1259,14 @@ const TEAM_COLORS = {
  fr:{AJA:['#0055a4','#f5f5f5'],ASM:['#e7000d','#f5f5f5'],SCO:['#111111','#f5f5f5'],ETR:['#005fab','#f5f5f5'],FCL:['#f58113','#111111'],HAC:['#6aa2d5','#1d2d5b'],LMF:['#d7141a','#ffd200'],LIL:['#e01e13','#20325f'],NIC:['#c8102e','#111111'],OL:['#1a3d8f','#e30613'],OM:['#2faee0','#f5f5f5'],PFC:['#1f2a4b','#7fb2e5'],PSG:['#004170','#da291c'],RCS:['#009fe3','#f5f5f5'],RCL:['#fee100','#e30613'],SB29:['#e30613','#f5f5f5'],SRF:['#e30613','#111111'],TFC:['#5b2c86','#f5f5f5']},
 };
 const lumHex = hex => { const m=/^#?([0-9a-f]{6})$/i.exec(hex||''); if(!m) return .5; const v=parseInt(m[1],16); return (0.299*(v>>16)+0.587*((v>>8)&255)+0.114*(v&255))/255; };
+let viewTeamColor = null;
+function teamLineColor(lg, t){
+  const pair = t.hc || (TEAM_COLORS[lg]||{})[t.abbr] || [t.col, t.col];
+  const ok = c => { const l = lumHex(c); return l > .13 && l < .86; };
+  return ok(pair[0]) ? pair[0] : ok(pair[1]) ? pair[1] : (ok(t.col) ? t.col : '#c9ccd1');
+}
 function heroVars(lg, t){
+  viewTeamColor = teamLineColor(lg, t);
   const pair = t.hc || (TEAM_COLORS[lg]||{})[t.abbr] || [t.col, t.col];
   const [c1, c2] = pair, l1 = lumHex(c1), l2 = lumHex(c2);
   // cores muito escuras ou muito claras recebem menos opacidade para manter o texto legível
@@ -3214,7 +3233,9 @@ function render(){
   const pageChanged = key!==lastPageKey || wasLoading, snap = pageChanged ? null : captureFlip();
   lastPageKey = key;
   const keepProbs = (S.view==='sim' && !pageChanged) ? document.getElementById('sim-probs') : null;
+  viewTeamColor = null;
   $('#view').innerHTML = V(L);
+  { const v = $('#view'), tc = ['team','squad','gsquad','player','gplayer'].includes(S.view) ? viewTeamColor : null; v.classList.toggle('team-mode', !!tc); if(tc) v.style.setProperty('--tm', tc); else v.style.removeProperty('--tm'); }
   if(keepProbs && keepProbs.querySelector('table.probs') && keepProbs.querySelector('table.probs').dataset.lg===S.lg){ const n = document.getElementById('sim-probs'); if(n){ n.replaceWith(keepProbs); keepProbs.classList.add('settled'); } }
   document.title = S.view==='overview' ? 'Radar das Seis · by Enzo Monteiro' : `${LEAGUES[S.lg].name} · Radar das Seis`;
   if(S.view==='player') renderSearch();
