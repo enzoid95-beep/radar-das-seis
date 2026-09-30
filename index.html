@@ -1271,6 +1271,11 @@ table.mk th.r,table.mk td.r{text-align:right}
 table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 .mk-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
 .mk-tag.o{background:rgba(239,68,68,.18);color:#fca5a5}.mk-tag.s{background:rgba(245,158,11,.18);color:#fcd34d}.mk-tag.d{background:rgba(148,163,184,.18);color:#cbd5e1}
+/* seletores abertos ficam sempre por cima dos painéis seguintes */
+.cmp-head{position:relative;z-index:30}
+.cmp-team{transform:none!important}
+.dd.open{z-index:100}
+.dd-menu{z-index:100}
 </style>
 </head>
 <body>
@@ -1520,7 +1525,7 @@ const IS_PUBLIC = typeof PUBLIC!=='undefined' && PUBLIC === true;
 const NAV_ALL = [
   ['Liga',[['home','Visão geral','home'],['table','Classificação','table'],['matches','Partidas','cal'],['stats','Dados gerais','pie'],['refs','Árbitros','whistle']]],
   ['Simulação',[['sim','Simulador','dice']]],
-  ['Times',[['team','Perfil do time','shield'],['rank','Ranking de times','rank'],['compare','Comparar times','cmp'],['tactic','Campo tático','field']]],
+  ['Times',[['team','Perfil do time','shield'],['rank','Ranking de times','rank'],['compare','Comparar times','cmp']]],
   ['Jogadores',[['player','Perfil do jogador','user'],['squad','Elencos','shirt'],['prank','Ranking de jogadores','rank'],['pcompare','Comparar jogadores','cmp']]],
 ];
 const IS_GH = typeof GH!=='undefined' && GH === true;
@@ -2706,7 +2711,7 @@ function placeIndicator(){
   set(to); indPos = to;
 }
 /* cards 3D que acompanham o dedo ou o mouse */
-const TILT_SEL = '.tile,.lcard,.match,.fact,.sq-card,.hero-side,.cmp-team,.thero,.hero';
+const TILT_SEL = '.tile,.lcard,.match,.fact,.sq-card,.hero-side,.thero,.hero';
 let tiltEl = null, tiltTimer = null;
 function tiltReset(){
   const el = tiltEl; tiltEl = null; if(!el) return;
