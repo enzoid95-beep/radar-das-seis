@@ -28,6 +28,7 @@ jobs:
         if: github.event_name != 'push'
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python3 update_data.py
 
       - name: Salvar dados novos
