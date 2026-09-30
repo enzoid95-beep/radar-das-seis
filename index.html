@@ -1103,6 +1103,25 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 @media (max-height:720px) and (min-width:761px){.ov-top{display:none}}
 .tb-brand{display:flex!important;place-items:unset!important}
 @media (max-width:760px){.ov-hl,.ov-top,.ov-stats{display:none!important}}
+/* ---------- simulador: ajustes ---------- */
+.sim-grid{align-items:stretch}
+.sim-side{display:flex;flex-direction:column}
+#sim-table{flex:1;display:flex}
+#sim-table table.simtbl{height:100%}
+.pcell i{transition:width .7s cubic-bezier(.25,1,.5,1)}
+#sim-probs.busy{opacity:1}
+.sim-probs-panel .est{transition:box-shadow .3s}
+.sim-probs-panel.calc .est{animation:estPulse 1s ease-in-out infinite}
+@keyframes estPulse{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--g2) 25%,transparent)}}
+.sim-tabs{display:flex;gap:6px;margin:0 0 12px}
+.sim-tabs button{padding:7px 13px;border-radius:20px;font-size:13.5px;font-weight:600;color:var(--muted);border:1px solid var(--line2);background:linear-gradient(180deg,#161b24,#0d1016)}
+.sim-tabs button[aria-pressed="true"]{color:#fff;border-color:color-mix(in srgb,var(--g1) 55%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--g1) 30%,#0d1016),color-mix(in srgb,var(--g2) 15%,#0d1016))}
+.sim-tabs em{font-style:normal;margin-left:4px;padding:1px 7px;border-radius:10px;background:color-mix(in srgb,#ef4444 30%,transparent);color:#fecaca;font-size:12px}
+.simscore small.real{color:color-mix(in srgb,var(--g1) 70%,#fff);font-weight:600}
+.mchip.danger{border-color:rgba(239,68,68,.35)}
+.mchip.danger:hover{border-color:rgba(239,68,68,.7);color:#fecaca}
+.mchip[disabled]{opacity:.4;cursor:default;transform:none}
+#view:not(.quiet) #sim-table.live .row td{animation:none}
 </style>
 </head>
 <body>
@@ -2721,7 +2740,7 @@ const fmtProb = p => p<=0 ? '0%' : p<.005 ? '<1%' : p>=1 ? '100%' : p>.995 ? '>9
 function simProbsHTML(L, cnt, tbl){
   const cols = SIM_COLS[L.lg] || SIM_COLS.en;
   const pr = (i,a,b) => { let s=0; for(let p=a-1;p<b;p++) s+=cnt[i][p]; return s/SIM_N; };
-  return `<div class="tbl-wrap"><table class="probs"><thead><tr><th class="l">Clube</th><th>PTS</th>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>
+  return `<div class="tbl-wrap"><table class="probs" data-lg="${L.lg}"><thead><tr><th class="l">Clube</th><th>PTS</th>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>
     ${tbl.map(r=>{ const t=L.T[r.i]; return `<tr class="row" data-team="${t.i}"><td class="l"><div class="club">${crest(t)}<span>${esc(t.name)}</span></div></td><td class="pts">${r.P}</td>
       ${cols.map(c=>{ const p = pr(r.i,c[1],c[2]); return `<td><div class="pcell${p<=0?' zero':''}" style="--pc:${c[3]}"><i style="width:${Math.min(100,p*100)}%"></i><span class="num">${fmtProb(p)}</span></div></td>`; }).join('')}</tr>`; }).join('')}
   </tbody></table></div>`;
@@ -2743,42 +2762,78 @@ function simDefaultRound(L){
   if(full.length) return full[0];
   const r = Object.keys(cnt).map(Number); return r.length ? Math.min(...r) : L.totalRounds;
 }
+/* jogos atrasados: não disputados, de rodadas anteriores à rodada atual */
+function simLate(L){ const cur = simDefaultRound(L); return L.matches.filter(m=>!isPlayed(m) && m[0] < cur).sort((a,b)=>(a[1]+a[2]).localeCompare(b[1]+b[2])); }
+/* resultado real chegou: apaga o palpite guardado para aquele jogo */
+function simCleanup(L){ const st = simStore(L); let n = 0; L.matches.forEach(m=>{ if(isPlayed(m) && st[simKey(m)]){ delete st[simKey(m)]; n++; } }); if(n) save(); }
 function viewSim(L){
   if(!S.simRound || typeof S.simRound!=='object') S.simRound = {};
-  const rounds = simRoundList(L); let r = S.simRound[L.lg] || simDefaultRound(L); if(!rounds.includes(r)) r = simDefaultRound(L); S.simRound[L.lg] = r;
-  const sc = simStore(L), ms = L.matches.filter(m=>m[0]===r).sort((a,b)=>(a[1]+a[2]).localeCompare(b[1]+b[2]));
+  simCleanup(L);
+  const rounds = simRoundList(L), late = simLate(L), cur = simDefaultRound(L);
+  let r = S.simRound[L.lg] ?? cur; if(r==='late' && !late.length) r = cur; if(r!=='late' && !rounds.includes(r)) r = cur; S.simRound[L.lg] = r;
+  const sc = simStore(L), ms = r==='late' ? late : L.matches.filter(m=>m[0]===r).sort((a,b)=>(a[1]+a[2]).localeCompare(b[1]+b[2]));
   const {done} = simSplit(L), tbl = simTable(L, done), nSim = Object.values(sc).filter(s=>s[0]!=null&&s[1]!=null).length, M = simModel(L);
   const row = m => { const h=L.T[m[3]], a=L.T[m[4]], p=isPlayed(m), s=sc[simKey(m)]||[null,null], k=simKey(m);
     const lh = M.muH*M.att[m[3]]*M.def[m[4]], la = M.muA*M.att[m[4]]*M.def[m[3]];
+    const when = (r==='late'?`${m[0]}ª rodada · `:'') + (m[5]==='adiado' ? 'adiado' : fdate(m[1],true)+(m[2]?' · '+m[2]:''));
     return `<div class="simrow${p?' fixed':''}${!p&&s[0]!=null&&s[1]!=null?' filled':''}">
       <div class="st h"><span>${esc(h.name)}</span>${crest(h)}</div>
-      ${p ? `<div class="simscore num"><b>${m[5]}</b><i>×</i><b>${m[6]}</b><small>encerrado</small></div>`
-          : `<div class="simscore"><input class="num" type="number" inputmode="numeric" min="0" max="30" data-simk="${k}" data-side="0" value="${s[0]??''}" placeholder="–" aria-label="Gols do ${esc(h.name)}"><i>×</i><input class="num" type="number" inputmode="numeric" min="0" max="30" data-simk="${k}" data-side="1" value="${s[1]??''}" placeholder="–" aria-label="Gols do ${esc(a.name)}"><small>${m[5]==='adiado'?'adiado':fdate(m[1],true)+(m[2]?' · '+m[2]:'')}<span class="prov"> · provável ${mostLikely(lh)}–${mostLikely(la)}</span></small></div>`}
+      ${p ? `<div class="simscore num"><b>${m[5]}</b><i>×</i><b>${m[6]}</b><small class="real">resultado real</small></div>`
+          : `<div class="simscore"><input class="num" type="number" inputmode="numeric" min="0" max="30" data-simk="${k}" data-side="0" value="${s[0]??''}" placeholder="–" aria-label="Gols do ${esc(h.name)}"><i>×</i><input class="num" type="number" inputmode="numeric" min="0" max="30" data-simk="${k}" data-side="1" value="${s[1]??''}" placeholder="–" aria-label="Gols do ${esc(a.name)}"><small>${when}<span class="prov"> · provável ${mostLikely(lh)}–${mostLikely(la)}</span></small></div>`}
       <div class="st a">${crest(a)}<span>${esc(a.name)}</span></div></div>`; };
-  const i = rounds.indexOf(r);
+  const i = r==='late' ? -1 : rounds.indexOf(r);
+  const prevR = r==='late' ? null : rounds[i-1], nextR = r==='late' ? cur : rounds[i+1];
   return head('Simulador',`${L.cfg.full} ${L.cfg.season} · coloque os placares e veja a tabela e as chances mudarem`)+`
   <div class="sim-grid">
     <div class="panel sim-panel"><div class="sim-head"><div><h2>Simulação de rodadas</h2><p class="sub">${nSim?`${nSim} ${nSim===1?'placar simulado':'placares simulados'} nesta liga`:'Digite os placares dos jogos que ainda vão acontecer.'}</p></div>
-        <div class="round-nav"><button data-simround="${rounds[i-1]??''}" ${i<=0?'disabled':''} aria-label="Rodada anterior">‹</button><b>${r}ª rodada</b><button data-simround="${rounds[i+1]??''}" ${i>=rounds.length-1?'disabled':''} aria-label="Próxima rodada">›</button></div></div>
-      <div class="simlist">${ms.map(row).join('')}</div>
-      <div class="sim-actions"><button class="mchip" data-simfill="${r}">Preencher com placares prováveis</button><button class="mchip" data-simclear="${r}">Limpar rodada</button>${nSim?`<button class="mchip" data-simclear="all">Limpar tudo</button>`:''}</div>
+        <div class="round-nav"><button data-simround="${prevR??''}" ${prevR==null?'disabled':''} aria-label="Rodada anterior">‹</button><b>${r==='late'?'Atrasados':r+'ª rodada'}</b><button data-simround="${nextR??''}" ${nextR==null?'disabled':''} aria-label="Próxima rodada">›</button></div></div>
+      ${late.length?`<div class="sim-tabs"><button data-simround="${cur}" aria-pressed="${r!=='late'}">Rodadas</button><button data-simround="late" aria-pressed="${r==='late'}">Jogos atrasados <em>${late.length}</em></button></div>`:''}
+      <div class="simlist">${ms.map(row).join('')||'<div class="empty">Nenhum jogo atrasado.</div>'}</div>
+      <div class="sim-actions"><button class="mchip" data-simfill="${r}">Preencher com placares prováveis</button><button class="mchip" data-simclear="${r}">Limpar ${r==='late'?'atrasados':'rodada'}</button><button class="mchip danger" data-simclear="all" ${nSim?'':'disabled'}>Limpar resultados</button></div>
     </div>
     <div class="panel sim-side"><h2>Classificação simulada</h2><p class="sub">Tabela real mais os seus placares. As setas mostram a mudança em relação à tabela de hoje.</p><div id="sim-table">${simTableHTML(L, tbl)}</div></div>
   </div>
   <div class="panel sim-probs-panel"><div class="probs-head"><div><h2>Probabilidades</h2><p class="sub">Recalculadas com os seus placares, em ${SIM_N.toLocaleString('pt-BR')} simulações do restante do campeonato.</p></div><span class="est">Estimativa</span></div>
     <div id="sim-probs"><div class="empty"><div class="spinner"></div>Calculando probabilidades…</div></div>
-    <p class="src">Modelo do Radar das Seis: cada time recebe uma força de ataque e de defesa a partir dos gols marcados e sofridos na temporada, separando casa e fora, com peso para a média da liga enquanto há poucos jogos. Cada partida restante é sorteada muitas vezes com essas forças, na mesma linha dos métodos usados por grupos acadêmicos como o da UFMG. Os números são estimativas, não previsões certas.</p></div>`;
+    <p class="src">Modelo do Radar das Seis: cada time recebe uma força de ataque e de defesa a partir dos gols marcados e sofridos na temporada, separando casa e fora, com peso para a média da liga enquanto há poucos jogos. Cada partida restante é sorteada muitas vezes com essas forças, na mesma linha dos métodos usados por grupos acadêmicos como o da UFMG. Resultados reais entram sozinhos assim que o jogo termina. Os números são estimativas, não previsões certas.</p></div>`;
 }
 let simTimer = null, simToken = 0;
+function flipRows(container, sel, mutate){
+  const before = new Map(); container.querySelectorAll(sel).forEach(r=>before.set(r.dataset.team, r.getBoundingClientRect().top));
+  mutate();
+  if(RM) return;
+  container.querySelectorAll(sel).forEach(r=>{ const old = before.get(r.dataset.team); if(old==null) return; const dy = old - r.getBoundingClientRect().top; if(Math.abs(dy)<1) return;
+    [...r.children].forEach(td=>td.animate([{transform:`translateY(${dy}px)`},{transform:'none'}],{duration:600,easing:'cubic-bezier(.25,1,.5,1)'})); });
+}
+function simTableUpdate(L, tbl){
+  const tEl = document.getElementById('sim-table'); if(!tEl) return;
+  flipRows(tEl, 'tr.row', ()=>{ tEl.innerHTML = simTableHTML(L, tbl); tEl.classList.add('live'); });
+}
+function simProbsUpdate(L, cnt, tbl){
+  const pEl = document.getElementById('sim-probs'); if(!pEl) return;
+  const table = pEl.querySelector('table.probs');
+  if(!table || table.dataset.lg !== L.lg){ pEl.innerHTML = simProbsHTML(L, cnt, tbl); return; }
+  const cols = SIM_COLS[L.lg] || SIM_COLS.en, tbody = table.tBodies[0], rows = {};
+  [...tbody.rows].forEach(r=>rows[r.dataset.team] = r);
+  const pr = (i,a,b) => { let s=0; for(let p=a-1;p<b;p++) s+=cnt[i][p]; return s/SIM_N; };
+  flipRows(tbody, 'tr', ()=>{
+    tbl.forEach(r=>{ const row = rows[r.i]; if(!row) return;
+      row.querySelector('td.pts').textContent = r.P;
+      const cells = row.querySelectorAll('.pcell');
+      cols.forEach((c,ci)=>{ const p = pr(r.i,c[1],c[2]), cell = cells[ci]; if(!cell) return;
+        cell.querySelector('i').style.width = Math.min(100,p*100)+'%'; cell.querySelector('span').textContent = fmtProb(p); cell.classList.toggle('zero', p<=0); });
+      tbody.appendChild(row); });
+  });
+}
 function simRefresh(full){
   const L = league(S.lg); if(S.view!=='sim') return;
   const {done, rest} = simSplit(L), tbl = simTable(L, done);
-  const tEl = document.getElementById('sim-table'); if(tEl) tEl.innerHTML = simTableHTML(L, tbl);
+  simTableUpdate(L, tbl);
   const key = L.lg+'|'+L.played.length+'|'+JSON.stringify(simStore(L));
-  const pEl = document.getElementById('sim-probs'); if(!pEl) return;
-  if(simCache[key]){ pEl.classList.remove('busy'); pEl.innerHTML = simProbsHTML(L, simCache[key], tbl); return; }
-  pEl.classList.add('busy'); const my = ++simToken;
-  simRun(L, done, rest, cnt=>{ simCache[key] = cnt; if(my!==simToken || S.view!=='sim' || S.lg!==L.lg) return; const el=document.getElementById('sim-probs'); if(el){ el.classList.remove('busy'); el.innerHTML = simProbsHTML(L, cnt, tbl); } });
+  const panel = document.querySelector('.sim-probs-panel');
+  if(simCache[key]){ panel && panel.classList.remove('calc'); simProbsUpdate(L, simCache[key], tbl); return; }
+  panel && panel.classList.add('calc'); const my = ++simToken;
+  simRun(L, done, rest, cnt=>{ simCache[key] = cnt; if(my!==simToken || S.view!=='sim' || S.lg!==L.lg) return; const pn = document.querySelector('.sim-probs-panel'); pn && pn.classList.remove('calc'); simProbsUpdate(L, cnt, tbl); });
 }
 document.addEventListener('input', e=>{
   const t = e.target; if(!t.dataset || !t.dataset.simk) return;
@@ -2791,11 +2846,11 @@ document.addEventListener('click', e=>{
   const b = e.target.closest('[data-simround],[data-simclear],[data-simfill]'); if(!b) return;
   e.stopImmediatePropagation();
   const L = league(S.lg), st = simStore(L);
-  if(b.dataset.simround!==undefined){ if(b.dataset.simround==='') return; S.simRound[L.lg] = +b.dataset.simround; return go({}, false); }
-  if(b.dataset.simclear==='all'){ S.sim[L.lg] = {}; return go({}, false); }
-  if(b.dataset.simclear){ const r=+b.dataset.simclear; L.matches.filter(m=>m[0]===r).forEach(m=>delete st[simKey(m)]); return go({}, false); }
-  if(b.dataset.simfill){ const r=+b.dataset.simfill, M=simModel(L);
-    L.matches.filter(m=>m[0]===r && !isPlayed(m)).forEach(m=>{ st[simKey(m)] = [mostLikely(M.muH*M.att[m[3]]*M.def[m[4]]), mostLikely(M.muA*M.att[m[4]]*M.def[m[3]])]; });
+  if(b.dataset.simround!==undefined){ const v = b.dataset.simround; if(v==='') return; S.simRound[L.lg] = v==='late' ? 'late' : +v; return go({}, false); }
+  if(b.dataset.simclear==='all'){ S.sim[L.lg] = {}; save(); return go({}, false); }
+  if(b.dataset.simclear){ const v=b.dataset.simclear, list = v==='late' ? simLate(L) : L.matches.filter(m=>m[0]===+v); list.forEach(m=>delete st[simKey(m)]); save(); return go({}, false); }
+  if(b.dataset.simfill){ const v=b.dataset.simfill, M=simModel(L), list = v==='late' ? simLate(L) : L.matches.filter(m=>m[0]===+v);
+    list.filter(m=>!isPlayed(m)).forEach(m=>{ st[simKey(m)] = [mostLikely(M.muH*M.att[m[3]]*M.def[m[4]]), mostLikely(M.muA*M.att[m[4]]*M.def[m[3]])]; });
     save(); return go({}, false); }
 }, true);
 
