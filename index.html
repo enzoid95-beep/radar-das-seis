@@ -1024,6 +1024,85 @@ table.probs .club{min-width:150px}
   .simscore small{font-size:10.5px}
   .sim-actions .mchip{flex:1 1 auto;text-align:center}
 }
+
+/* =========================================================
+   VISÃO GERAL DAS SEIS LIGAS (cabe na tela, sem rolar)
+   ========================================================= */
+button.brand{background:none;border:0;padding:0 6px;text-align:left;cursor:pointer;border-radius:12px;transition:background .2s}
+button.brand:hover{background:rgba(255,255,255,.04)}
+button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
+.tb-brand{display:flex;align-items:center;gap:9px;background:none;border:0;padding:0;color:inherit;width:auto!important;height:auto!important}
+.tb-brand svg{width:26px;height:26px}
+.ov-page{height:calc(100vh - 84px);height:calc(100dvh - 84px);display:flex;flex-direction:column;gap:clamp(8px,1.6vh,16px);min-height:520px}
+.ov-title h1{margin:0;font:800 clamp(26px,3.6vh,38px)/1 "Barlow Condensed",sans-serif;padding-top:.14em;margin-top:-.14em;
+  background:var(--grain),linear-gradient(180deg,#fff 0%,#f4f6fa 45%,#c9cfd9 75%,color-mix(in srgb,var(--g2) 30%,#9aa3b1) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.9));text-shadow:none}
+.ov-title p{margin:4px 0 0;color:var(--muted);font-size:clamp(12.5px,1.7vh,14.5px)}
+.ov-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:clamp(10px,1.6vh,16px)}
+.ovcard{position:relative;overflow:hidden;min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:clamp(6px,1.1vh,12px);text-align:left;color:var(--text);
+  padding:clamp(12px,1.9vh,18px);border-radius:18px;border:1px solid color-mix(in srgb,var(--c1) 35%,rgba(255,255,255,.06));
+  background:radial-gradient(90% 70% at 100% 0%,color-mix(in srgb,var(--c2) 22%,transparent),transparent 70%),radial-gradient(90% 80% at 0% 100%,color-mix(in srgb,var(--c1) 26%,transparent),transparent 72%),var(--noise),linear-gradient(180deg,#10141b,#07090c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 18px 36px -22px rgba(0,0,0,.9);transition:transform .2s,border-color .2s,box-shadow .2s}
+.ovcard::before{content:"";position:absolute;top:0;left:16px;right:16px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c1),var(--c2));opacity:.8}
+.ovcard:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c1) 65%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 22px 40px -20px color-mix(in srgb,var(--c1) 50%,#000)}
+.ov-head{display:flex;align-items:center;gap:10px}
+.ov-head .lg-logo{width:clamp(26px,3.6vh,34px);height:clamp(26px,3.6vh,34px)}
+.ov-head b{display:block;font:800 clamp(18px,2.6vh,24px)/1 "Barlow Condensed",sans-serif;letter-spacing:.2px}
+.ov-head small{display:block;font-size:clamp(11px,1.45vh,12.5px);color:var(--muted);margin-top:2px}
+.ov-head > div{flex:1;min-width:0}
+.ov-go{font-size:26px;line-height:1;color:color-mix(in srgb,var(--c2) 70%,#fff);opacity:.7}
+.ov-lead{display:flex;align-items:center;gap:12px;padding:clamp(6px,1.1vh,10px) 12px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.07)}
+.ov-lead img{width:clamp(34px,5vh,46px);height:clamp(34px,5vh,46px);object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
+.ov-lead > div{flex:1;min-width:0}
+.ov-lead small{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.ov-lead b{display:block;font:700 clamp(16px,2.3vh,20px)/1.1 "Barlow Condensed",sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-lead span{font-size:clamp(11px,1.45vh,12.5px);color:var(--muted)}
+.ov-lead em{font-style:normal;font:800 clamp(26px,4vh,36px)/1 "Barlow Condensed",sans-serif;color:#fff}
+.ov-lead em small{display:inline;font:600 12px Barlow,sans-serif;color:var(--muted);margin-left:3px;text-transform:none;letter-spacing:0}
+.ov-top{display:flex;flex-direction:column;gap:clamp(2px,.5vh,5px)}
+.ov-top > div{display:flex;align-items:center;gap:8px;font-size:clamp(12.5px,1.7vh,14px)}
+.ov-top .p{width:14px;color:var(--muted);font-weight:700;text-align:right}
+.ov-top .crest{width:clamp(16px,2.3vh,20px);height:clamp(16px,2.3vh,20px)}
+.ov-top .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.ov-top b{font:700 clamp(14px,2vh,16px)/1 "Barlow Condensed",sans-serif}
+.ov-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ov-stats > div{padding:clamp(5px,.9vh,8px) 8px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05);text-align:center}
+.ov-stats b{display:block;font:700 clamp(16px,2.3vh,20px)/1 "Barlow Condensed",sans-serif}
+.ov-stats span{font-size:clamp(10px,1.3vh,11.5px);color:var(--muted)}
+.ov-hl{display:flex;flex-direction:column;gap:clamp(3px,.6vh,6px)}
+.ov-hl > div{display:flex;align-items:center;gap:8px;font-size:clamp(12px,1.6vh,13.5px);font-weight:600}
+.ov-hl .crest{width:clamp(16px,2.2vh,20px);height:clamp(16px,2.2vh,20px)}
+.ov-hl span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-hl small{color:var(--muted);font-weight:500;margin-right:6px}
+.ov-hl b{font:700 clamp(14px,2vh,16px)/1 "Barlow Condensed",sans-serif}
+@media (max-height:760px){.ov-top > div:nth-child(3){display:none}}
+@media (max-height:680px){.ov-top{display:none}}
+@media (max-width:1100px) and (min-width:761px){.ov-hl > div:nth-child(3){display:none}}
+@media (max-width:760px){
+  .ov-page{height:calc(100dvh - 232px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));min-height:420px;gap:8px}
+  .ov-title p{display:none}
+  .ov-title h1{font-size:26px}
+  .ov-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:8px}
+  .ovcard{padding:10px;border-radius:14px;gap:6px;justify-content:flex-start}
+  .ov-head .lg-logo{width:22px;height:22px}.ov-head b{font-size:16px}.ov-head small,.ov-go,.ov-top,.ov-stats,.ov-hl{display:none}
+  .ov-lead{flex-direction:column;align-items:flex-start;gap:4px;padding:8px;flex:1;justify-content:center}
+  .ov-lead img{width:30px;height:30px}
+  .ov-lead b{font-size:15px;max-width:100%}
+  .ov-lead span{display:none}
+  .ov-lead em{font-size:22px}
+}
+
+@media (min-width:761px){.main:has(.ov-page){padding-bottom:22px}.main:has(.ov-page) .ov-page{height:calc(100vh - 44px);height:calc(100dvh - 44px)}}
+.ov-stats span{white-space:nowrap}
+.ovcard{gap:clamp(4px,.85vh,10px);padding:clamp(11px,1.6vh,16px)}
+.ov-lead{padding:clamp(5px,.8vh,9px) 11px}
+.ov-hl{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.ov-hl > div:nth-child(3){grid-column:1/-1}
+.ov-hl span small{display:block;margin:0;font-size:10.5px;line-height:1.1}
+.ov-stats > div{padding:clamp(4px,.7vh,7px) 6px}
+@media (max-height:900px) and (min-width:761px){.ov-top > div:nth-child(3){display:none}}
+@media (max-height:720px) and (min-width:761px){.ov-top{display:none}}
+.tb-brand{display:flex!important;place-items:unset!important}
+@media (max-width:760px){.ov-hl,.ov-top,.ov-stats{display:none!important}}
 </style>
 </head>
 <body>
@@ -1261,8 +1340,8 @@ window.addEventListener('resize', ()=>{ clearTimeout(window.__fs); window.__fs =
 function renderSide(){
   const lastDate = ORDER.map(k=>league(k).byDate.slice(-1)[0]?.[1]||'').sort().pop();
   $('#side').innerHTML = `
-    <div class="brand"><div class="brand-mark">${LOGO_SVG}</div>
-      <div><b>Radar das Seis</b><span>by Enzo Monteiro</span></div></div>
+    <button class="brand" data-nav="overview" aria-label="Visão geral das seis ligas" ${S.view==='overview'?'aria-current="page"':''}><div class="brand-mark">${LOGO_SVG}</div>
+      <div><b>Radar das Seis</b><span>by Enzo Monteiro</span></div></button>
     <div class="side-group lg-group"><div class="side-title">Ligas</div>
       <div class="lg-list">${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}">${lgDot(k)}<span class="lg-n">${LEAGUES[k].name}</span><small>${LEAGUES[k].season}</small></button>`).join('')}</div>
     </div>
@@ -2130,6 +2209,9 @@ async function boot(){
     try{ const raw = await fetchData(); if(raw.updated && raw.updated!==lastRawUpdated){ lastRawUpdated = raw.updated; Object.keys(cache).forEach(k=>delete cache[k]); const oldD = DATA; DATA = adapt(raw); noteFresh(oldD, DATA); const y=window.scrollY; quietRender = true; try{ render(); } finally { quietRender = false; } window.scrollTo(0,y); } }catch(e){}
   }, 600000);
 }
+const SCOL_DEF = {mp:['Jogos',s=>s.mp??'—'], g:['Gols',s=>s.g], a:['Assistências',s=>s.a??0], ga:['G + A',s=>s.g+(s.a||0)], gpm:['Gols por jogo',s=>s.mp?nf2.format(s.g/s.mp):'—'], p:['Gols de pênalti',s=>s.p??0]};
+const SCOLS = {g:['mp','g','gpm'], a:['mp','a'], ga:['mp','g','a','ga'], gpm:['mp','g','gpm'], p:['mp','g','p']};
+const SKEY = {g:'g', a:'a', ga:'ga', gpm:'gpm', p:'p'};
 const SMET = {g:['Gols',s=>s.g], a:['Assistências',s=>s.a||0], ga:['Gols + assistências',s=>s.g+(s.a||0)], gpm:['Gols por jogo',s=>s.mp?s.g/s.mp:0], p:['Gols de pênalti',s=>s.p||0]};
 const POSPT = {Goalkeeper:'Goleiro',Defence:'Defensor',Defender:'Defensor',Midfield:'Meio-campista',Midfielder:'Meio-campista',Offence:'Atacante',Attacker:'Atacante','Centre-Forward':'Centroavante','Left Winger':'Ponta-esquerda','Right Winger':'Ponta-direita','Attacking Midfield':'Meia-atacante','Central Midfield':'Meio-campista','Defensive Midfield':'Volante','Left-Back':'Lateral-esquerdo','Right-Back':'Lateral-direito','Centre-Back':'Zagueiro','Second Striker':'Segundo atacante'};
 function viewScorers(L){
@@ -2139,10 +2221,10 @@ function viewScorers(L){
   return head('Artilharia',`${L.cfg.full} ${L.cfg.season}`)+(list.length?`
   <div class="view-head" style="margin:4px 0 12px"><div><p>Ordenar por</p></div><div class="seg" role="group" aria-label="Ordenar">${Object.entries(SMET).map(([id,[l]])=>`<button data-smet="${id}" aria-pressed="${id===k}">${l}</button>`).join('')}</div></div>
   <div class="panel fade"><div class="tbl-wrap"><table>
-    <thead><tr><th>#</th><th class="l sticky">Jogador</th><th class="l hide-sm">Clube</th><th>Jogos</th><th>Gols</th><th>Assist.</th><th class="hide-sm">Pênaltis</th><th>Gols/jogo</th></tr></thead>
+    <thead><tr><th>#</th><th class="l sticky">Jogador</th><th class="l hide-sm">Clube</th>${SCOLS[k].map(c=>`<th>${SCOL_DEF[c][0]}</th>`).join('')}</tr></thead>
     <tbody>${rows.map((s,i)=>{const t=L.T[s.t]; const v=f(s), rank=1+rows.filter(o=>f(o)>v).length;
       return `<tr class="${t?'row':''}" ${t?`data-team="${t.i}"`:''}><td class="pos">${rank}</td><td class="l sticky"><div class="club" style="min-width:170px"><span>${esc(s.n)}<small style="display:block;font-weight:500;color:var(--muted);font-size:12px">${esc(POSPT[s.pos]||s.pos||'')}${s.nat?` · ${esc(nat(s.nat).f)} ${esc(nat(s.nat).pt)}`:''}</small></span></div></td>
-      <td class="l hide-sm"><div class="club" style="min-width:120px">${t?crest(t):''}<span>${t?esc(t.name):''}</span></div></td><td>${s.mp??'—'}</td><td class="pts">${s.g}</td><td>${s.a??0}</td><td class="hide-sm">${s.p??0}</td><td>${s.mp?nf2.format(s.g/s.mp):'—'}</td></tr>`}).join('')}</tbody></table></div>
+      <td class="l hide-sm"><div class="club" style="min-width:120px">${t?crest(t):''}<span>${t?esc(t.name):''}</span></div></td>${SCOLS[k].map(c=>`<td class="${c===SKEY[k]?'pts':''}">${SCOL_DEF[c][1](s)}</td>`).join('')}</tr>`}).join('')}</tbody></table></div>
     <p class="src" style="margin-top:12px">Lista oficial de artilheiros da competição (jogadores com mais gols). Toque em um nome para abrir o time.</p></div>`
   : `<div class="panel empty-state"><h2>Artilharia aparece na próxima atualização</h2><p>A lista de artilheiros chega junto com a primeira atualização automática dos dados.</p></div>`);
 }
@@ -2187,7 +2269,7 @@ function closeSheet(){ const s = document.getElementById('msheet'); if(s){ s.cla
 function openMore(){
   const items = NAV.flatMap(([g,its])=>its.map(it=>[g,...it])).filter(([,v])=>!TAB_MAIN.some(([m])=>m===v));
   const groups = [...new Set(items.map(x=>x[0]))];
-  openSheet(groups.map(g=>`<div class="msheet-group"><small>${g}</small>${items.filter(x=>x[0]===g).map(([,v,l,ic])=>`<button class="msheet-item" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}<span>${l}</span></button>`).join('')}</div>`).join(''), 'Mais seções');
+  openSheet(`<div class="msheet-group"><button class="msheet-item" data-nav="overview" ${S.view==='overview'?'aria-current="page"':''}>${icon('home')}<span>As seis ligas</span></button></div>` + groups.map(g=>`<div class="msheet-group"><small>${g}</small>${items.filter(x=>x[0]===g).map(([,v,l,ic])=>`<button class="msheet-item" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}<span>${l}</span></button>`).join('')}</div>`).join(''), 'Mais seções');
 }
 /* filtros viram um botão que abre um painel de baixo */
 function mobileFilters(view){
@@ -2717,6 +2799,35 @@ document.addEventListener('click', e=>{
     save(); return go({}, false); }
 }, true);
 
+/* ================= VISÃO GERAL DAS SEIS LIGAS ================= */
+function ovCard(lg){
+  const L = league(lg), cfg = LEAGUES[lg];
+  if(!L.T.length) return `<button class="ovcard" data-league="${lg}" data-ovgo style="--c1:${cfg.g[0]};--c2:${cfg.g[1]}"><div class="ov-head">${lgDot(lg)}<div><b>${cfg.name}</b><small>sem dados ainda</small></div></div></button>`;
+  const t = L.table, lead = t[0], second = t[1], gap = lead.all.P - (second ? second.all.P : 0);
+  const best = k => sorted(L,k)[0];
+  const atk = best('gp'), dfn = best('gc');
+  const sc = ((typeof DATA!=='undefined' && DATA[lg] && DATA[lg].scorers) || [])[0];
+  const scT = sc && L.T[sc.t];
+  const goals = L.played.reduce((s,m)=>s+m[5]+m[6],0);
+  return `<button class="ovcard" data-league="${lg}" data-ovgo style="--c1:${cfg.g[0]};--c2:${cfg.g[1]}">
+    <div class="ov-head">${lgDot(lg)}<div><b>${cfg.name}</b><small>${cfg.country} · ${cfg.season} · ${L.latest}ª rodada</small></div><span class="ov-go">›</span></div>
+    <div class="ov-lead"><img src="${lead.hi}" alt=""><div><small>Líder</small><b>${esc(lead.name)}</b><span>${gap>0?`${gap} ${gap===1?'ponto':'pontos'} à frente`:'empatado em pontos'}</span></div><em class="num">${lead.all.P}<small>pts</small></em></div>
+    <div class="ov-top">${t.slice(1,4).map((x,k)=>`<div><span class="p">${k+2}</span>${crest(x)}<span class="n">${esc(x.name)}</span><b class="num">${x.all.P}</b></div>`).join('')}</div>
+    <div class="ov-stats"><div><b class="num">${nf2.format(L.avg.gpg)}</b><span>gols/jogo</span></div><div><b class="num">${pct(L.avg.hw)}</b><span>vitórias casa</span></div><div><b class="num">${goals}</b><span>gols</span></div></div>
+    <div class="ov-hl">
+      <div>${crest(atk)}<span><small>Melhor ataque</small>${esc(atk.name)}</span><b class="num">${atk.all.GP}</b></div>
+      <div>${crest(dfn)}<span><small>Melhor defesa</small>${esc(dfn.name)}</span><b class="num">${dfn.all.GC}</b></div>
+      ${sc?`<div>${scT?crest(scT):''}<span><small>Artilheiro</small>${esc(sc.n)}</span><b class="num">${sc.g}</b></div>`:''}
+    </div>
+  </button>`;
+}
+function viewOverview(){
+  return `<div class="ov-page">
+    <div class="ov-title"><div><h1>As seis ligas</h1><p>Resumo de cada campeonato. Toque em uma liga para abrir.</p></div></div>
+    <div class="ov-grid">${ORDER.map(ovCard).join('')}</div>
+  </div>`;
+}
+
 /* ---------- render / events ---------- */
 function applyTheme(){
   const g=LEAGUES[S.lg].g, r=document.documentElement.style;
@@ -2729,13 +2840,13 @@ function render(){
   const L = league(S.lg);
   applyTheme(); renderSide();
   if(!L.T.length){ $('#topbar-title').innerHTML = `${lgDot(S.lg)}<b>${LEAGUES[S.lg].name}</b>`; $('#view').innerHTML = `<div class="panel empty-state"><h2>Sem dados da ${esc(LEAGUES[S.lg].name)} ainda</h2><p>Os jogos aparecem aqui assim que a próxima atualização automática trouxer a tabela da liga.</p></div>`; return; }
-  const V = {home:viewHome,table:viewTable,matches:viewMatches,team:viewTeam,rank:viewRank,compare:viewCompare,player:viewPlayer,squad:viewSquad,prank:viewPRank,refs:viewRefs,stats:viewStats,scorers:viewScorers,gsquad:viewGSquad,gplayer:viewGPlayer,grefs:viewGRefs,sim:viewSim}[S.view]||viewHome;
-  $('#topbar-title').innerHTML = `${lgDot(S.lg)}<b>${LEAGUES[S.lg].name}</b>`;
+  const V = {home:viewHome,table:viewTable,matches:viewMatches,team:viewTeam,rank:viewRank,compare:viewCompare,player:viewPlayer,squad:viewSquad,prank:viewPRank,refs:viewRefs,stats:viewStats,scorers:viewScorers,gsquad:viewGSquad,gplayer:viewGPlayer,grefs:viewGRefs,sim:viewSim,overview:viewOverview}[S.view]||viewHome;
+  $('#topbar-title').innerHTML = S.view==='overview' ? `<button class="tb-brand" data-nav="overview">${LOGO_SVG.replace(/rds-/g,'rdt-')}<b>Radar das Seis</b></button>` : `<button class="tb-brand" data-nav="overview">${lgDot(S.lg)}<b>${LEAGUES[S.lg].name}</b></button>`;
   const key = pageKey(), wasLoading = !!document.querySelector('#view .empty-state .spinner, #view .empty .spinner');
   const pageChanged = key!==lastPageKey || wasLoading, snap = pageChanged ? null : captureFlip();
   lastPageKey = key;
   $('#view').innerHTML = V(L);
-  document.title = `${LEAGUES[S.lg].name} · Radar das Seis`;
+  document.title = S.view==='overview' ? 'Radar das Seis · by Enzo Monteiro' : `${LEAGUES[S.lg].name} · Radar das Seis`;
   if(S.view==='player') renderSearch();
   if(S.view==='gplayer') renderGSearch();
   if(S.view==='sim') setTimeout(()=>simRefresh(), 30);
@@ -2760,7 +2871,7 @@ document.addEventListener('click', e=>{
   if(b.dataset.gplayer!==undefined){ S.gplayer[S.lg]=+b.dataset.gplayer; S.gq=''; return go({view:'gplayer'}); }
   if(b.dataset.gref!==undefined){ S.gref[S.lg]=b.dataset.gref||null; return go({view:'grefs'}); }
   if(b.dataset.reloadPlayers!==undefined){ delete PL[S.lg]; getMcp().then(m=>m&&m.invalidate&&m.invalidate('Opta').catch(()=>{})); return go({},false); }
-  if(b.dataset.league){ spinLeague = b.dataset.league!==S.lg; return go({lg:b.dataset.league}); }
+  if(b.dataset.league){ spinLeague = b.dataset.league!==S.lg; return go(b.dataset.ovgo!==undefined ? {lg:b.dataset.league, view:'home'} : {lg:b.dataset.league}); }
   if(b.dataset.nav) return go({view:b.dataset.nav});
   if(b.dataset.mode) return go({mode:b.dataset.mode},false);
   if(b.dataset.round){ S.round[S.lg]=+b.dataset.round; return go({},false); }
