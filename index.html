@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#020305">
+<meta name="theme-color" content="#05070b">
 <meta name="description" content="Radar das Seis: classificação, jogos e estatísticas de Brasileirão, Premier League, La Liga, Serie A, Bundesliga e Ligue 1, atualizados automaticamente.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -898,6 +898,21 @@ tr.row.zoned td.pos{background:color-mix(in srgb,var(--zc) 12%,transparent)}
 tr.row.zoned td.sticky{background:linear-gradient(color-mix(in srgb,var(--zc) 7%,transparent),color-mix(in srgb,var(--zc) 7%,transparent)),#0b0e13}
 tr.row.zoned:hover td{background:color-mix(in srgb,var(--zc) 12%,transparent)}
 tr.row.zoned:hover td.sticky{background:linear-gradient(color-mix(in srgb,var(--zc) 12%,transparent),color-mix(in srgb,var(--zc) 12%,transparent)),#0e1117}
+
+/* ---------- fundo: mais iluminação na cor da liga, um pouco menos escuro ---------- */
+:root{--bg:#05070b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#05070b}}
+:root[data-theme="dark"]{--bg:#05070b}
+body::before{opacity:.16}
+body::after{background:
+  radial-gradient(70% 60% at 100% 0%,color-mix(in srgb,var(--g2) 26%,transparent),transparent 72%),
+  radial-gradient(65% 65% at 0% 100%,color-mix(in srgb,var(--g1) 30%,transparent),transparent 74%),
+  radial-gradient(55% 45% at 45% -5%,color-mix(in srgb,var(--g1) 20%,transparent),transparent 70%),
+  radial-gradient(45% 40% at 75% 65%,color-mix(in srgb,var(--g2) 9%,transparent),transparent 75%),
+  radial-gradient(130% 100% at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%),
+  var(--noise)}
+.panel{background:var(--noise),linear-gradient(180deg,rgba(15,19,26,.95) 0%,rgba(8,10,14,.97) 100%)}
+.side{background:var(--noise),linear-gradient(180deg,color-mix(in srgb,var(--g1) 7%,rgba(6,8,11,.92)),rgba(3,4,6,.95))}
 </style>
 </head>
 <body>
