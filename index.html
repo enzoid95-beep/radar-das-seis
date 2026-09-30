@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#020305">
 <meta name="description" content="Radar das Seis: classificação, jogos e estatísticas de Brasileirão, Premier League, La Liga, Serie A, Bundesliga e Ligue 1, atualizados automaticamente.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Radar das Seis">
 <title>Radar das Seis · by Enzo Monteiro</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -698,6 +704,133 @@ body{text-shadow:0 1px 0 rgba(0,0,0,.9),0 -1px 0 rgba(255,255,255,.035),0 2px 8p
 .trophy.has-img img{height:clamp(112px,13vw,178px);width:auto;max-width:clamp(120px,15vw,200px);object-fit:contain}
 .trophy.has-img::after{bottom:-4px}
 @media (max-width:620px){.trophy.has-img img{height:84px;max-width:110px}}
+
+/* =========================================================
+   VERSÃO MOBILE (até 760 px) — nada abaixo afeta o desktop
+   ========================================================= */
+#mtabbar,#mleagues,#msheet,#mteam,.mtabs,.mfilter,#minstall{display:none}
+@media (max-width:760px){
+  /* navegação: barra de baixo no lugar da lateral */
+  .side,.scrim,.topbar [data-menu]{display:none!important}
+  .main{padding:14px 14px calc(92px + env(safe-area-inset-bottom,0px))}
+  .topbar{display:flex;flex-wrap:wrap;gap:8px 10px;margin:-14px -14px 14px;padding:10px 14px 8px;padding-top:calc(10px + env(safe-area-inset-top,0px));
+    background:rgba(2,3,5,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid color-mix(in srgb,var(--g1) 25%,transparent)}
+  .topbar #topbar-title{flex:1}
+  .topbar #topbar-title b{font-size:20px}
+  #mleagues{display:flex;gap:6px;width:calc(100% + 28px);margin:0 -14px;padding:2px 14px 2px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+  #mleagues::-webkit-scrollbar{display:none}
+  #mleagues button{flex:none;display:flex;align-items:center;gap:7px;padding:7px 12px 7px 9px;border-radius:20px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:13.5px;font-weight:600;color:var(--muted);scroll-snap-align:center}
+  #mleagues button[aria-current="true"]{color:#fff;border-color:color-mix(in srgb,var(--g1) 60%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--g1) 30%,transparent),color-mix(in srgb,var(--g2) 14%,transparent))}
+  #mleagues .lg-logo{width:20px;height:20px}
+  #mtabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));
+    background:var(--noise),linear-gradient(180deg,rgba(10,12,16,.94),rgba(4,5,7,.98));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid color-mix(in srgb,var(--g1) 30%,transparent);box-shadow:0 -10px 30px rgba(0,0,0,.6)}
+  #mtabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:12px;color:var(--muted);font-size:11px;font-weight:600;position:relative}
+  #mtabbar button svg{width:23px;height:23px}
+  #mtabbar button[aria-current="page"]{color:#fff}
+  #mtabbar button[aria-current="page"]::before{content:"";position:absolute;top:-6px;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--g1),var(--g2))}
+  #mtabbar button[aria-current="page"] svg{color:var(--g2);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--g2) 55%,transparent))}
+
+  /* painel que sobe de baixo */
+  #msheet{display:block;position:fixed;inset:0;z-index:70;pointer-events:none}
+  .msheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .25s}
+  .msheet-card{position:absolute;left:0;right:0;bottom:0;max-height:78vh;overflow-y:auto;padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;
+    background:var(--noise),linear-gradient(180deg,#12151c,#07090c);border-top:1px solid color-mix(in srgb,var(--g1) 40%,transparent);transform:translateY(105%);transition:transform .32s cubic-bezier(.25,1,.5,1);box-shadow:0 -20px 50px rgba(0,0,0,.7)}
+  #msheet.open{pointer-events:auto}
+  #msheet.open .msheet-bg{opacity:1}
+  #msheet.open .msheet-card{transform:none}
+  .msheet-grip{width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.18);margin:4px auto 12px}
+  .msheet-title{margin:0 0 12px;font:700 20px/1 "Barlow Condensed",sans-serif}
+  .msheet-group{margin-bottom:14px}
+  .msheet-group small{display:block;font-size:11.5px;font-weight:700;color:color-mix(in srgb,var(--g1) 50%,var(--dim));margin:0 4px 6px}
+  .msheet-item{width:100%;display:flex;align-items:center;gap:12px;padding:13px 12px;border-radius:12px;font-size:16px;font-weight:600;color:var(--text);text-align:left}
+  .msheet-item svg{width:21px;height:21px;color:var(--muted)}
+  .msheet-item[aria-current="page"]{background:linear-gradient(90deg,color-mix(in srgb,var(--g1) 24%,transparent),transparent)}
+  .msheet-item[aria-current="page"] svg{color:var(--g2)}
+  .msheet-body .in-sheet{display:flex!important;flex-direction:column;gap:6px;background:none;border:0;box-shadow:none;padding:0}
+  .msheet-body .in-sheet button{width:100%;padding:13px 14px;border-radius:12px;font-size:16px;text-align:left;border:1px solid var(--line2);background:rgba(255,255,255,.03);color:var(--text)}
+  .msheet-body .in-sheet button[aria-pressed="true"]{background:linear-gradient(135deg,var(--g1),var(--g2));color:#07090d;font-weight:700;border-color:transparent;text-shadow:none}
+  .msheet-body .metric-groups.in-sheet .row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .msheet-body .metric-groups.in-sheet .row > span{width:auto;margin:4px 4px 0;font-size:11.5px}
+  body.sheet-open{overflow:hidden}
+
+  /* filtros: botão que abre o painel */
+  #view .view-head .seg,#view .metric-groups{display:none}
+  .mfilter{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--g1) 35%,var(--line2));background:rgba(255,255,255,.03);font-weight:600;font-size:15px;margin:0 0 12px}
+  .mfilter svg{width:18px;height:18px;color:var(--g2)}
+  .mfilter .chev{width:16px;height:16px;color:var(--muted)}
+  .view-head{margin-bottom:12px}
+  .view-head h1{font-size:30px}
+
+  /* tabela compacta */
+  #view table .mx{display:none}
+  #view table .mform{display:table-cell!important}
+  #view .tbl-wrap{margin:0 -12px;padding:0 12px}
+  .panel{padding:14px 12px;border-radius:16px}
+  .club{min-width:0;max-width:34vw;overflow:hidden}
+  .club span{overflow:hidden;text-overflow:ellipsis}
+  td,th{padding:9px 4px}
+  .f{width:17px;height:17px;font-size:10px;border-radius:5px}
+  tr.row.mopen td{background:color-mix(in srgb,var(--g1) 10%,transparent)}
+  tr.mdetail td{padding:0 0 10px;background:color-mix(in srgb,var(--g1) 6%,transparent)}
+  .mdet{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 8px 2px;text-align:center;animation:rise .35s cubic-bezier(.25,1,.5,1)}
+  .mdet b{display:block;font:700 22px/1 "Barlow Condensed",sans-serif}
+  .mdet span{font-size:11.5px;color:var(--muted)}
+  .mdet .btn{grid-column:1/-1;justify-content:center;margin-top:6px;padding:10px}
+
+  /* partidas: lista vertical e troca de rodada deslizando */
+  .matches.big{grid-template-columns:1fr;gap:10px}
+  .matches.big::before{content:"Deslize para os lados para trocar de rodada";display:block;text-align:center;font-size:12px;color:var(--dim);margin:-2px 0 2px}
+  @keyframes swipeNext{from{opacity:0;transform:translate3d(40px,0,0)}}
+  @keyframes swipePrev{from{opacity:0;transform:translate3d(-40px,0,0)}}
+  .matches.swipe-next{animation:swipeNext .35s cubic-bezier(.25,1,.5,1)}
+  .matches.swipe-prev{animation:swipePrev .35s cubic-bezier(.25,1,.5,1)}
+  #view.enter .matches.swipe-next .cascade,#view.enter .matches.swipe-prev .cascade{animation:none}
+  .round-nav b{min-width:92px;font-size:18px}
+
+  /* perfil do time em abas + cabeçalho fixo */
+  .mtabs{display:flex;gap:6px;margin:0 -14px 14px;padding:2px 14px 4px;overflow-x:auto;scrollbar-width:none}
+  .mtabs::-webkit-scrollbar{display:none}
+  .mtabs button{flex:none;padding:9px 15px;border-radius:20px;font-size:14.5px;font-weight:600;color:var(--muted);border:1px solid var(--line2)}
+  .mtabs button[aria-selected="true"]{color:#fff;border-color:transparent;background:linear-gradient(135deg,color-mix(in srgb,var(--h1,var(--g1)) 70%,#000),color-mix(in srgb,var(--h2,var(--g2)) 55%,#000))}
+  .mtabs-on .mt-hide{display:none!important}
+  .mtabs-on .grid.g2{gap:12px}
+  #mteam{display:block;position:fixed;left:0;right:0;z-index:40;transform:translateY(-120%);opacity:0;transition:transform .3s cubic-bezier(.25,1,.5,1),opacity .2s;pointer-events:none}
+  #mteam.show{transform:none;opacity:1;pointer-events:auto}
+  #mteam > button{width:100%;display:flex;align-items:center;gap:10px;padding:8px 14px}
+  #mteam .crest{width:28px;height:28px}
+  #mteam b{font:700 18px/1 "Barlow Condensed",sans-serif;flex:1;text-align:left}
+  #mteam span{font-size:13px;color:var(--muted)}
+  body.is-mobile .thero{grid-template-columns:auto minmax(0,1fr)}
+  body.is-mobile .thero h1{font-size:34px}
+  body.is-mobile .thero .line{gap:6px 16px}
+  body.is-mobile .thero .line b{font-size:22px}
+  .picker{margin:0 -14px 8px;padding:4px 14px 10px}
+
+  /* instalar */
+  #minstall{display:flex;align-items:center;gap:10px;position:fixed;left:10px;right:10px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:45;padding:10px 12px;border-radius:14px;
+    background:var(--noise),linear-gradient(180deg,#151922,#0a0c10);border:1px solid color-mix(in srgb,var(--g1) 45%,transparent);box-shadow:0 14px 34px rgba(0,0,0,.7);animation:rise .4s cubic-bezier(.25,1,.5,1)}
+  #minstall img{width:34px;height:34px}
+  #minstall div{flex:1;min-width:0}
+  #minstall b{display:block;font-size:14px}
+  #minstall small{display:block;font-size:12px;color:var(--muted);line-height:1.35}
+  #minstall .btn{margin:0}
+  .minstall-x{font-size:22px;color:var(--muted);padding:0 4px}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+
+  /* mais leve no celular */
+  .tile::after,.lcard::after,.match::after,.fact::after,.sq-card::after,.thero::after{display:none}
+  body::before{opacity:.1}
+  .hero,.thero{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 34px -24px rgba(0,0,0,1)}
+}
+
+@media (max-width:760px){
+  #mleagues button{width:auto;height:auto;display:flex;place-items:unset;white-space:nowrap}
+  #mteam{background:rgba(6,8,11,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid color-mix(in srgb,var(--h1,var(--g1)) 40%,transparent)}
+  #mteam button[data-mtop]{background:none;border:0}
+  #mteam .mtabs.mtabs-mini{margin:0;padding:0 14px 8px}
+  #mteam .mtabs.mtabs-mini button{padding:7px 13px;font-size:13.5px}
+}
+@media (max-width:760px){#mteam .mtabs.mtabs-mini{display:flex;overflow-x:auto}#mteam .mtabs.mtabs-mini button{width:auto;flex:none}}
 </style>
 </head>
 <body>
@@ -757,7 +890,7 @@ if(!LEAGUES[S.lg]) S.lg='br';
 if(typeof PUBLIC!=='undefined' && PUBLIC===true && ['player','squad','prank','refs'].includes(S.view)) S.view='home';
 if(!(typeof GH!=='undefined' && GH===true) && S.view==='scorers') S.view='home';
 ['player','squad','ref'].forEach(k=>{ if(!S[k]||typeof S[k]!=='object') S[k]={}; }); S.pq='';
-const save = () => { try { const {pq,squadOur,...keep}=S; localStorage.setItem('cdl-state', JSON.stringify(keep)); } catch(e){} };
+const save = () => { try { const {pq,squadOur,mtab,...keep}=S; localStorage.setItem('cdl-state', JSON.stringify(keep)); } catch(e){} };
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -1027,12 +1160,12 @@ function viewTable(L){
   <div class="view-head"><div><h1>Classificação</h1><p>${cfg.full} ${cfg.season} · ${L.latest}ª rodada</p></div>
     <div class="seg" role="group" aria-label="Recorte da tabela">${modes.map(([k,l])=>`<button data-mode="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div>
   <div class="panel fade"><div class="tbl-wrap"><table>
-    <thead><tr><th>#</th><th class="l sticky">Clube</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th class="hide-sm">GP</th><th class="hide-sm">GC</th><th>SG</th><th>AP%</th><th class="hide-sm">Últimos 5</th></tr></thead>
+    <thead><tr><th>#</th><th class="l sticky">Clube</th><th>PTS</th><th>J</th><th class="mx">V</th><th class="mx">E</th><th class="mx">D</th><th class="hide-sm mx">GP</th><th class="hide-sm mx">GC</th><th>SG</th><th class="mx">AP%</th><th class="hide-sm mform">Últimos 5</th></tr></thead>
     <tbody>${rows.map((t,k)=>{const r=t[key], z=S.mode==='geral'?zoneOf(cfg,k+1):null;
       return `<tr class="row" data-team="${t.i}"><td class="pos">${z?`<i style="background:${z[3]}"></i>`:''}${k+1}</td>
       <td class="l sticky"><div class="club">${crest(t)}<span>${esc(t.name)}</span></div></td>
-      <td class="pts">${r.P}</td><td>${r.J}</td><td>${r.V}</td><td>${r.E}</td><td>${r.D}</td><td class="hide-sm">${r.GP}</td><td class="hide-sm">${r.GC}</td>
-      <td>${sgn(r.GP-r.GC)}</td><td>${r.J?Math.round(r.P/(3*r.J)*100):0}</td><td class="hide-sm">${form(games(t))}</td></tr>`}).join('')}</tbody></table></div>
+      <td class="pts">${r.P}</td><td>${r.J}</td><td class="mx">${r.V}</td><td class="mx">${r.E}</td><td class="mx">${r.D}</td><td class="hide-sm mx">${r.GP}</td><td class="hide-sm mx">${r.GC}</td>
+      <td>${sgn(r.GP-r.GC)}</td><td class="mx">${r.J?Math.round(r.P/(3*r.J)*100):0}</td><td class="hide-sm mform">${form(games(t))}</td></tr>`}).join('')}</tbody></table></div>
     ${S.mode==='geral'?`<div class="legend">${cfg.zones.map(z=>`<span><i style="background:${z[3]}"></i>${z[2]}</span>`).join('')}</div>`
       :`<div class="legend"><span>${S.mode==='1t'?'Tabela considerando apenas o placar do intervalo.':S.mode==='2t'?'Tabela considerando apenas os gols do segundo tempo.':'Somente jogos '+(S.mode==='casa'?'como mandante.':'como visitante.')}</span></div>`}
   </div>`;
@@ -1115,33 +1248,33 @@ function viewTeam(L){
     <div class="posbig"><b class="num">${t.pos}º</b><span>de ${L.N} na tabela</span>${OPTA[L.lg]?`<button class="btn sm" data-squad-of="${t.i}">Ver elenco</button>`:''}</div>
   </section>
 
-  <div class="panel" style="margin-bottom:16px"><h2>Desempenho</h2><p class="sub">Número do clube e posição no ranking da liga em cada indicador.</p>
+  <div data-mtab="resumo" class="panel" style="margin-bottom:16px"><h2>Desempenho</h2><p class="sub">Número do clube e posição no ranking da liga em cada indicador.</p>
     <div class="tiles">${tile(L,t,'ppg')}${tile(L,t,'gpm')}${tile(L,t,'gcm')}${tile(L,t,'cs')}${tile(L,t,'fts')}${tile(L,t,'f5')}${tile(L,t,'homeAp')}${tile(L,t,'awayAp')}${tile(L,t,'recov')}${tile(L,t,'lost')}</div></div>
 
   <div class="grid g2">
-    <div class="panel"><h2>Casa × fora</h2><p class="sub">Campanha como mandante (esquerda) e visitante (direita).</p>
+    <div data-mtab="casa" class="panel"><h2>Casa × fora</h2><p class="sub">Campanha como mandante (esquerda) e visitante (direita).</p>
       <div class="split"><div class="h" style="text-align:right">Mandante</div><div></div><div class="h">Visitante</div>
         ${splitRow('Jogos',t.home.J,t.away.J)}${splitRow('Pontos',t.home.P,t.away.P)}${splitRow('Vitórias',t.home.V,t.away.V)}
         ${splitRow('Empates',t.home.E,t.away.E)}${splitRow('Derrotas',t.home.D,t.away.D,v=>v,true)}${splitRow('Gols pró',t.home.GP,t.away.GP)}
         ${splitRow('Gols contra',t.home.GC,t.away.GC,v=>v,true)}${splitRow('Aproveit.',x.homeAp,x.awayAp,pct,false,1)}</div></div>
-    <div class="panel"><h2>Gols por tempo</h2><p class="sub">Em que metade do jogo o time marca e sofre.</p>
+    <div data-mtab="casa" class="panel"><h2>Gols por tempo</h2><p class="sub">Em que metade do jogo o time marca e sofre.</p>
       <div class="split"><div class="h" style="text-align:right">1º tempo</div><div></div><div class="h">2º tempo</div>
         ${splitRow('Marcados',x.gp1,x.gp2)}${splitRow('Sofridos',x.gc1,x.gc2,v=>v,true)}${splitRow('Saldo',x.gp1-x.gc1,x.gp2-x.gc2,sgn)}</div>
       <p class="sub" style="margin:14px 0 0">Saldo por tempo: 1º ${sgn(x.gp1-x.gc1)} · 2º ${sgn(x.gp2-x.gc2)}. Na tabela só do 1º tempo o clube é ${ord(sortTable([...L.T],'h1',cfg.winsFirst).indexOf(t)+1)}; na do 2º, ${ord(sortTable([...L.T],'h2',cfg.winsFirst).indexOf(t)+1)}.</p></div>
 
-    <div class="panel"><h2>Tendências nos jogos</h2><p class="sub">Frequência em partidas do clube. O traço branco marca a média da liga.</p>
+    <div data-mtab="casa" class="panel"><h2>Tendências nos jogos</h2><p class="sub">Frequência em partidas do clube. O traço branco marca a média da liga.</p>
       ${trend('Ambos marcam',x.btts,L.avg.btts)}${trend('Mais de 1,5 gols',x.o15,L.avg.o15)}${trend('Mais de 2,5 gols',x.o25,L.avg.o25)}${trend('Mais de 3,5 gols',x.o35,L.avg.o35)}${trend('Sem sofrer gols',x.cs,L.avg.cs)}${trend('Sem marcar',x.fts,L.avg.fts)}</div>
-    <div class="panel"><h2>Do intervalo ao apito final</h2><p class="sub">Resultado final conforme a situação no intervalo.</p>
+    <div data-mtab="casa" class="panel"><h2>Do intervalo ao apito final</h2><p class="sub">Resultado final conforme a situação no intervalo.</p>
       <table class="matrix"><thead><tr><th class="l">No intervalo</th><th>Jogos</th><th>V</th><th>E</th><th>D</th></tr></thead><tbody>
       ${[['lead','Vencendo'],['draw','Empatando'],['trail','Perdendo']].map(([k,l])=>`<tr><td class="l">${l}</td><td>${htTot(k)}</td>${['V','E','D'].map(r=>`<td><span class="cell" style="background:${cellBg(ht[k][r],htTot(k),r)}">${ht[k][r]}</span></td>`).join('')}</tr>`).join('')}
       </tbody></table>
       <div class="facts" style="margin-top:12px"><div class="fact"><small>Pontos buscados no 2º tempo</small><b class="num">${x.recov}</b><span>${ord(rankOf(L,'recov',t))} na liga</span></div>
       <div class="fact"><small>Pontos cedidos após vencer no intervalo</small><b class="num">${x.lost}</b><span>${ord(rankOf(L,'lost',t))} na liga</span></div></div></div>
 
-    <div class="panel span2"><h2>Posição rodada a rodada</h2><p class="sub">Faixas coloridas indicam as zonas da tabela.</p>${posChart(L,t)}</div>
+    <div data-mtab="resumo" class="panel span2"><h2>Posição rodada a rodada</h2><p class="sub">Faixas coloridas indicam as zonas da tabela.</p>${posChart(L,t)}</div>
 
-    <div class="panel"><h2>Perfil em relação à liga</h2><p class="sub">Quanto mais perto da borda, melhor o clube em comparação com os outros ${L.N-1}.</p>${radar(L,[[t,t.col]])}</div>
-    <div class="panel"><h2>Sequências e marcas</h2><p class="sub">Recortes da campanha em ordem cronológica.</p>
+    <div data-mtab="resumo" class="panel"><h2>Perfil em relação à liga</h2><p class="sub">Quanto mais perto da borda, melhor o clube em comparação com os outros ${L.N-1}.</p>${radar(L,[[t,t.col]])}</div>
+    <div data-mtab="resumo" class="panel"><h2>Sequências e marcas</h2><p class="sub">Recortes da campanha em ordem cronológica.</p>
       <div class="facts">
         <div class="fact"><small>Momento atual</small><b class="num">${t.cur.n} ${curTxt}</b></div>
         <div class="fact"><small>Maior invencibilidade</small><b class="num">${x.unb} jogos</b></div>
@@ -1154,8 +1287,8 @@ function viewTeam(L){
       </div></div>
 
     ${optaTeamSection(L, t)}${IS_GH?ghTeamScorers(L,t):''}
-    <div class="panel"><h2>Últimos jogos</h2><p class="sub">Mais recentes primeiro.</p><div class="glist">${g1.map(gi).join('')||'<div class="empty">Sem jogos.</div>'}</div></div>
-    <div class="panel"><h2>Próximos jogos</h2><p class="sub">Datas conforme o calendário da competição.</p><div class="glist">
+    <div data-mtab="jogos" class="panel"><h2>Últimos jogos</h2><p class="sub">Mais recentes primeiro.</p><div class="glist">${g1.map(gi).join('')||'<div class="empty">Sem jogos.</div>'}</div></div>
+    <div data-mtab="jogos" class="panel"><h2>Próximos jogos</h2><p class="sub">Datas conforme o calendário da competição.</p><div class="glist">
       ${upcoming.map(m=>{const home=m[3]===t.i, o=L.T[home?m[4]:m[3]];return `<div class="gi"><span class="d">${fdate(m[1],true)}</span><span class="o" data-team="${o.i}">${crest(o)}<span>${esc(o.name)}</span><em>${home?'casa':'fora'}</em></span><span class="d">${m[5]==='adiado'?'adiado':(m[2]||'')}</span><span class="d">${o.pos}º</span></div>`}).join('')||'<div class="empty">Sem jogos marcados.</div>'}</div></div>
   </div>`;
 }
@@ -1644,8 +1777,8 @@ function optaTeamSection(L, t){
   if(!OPTA[L.lg]) return '';
   const st = ensureOptaFor(L);
   const headH = `<h2>Dados detalhados</h2><p class="sub">Eventos das partidas registrados pela Opta.</p>`;
-  if(!st || st.status==='loading') return `<div class="panel span2">${headH}<div class="empty"><div class="spinner" aria-hidden="true"></div>Carregando eventos da Opta…</div></div>`;
-  if(st.status==='error') return `<div class="panel span2">${headH}<div class="empty">Não foi possível carregar os dados da Opta agora. Abra a seção Jogadores ou Árbitros para ver o motivo e tentar de novo.</div></div>`;
+  if(!st || st.status==='loading') return `<div data-mtab="gols" class="panel span2">${headH}<div class="empty"><div class="spinner" aria-hidden="true"></div>Carregando eventos da Opta…</div></div>`;
+  if(st.status==='error') return `<div data-mtab="gols" class="panel span2">${headH}<div class="empty">Não foi possível carregar os dados da Opta agora. Abra a seção Jogadores ou Árbitros para ver o motivo e tentar de novo.</div></div>`;
   const D = st, o = optaTeamOf(D, t); if(!o || !o.a) return '';
   const a = o.a, all = Object.values(D.tagg), N = all.length;
   const rankBy = (f, low) => 1 + all.filter(x=> low ? f(x)<f(a) : f(x)>f(a)).length;
@@ -1660,8 +1793,8 @@ function optaTeamSection(L, t){
   const mp = a.mp||1;
   const tileX = (v,lab,r,sub) => `<div class="tile"><div class="v num">${v}</div><div class="k">${lab}</div><div class="rk">${sub?`<span>${sub}</span>`:''}${r?`<b class="${r<=Math.ceil(N/4)?'top':r>N-Math.ceil(N/4)?'bot':''}">${ord(r)}</b>`:''}</div></div>`;
   return `
-  <div class="panel span2"><h2>Gols por faixa de minutos</h2><p class="sub">Quando o time marca e quando sofre, a cada 15 minutos.</p>${bucketChart(a.gfB, a.gaB)}</div>
-  <div class="panel span2"><h2>Dados detalhados</h2><p class="sub">Eventos das partidas registrados pela Opta, com a posição do clube na liga.</p>
+  <div data-mtab="gols" class="panel span2"><h2>Gols por faixa de minutos</h2><p class="sub">Quando o time marca e quando sofre, a cada 15 minutos.</p>${bucketChart(a.gfB, a.gaB)}</div>
+  <div data-mtab="gols" class="panel span2"><h2>Dados detalhados</h2><p class="sub">Eventos das partidas registrados pela Opta, com a posição do clube na liga.</p>
     <div class="tiles">
       ${tileX(pctOf(a.fs.V,fsT),'Vence quando abre o placar',fsT&&rankBy(x=>{const n=x.fs.V+x.fs.E+x.fs.D;return n?x.fs.V/n:0}),`${a.fs.V} de ${fsT} jogos`)}
       ${tileX(pctOf(a.fc.V+a.fc.E,fcT),'Pontua quando sofre o 1º gol',fcT&&rankBy(x=>{const n=x.fc.V+x.fc.E+x.fc.D;return n?(x.fc.V+x.fc.E)/n:0}),`${a.fc.V+a.fc.E} de ${fcT} jogos`)}
@@ -1674,9 +1807,9 @@ function optaTeamSection(L, t){
       ${attAvg?tileX(nfI.format(attAvg),'Público médio em casa',rankBy(x=>x.att.length?x.att.reduce((s,y)=>s+y.v,0)/x.att.length:0),attMax?`recorde ${nfI.format(attMax.v)}`:''):''}
       ${a.stopN?tileX(`${Math.round((a.stop1+a.stop2)/a.stopN/60)} min`,'Acréscimos anunciados por jogo',null,`1º T ${nf1.format(a.stop1/a.stopN/60)} · 2º T ${nf1.format(a.stop2/a.stopN/60)}`):''}
     </div></div>
-  <div class="panel"><h2>Artilheiros do time</h2><p class="sub">Gols na liga.</p><div class="mini">${plist(scorers,'g','gols')}</div></div>
-  <div class="panel"><h2>Garçons do time</h2><p class="sub">Assistências na liga.</p><div class="mini">${plist(assisters,'a','assist.')}</div></div>
-  ${topRefs.length?`<div class="panel span2"><h2>Árbitros que mais apitaram o time</h2><div class="mini">${topRefs.map(([id,n])=>{const r=D.refs[id];return `<div class="mini-row" data-ref="${id}"><span class="ref-ic sm">${icon('whistle')}</span><span class="nm">${esc(r.name)}</span><span class="vl num">${n}<small>${n===1?'jogo':'jogos'}</small></span></div>`}).join('')}</div></div>`:''}`;
+  <div data-mtab="gols" class="panel"><h2>Artilheiros do time</h2><p class="sub">Gols na liga.</p><div class="mini">${plist(scorers,'g','gols')}</div></div>
+  <div data-mtab="gols" class="panel"><h2>Garçons do time</h2><p class="sub">Assistências na liga.</p><div class="mini">${plist(assisters,'a','assist.')}</div></div>
+  ${topRefs.length?`<div data-mtab="gols" class="panel span2"><h2>Árbitros que mais apitaram o time</h2><div class="mini">${topRefs.map(([id,n])=>{const r=D.refs[id];return `<div class="mini-row" data-ref="${id}"><span class="ref-ic sm">${icon('whistle')}</span><span class="nm">${esc(r.name)}</span><span class="vl num">${n}<small>${n===1?'jogo':'jogos'}</small></span></div>`}).join('')}</div></div>`:''}`;
 }
 
 function htSummary(L){
@@ -1809,10 +1942,150 @@ function viewScorers(L){
 function ghTeamScorers(L, t){
   const list = ((DATA[L.lg]||{}).scorers||[]).filter(s=>s.t===t.i).sort((a,b)=>b.g-a.g||(b.a||0)-(a.a||0)).slice(0,6);
   if(!list.length) return '';
-  return `<div class="panel span2"><h2>Artilheiros do time</h2><p class="sub">Jogadores do clube na lista de artilheiros da liga.</p><div class="tbl-wrap"><table>
+  return `<div data-mtab="gols" class="panel span2"><h2>Artilheiros do time</h2><p class="sub">Jogadores do clube na lista de artilheiros da liga.</p><div class="tbl-wrap"><table>
     <thead><tr><th class="l">Jogador</th><th>Jogos</th><th>Gols</th><th>Assist.</th><th>Pênaltis</th></tr></thead>
     <tbody>${list.map(s=>`<tr><td class="l"><b>${esc(s.n)}</b></td><td>${s.mp??'—'}</td><td class="pts">${s.g}</td><td>${s.a??0}</td><td>${s.p??0}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
+
+/* ================= VERSÃO MOBILE (só em telas de até 760 px) ================= */
+const MQ = window.matchMedia ? matchMedia('(max-width: 760px)') : {matches:false};
+const isMobile = () => MQ.matches;
+let swipeDir = 0;
+const MTABS = [['resumo','Resumo'],['casa','Casa × fora'],['gols','Gols'],['jogos','Jogos']];
+const TAB_MAIN = [['home','Início','home'],['table','Tabela','table'],['matches','Jogos','cal'],['team','Times','shield']];
+
+function mobileShell(){
+  if(document.getElementById('mtabbar')) return;
+  const bar = document.createElement('nav'); bar.id = 'mtabbar'; bar.setAttribute('aria-label','Navegação principal'); document.body.appendChild(bar);
+  const strip = document.createElement('div'); strip.id = 'mleagues'; strip.setAttribute('role','group'); strip.setAttribute('aria-label','Ligas');
+  const tb = document.querySelector('.topbar'); if(tb) tb.appendChild(strip);
+  const sheet = document.createElement('div'); sheet.id = 'msheet'; sheet.innerHTML = '<div class="msheet-bg" data-msheet-close></div><div class="msheet-card" role="dialog" aria-modal="true"><div class="msheet-grip"></div><div class="msheet-body"></div></div>'; document.body.appendChild(sheet);
+  const mt = document.createElement('div'); mt.id = 'mteam'; document.body.appendChild(mt);
+}
+function renderMobileChrome(){
+  mobileShell();
+  const bar = document.getElementById('mtabbar'), strip = document.getElementById('mleagues');
+  const more = !TAB_MAIN.some(([v])=>v===S.view);
+  bar.innerHTML = TAB_MAIN.map(([v,l,ic])=>`<button data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}<span>${l}</span></button>`).join('')
+    + `<button data-msheet="more" ${more?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Mais</span></button>`;
+  strip.innerHTML = ORDER.map(k=>`<button data-league="${k}" aria-current="${k===S.lg}" aria-label="${LEAGUES[k].name}">${lgDot(k)}<span>${LG_SHORT[k]}</span></button>`).join('');
+  const act = strip.querySelector('[aria-current="true"]'); if(act && act.scrollIntoView) act.scrollIntoView({block:'nearest', inline:'center'});
+}
+function openSheet(html, title){
+  const s = document.getElementById('msheet'); if(!s) return;
+  s.querySelector('.msheet-body').innerHTML = (title?`<h3 class="msheet-title">${title}</h3>`:'') + html;
+  s.classList.add('open'); document.body.classList.add('sheet-open');
+}
+function closeSheet(){ const s = document.getElementById('msheet'); if(s){ s.classList.remove('open'); document.body.classList.remove('sheet-open'); } }
+function openMore(){
+  const items = NAV.flatMap(([g,its])=>its.map(it=>[g,...it])).filter(([,v])=>!TAB_MAIN.some(([m])=>m===v));
+  const groups = [...new Set(items.map(x=>x[0]))];
+  openSheet(groups.map(g=>`<div class="msheet-group"><small>${g}</small>${items.filter(x=>x[0]===g).map(([,v,l,ic])=>`<button class="msheet-item" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}<span>${l}</span></button>`).join('')}</div>`).join(''), 'Mais seções');
+}
+/* filtros viram um botão que abre um painel de baixo */
+function mobileFilters(view){
+  view.querySelectorAll('.view-head .seg, .metric-groups').forEach((grp,k)=>{
+    const on = grp.querySelector('[aria-pressed="true"]');
+    const btn = document.createElement('button'); btn.className = 'mfilter'; btn.dataset.mfilter = k;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>${on?esc(on.textContent):'Filtrar'}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>`;
+    grp.dataset.mgroup = k; grp.after(btn);
+  });
+}
+/* tabela compacta: tocar na linha mostra os outros números */
+function toggleTableRow(tr){
+  const next = tr.nextElementSibling;
+  if(next && next.classList.contains('mdetail')){ next.remove(); tr.classList.remove('mopen'); return; }
+  document.querySelectorAll('#view tr.mdetail').forEach(r=>{ r.previousElementSibling && r.previousElementSibling.classList.remove('mopen'); r.remove(); });
+  const L = league(S.lg), t = L.T[+tr.dataset.team], key = {geral:'all',casa:'home',fora:'away','1t':'h1','2t':'h2'}[S.mode]||'all', r = t[key];
+  const ap = r.J ? Math.round(r.P/(3*r.J)*100) : 0;
+  const row = document.createElement('tr'); row.className = 'mdetail';
+  row.innerHTML = `<td colspan="${tr.children.length}"><div class="mdet">
+    <div><b class="num">${r.V}</b><span>vitórias</span></div><div><b class="num">${r.E}</b><span>empates</span></div><div><b class="num">${r.D}</b><span>derrotas</span></div>
+    <div><b class="num">${r.GP}</b><span>gols pró</span></div><div><b class="num">${r.GC}</b><span>gols contra</span></div><div><b class="num">${ap}%</b><span>aproveit.</span></div>
+    <button class="btn sm" data-team="${t.i}">Ver perfil do ${esc(t.name)}</button></div></td>`;
+  tr.after(row); tr.classList.add('mopen');
+}
+/* perfil do time em abas */
+function mobileTeamTabs(view){
+  const hero = view.querySelector('.thero'); if(!hero) return;
+  const present = MTABS.filter(([k])=>view.querySelector(`[data-mtab="${k}"]`));
+  if(present.length < 2) return;
+  if(!present.some(([k])=>k===S.mtab)) S.mtab = present[0][0];
+  const bar = document.createElement('div'); bar.className = 'mtabs'; bar.setAttribute('role','tablist');
+  bar.innerHTML = present.map(([k,l])=>`<button role="tab" data-mtabbtn="${k}" aria-selected="${k===S.mtab}">${l}</button>`).join('');
+  hero.after(bar); view.classList.add('mtabs-on'); applyMTab(view);
+}
+function applyMTab(view){
+  view.querySelectorAll('[data-mtab]').forEach(p=>p.classList.toggle('mt-hide', p.dataset.mtab!==S.mtab));
+  document.querySelectorAll('[data-mtabbtn]').forEach(b=>b.setAttribute('aria-selected', b.dataset.mtabbtn===S.mtab));
+}
+/* cabeçalho fixo com o escudo quando o card do time sai da tela */
+let mteamObs = null;
+function mobileTeamHeader(view){
+  const bar = document.getElementById('mteam'); if(mteamObs){ mteamObs.disconnect(); mteamObs = null; }
+  bar.classList.remove('show'); bar.innerHTML = '';
+  const hero = view.querySelector('.thero'); if(!hero || S.view!=='team' || !('IntersectionObserver' in window)) return;
+  const L = league(S.lg), t = L.T[S.team[S.lg] ?? L.table[0].i]; if(!t) return;
+  const tabs = view.querySelector('.mtabs');
+  bar.innerHTML = `<button data-mtop>${crest(t)}<b>${esc(t.name)}</b><span class="num">${t.pos}º · ${t.all.P} pts</span></button>${tabs?`<div class="mtabs mtabs-mini">${tabs.innerHTML}</div>`:''}`;
+  bar.setAttribute('style', heroVars(S.lg, t));
+  const top = (document.querySelector('.topbar')||{}).offsetHeight || 60; bar.style.top = top+'px';
+  mteamObs = new IntersectionObserver(([e])=>bar.classList.toggle('show', !e.isIntersecting && e.boundingClientRect.top < top), {rootMargin:`-${top}px 0px 0px 0px`, threshold:0});
+  mteamObs.observe(hero);
+}
+/* deslizar para trocar de rodada */
+let tStart = null;
+document.addEventListener('touchstart', e=>{ if(!isMobile() || S.view!=='matches' || e.touches.length!==1) return; const t=e.touches[0]; tStart = {x:t.clientX, y:t.clientY, at:Date.now()}; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  if(!tStart) return; const t = e.changedTouches[0], dx = t.clientX - tStart.x, dy = t.clientY - tStart.y, dt = Date.now()-tStart.at; tStart = null;
+  if(Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)*1.6 || dt > 700) return;
+  const L = league(S.lg); let r = S.round[S.lg] || L.latest; const nr = r + (dx<0 ? 1 : -1);
+  if(nr < 1 || nr > L.totalRounds) return;
+  swipeDir = dx<0 ? 1 : -1; S.round[S.lg] = nr; go({}, false);
+}, {passive:true});
+/* instalar como app (versão do GitHub) */
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredInstall = e; showInstallHint(); });
+function showInstallHint(){
+  if(!IS_GH || !isMobile()) return;
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  let dismissed = false; try{ dismissed = localStorage.getItem('rds-install-dismissed')==='1'; }catch(e){}
+  if(standalone || dismissed || document.getElementById('minstall')) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(!ios && !deferredInstall) return;
+  const el = document.createElement('div'); el.id = 'minstall';
+  el.innerHTML = `<img src="${DATA._lg[S.lg]}" alt=""><div><b>Instale o Radar das Seis</b><small>${ios?'Toque em Compartilhar e depois em “Adicionar à Tela de Início”.':'Abra como app, em tela cheia.'}</small></div>${ios?'':'<button class="btn sm" data-install>Instalar</button>'}<button class="minstall-x" data-install-x aria-label="Fechar">×</button>`;
+  document.body.appendChild(el);
+}
+function mobileAfterRender(pageChanged){
+  document.body.classList.toggle('is-mobile', isMobile());
+  renderMobileChrome();
+  if(!isMobile()) return;
+  const view = $('#view');
+  mobileFilters(view);
+  if(S.view==='team') mobileTeamTabs(view);
+  mobileTeamHeader(view);
+  if(S.view==='matches' && swipeDir){ const m = view.querySelector('.matches'); if(m && !RM){ m.classList.add(swipeDir>0?'swipe-next':'swipe-prev'); } }
+  swipeDir = 0;
+  if(IS_GH) setTimeout(showInstallHint, 1500);
+}
+document.addEventListener('click', e=>{
+  if(!isMobile()) return;
+  const t = e.target;
+  if(t.closest('[data-msheet-close]')) return closeSheet();
+  if(t.closest('[data-msheet="more"]')){ e.stopImmediatePropagation(); return openMore(); }
+  const f = t.closest('[data-mfilter]');
+  if(f){ e.stopImmediatePropagation(); const g = document.querySelector(`#view [data-mgroup="${f.dataset.mfilter}"]`); if(g){ const c = g.cloneNode(true); c.removeAttribute('data-mgroup'); c.classList.add('in-sheet'); openSheet(c.outerHTML, 'Filtrar'); } return; }
+  const tab = t.closest('[data-mtabbtn]'); if(tab){ e.stopImmediatePropagation(); S.mtab = tab.dataset.mtabbtn; applyMTab($('#view')); const tb=$('#view .mtabs'); if(tb){ const y = tb.getBoundingClientRect().top + window.scrollY - ((document.querySelector('.topbar')||{}).offsetHeight||60) - 8; if(window.scrollY > y) window.scrollTo({top:y,behavior:'smooth'}); } return; }
+  if(t.closest('[data-mtop]')){ e.stopImmediatePropagation(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if(t.closest('[data-install-x]')){ e.stopImmediatePropagation(); try{ localStorage.setItem('rds-install-dismissed','1'); }catch(err){} const el=document.getElementById('minstall'); el && el.remove(); return; }
+  if(t.closest('[data-install]')){ e.stopImmediatePropagation(); if(deferredInstall){ deferredInstall.prompt(); deferredInstall = null; } const el=document.getElementById('minstall'); el && el.remove(); return; }
+  const tr = t.closest('#view tr.row[data-team]');
+  if(tr && S.view==='table'){ e.stopImmediatePropagation(); return toggleTableRow(tr); }
+  if(t.closest('#msheet [data-nav],#msheet [data-mode],#msheet [data-metric],#msheet [data-pmetric],#msheet [data-rsort],#msheet [data-smet]')) setTimeout(closeSheet, 60);
+}, true);
+MQ.addEventListener && MQ.addEventListener('change', ()=>{ closeSheet(); if(typeof DATA!=='undefined' && DATA) render(); });
+if(IS_GH && 'serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ================= ANIMAÇÕES ================= */
 const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -1840,8 +2113,8 @@ function playFlip(snap){
 /* entrada em cascata */
 const CASCADE_SEL = ['#view > .view-head','#view > .back','#view > .hero','#view > .thero','#view > .picker','#view > .psearch','#view > .leader-cards > *','#view > .metric-groups',
   '#view > .panel','#view > .grid > *','#view > .grid > .grid > *','#view > .matches > .match','#view > .cmp-head > *','#view .tiles > .tile','#view .sq-grid > .sq-card','#view .facts > .fact'].join(',');
-function markCascade(view){
-  [...view.querySelectorAll(CASCADE_SEL)].forEach((el,i)=>{ el.classList.add('cascade'); el.style.setProperty('--d', Math.min(i,16)*45+'ms'); });
+function markCascade(view, cap=16){
+  [...view.querySelectorAll(CASCADE_SEL)].forEach((el,i)=>{ if(i>cap+6) return; el.classList.add('cascade'); el.style.setProperty('--d', Math.min(i,cap)*45+'ms'); });
 }
 const delayOf = el => parseInt(getComputedStyle(el).getPropertyValue('--d')) || 0;
 
@@ -1914,7 +2187,7 @@ function tiltReset(){
   clearTimeout(el._tt); el._tt = setTimeout(()=>{ if(el!==tiltEl){ el.classList.remove('tilt-out'); ['--rx','--ry'].forEach(p=>el.style.removeProperty(p)); } }, 480);
 }
 function tiltMove(e){
-  if(RM) return;
+  if(RM || isMobile()) return;
   const el = e.target.closest && e.target.closest(TILT_SEL);
   if(el!==tiltEl){ tiltReset(); tiltEl = el; if(el){ clearTimeout(el._tt); el.classList.remove('tilt-out'); el.classList.add('tilting'); } }
   if(!el) return;
@@ -1948,14 +2221,16 @@ function noteFresh(oldD, newD){
 
 function afterRender(pageChanged, snap){
   const view = $('#view');
+  try{ mobileAfterRender(pageChanged); }catch(e){ console.error(e); }
+  const mob = isMobile();
   view.classList.remove('enter');
   view.classList.toggle('quiet', quietRender || RM);
   placeIndicator();
   if(spinLeague){ spinLeague = false; if(!RM) document.querySelectorAll('.lg-btn[aria-current="true"] .lg-logo, #topbar-title .lg-logo, #view .hero-kick .lg-logo').forEach(l=>{ l.classList.remove('spin'); void l.offsetWidth; l.classList.add('spin'); }); }
   if(RM || quietRender) return;
   if(pageChanged){
-    markCascade(view); splitScores(view); void view.offsetWidth; view.classList.add('enter');
-    countAll([...view.querySelectorAll(COUNT_SEL)].slice(0,60));
+    markCascade(view, mob ? 8 : 16); splitScores(view); void view.offsetWidth; view.classList.add('enter');
+    countAll([...view.querySelectorAll(COUNT_SEL)].slice(0, mob ? 14 : 60));
     drawCharts(view);
   } else playFlip(snap);
 }
