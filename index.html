@@ -1261,6 +1261,16 @@ select option,select optgroup{background:#10141b;color:#f3f5f8}
 .cmp-team.b .dd-menu{left:auto;right:0}
 @media (max-width:620px){.cmp-team .dd{max-width:100%}.cmp-team.b .pc-sel{align-items:stretch}}
 .dd-opt[hidden],.dd-grp[hidden]{display:none!important}.cmp-team .dd-ic{width:20px!important;height:20px!important}.cmp-team .dd-menu img{width:20px;height:20px}
+/* ---------- mercado e lesionados ---------- */
+.mk-tiles{margin-bottom:14px}
+.tile .v.neg{color:#f87171}.tile .v.pos{color:#4ade80}.tile .v.warn{color:#fbbf24}
+.mk-grid{gap:14px}
+.mk-h{margin:0 0 8px;font:700 13px/1 Barlow,sans-serif;letter-spacing:.6px;text-transform:uppercase;color:#e6eaf0}
+table.mk th{text-align:left;font-size:12px}
+table.mk th.r,table.mk td.r{text-align:right}
+table.mk td{text-align:left;font-size:14px;padding:8px 6px}
+.mk-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+.mk-tag.o{background:rgba(239,68,68,.18);color:#fca5a5}.mk-tag.s{background:rgba(245,158,11,.18);color:#fcd34d}.mk-tag.d{background:rgba(148,163,184,.18);color:#cbd5e1}
 </style>
 </head>
 <body>
@@ -1798,7 +1808,7 @@ function viewTeam(L){
         <div class="fact"><small>Converte vantagem do intervalo</small><b class="num">${htTot('lead')?pct(x.winLead):'—'}</b><span>${htTot('lead')} jogos vencendo no intervalo</span></div>
       </div></div>
 
-    ${optaTeamSection(L, t)}${IS_GH?ghTeamScorers(L,t):''}
+    ${optaTeamSection(L, t)}${IS_GH?ghTeamScorers(L,t):''}${ghTeamMarket(L,t)}
     <div data-mtab="jogos" class="panel"><h2>Últimos jogos</h2><p class="sub">Mais recentes primeiro.</p><div class="glist">${g1.map(gi).join('')||'<div class="empty">Sem jogos.</div>'}</div></div>
     <div data-mtab="jogos" class="panel"><h2>Próximos jogos</h2><p class="sub">Datas conforme o calendário da competição.</p><div class="glist">
       ${upcoming.map(m=>{const home=m[3]===t.i, o=L.T[home?m[4]:m[3]];return `<div class="gi"><span class="d">${fdate(m[1],true)}</span><span class="o" data-team="${o.i}">${crest(o)}<span>${esc(o.name)}</span><em>${home?'casa':'fora'}</em></span><span class="d">${m[5]==='adiado'?'adiado':(m[2]||'')}</span><span class="d">${o.pos}º</span></div>`}).join('')||'<div class="empty">Sem jogos marcados.</div>'}</div></div>
@@ -2405,7 +2415,7 @@ function matchMeta(lg, apiTeams){
   return out;
 }
 function adapt(raw){
-  const D = {_lg: LG_LOGOS, _updated: null, _source: raw.source || 'football-data.org'};
+  const D = {_lg: LG_LOGOS, _updated: null, _source: raw.source || 'football-data.org', _af: ((raw.extra||{})._af) || {}};
   if(raw.updated){ const d = new Date(raw.updated); D._updated = isNaN(d) ? raw.updated : d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'}); }
   ORDER.forEach(lg=>{
     const L = (raw.leagues||{})[lg];
@@ -2415,7 +2425,9 @@ function adapt(raw){
     const teams = (L.teams||[]).map((t,i)=>{ const m = mm[i];
       return m ? {n:m.n, f:t.full||m.f, a:t.tla||m.a, c:m.h, h:m.h, col:m.col, hc:m.hc}
                : {n:t.name, f:t.full||t.name, a:t.tla||t.name.slice(0,3).toUpperCase(), c:t.crest, h:t.crest, col:LEAGUES[lg].g[0], hc:null}; });
-    D[lg] = {teams, matches:L.matches||[], scorers:L.scorers||[], squads:L.squads||[], refs:L.refs||[]};
+    const ex = ((raw.extra||{})[lg]) || {}, inj = {}, tr = {};
+    (L.teams||[]).forEach((t,i)=>{ const k = t.full || t.name; if(ex.inj && ex.inj[k]) inj[i] = ex.inj[k]; if(ex.tr && ex.tr[k]) tr[i] = ex.tr[k]; });
+    D[lg] = {teams, matches:L.matches||[], scorers:L.scorers||[], squads:L.squads||[], refs:L.refs||[], inj, tr, injAt: ex.injAt || null};
   });
   return D;
 }
@@ -2466,7 +2478,7 @@ function ghTeamScorers(L, t){
 const MQ = window.matchMedia ? matchMedia('(max-width: 760px)') : {matches:false};
 const isMobile = () => MQ.matches;
 let swipeDir = 0;
-const MTABS = [['resumo','Resumo'],['casa','Casa × fora'],['gols','Gols'],['jogos','Jogos']];
+const MTABS = [['resumo','Resumo'],['casa','Casa × fora'],['gols','Gols'],['mercado','Mercado'],['jogos','Jogos']];
 const TAB_MAIN = [['home','Início','home'],['table','Tabela','table'],['matches','Jogos','cal'],['team','Times','shield']];
 
 function mobileShell(){
@@ -3290,6 +3302,60 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('.dd-menu')) ddClose();
 }, true);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') ddClose(); });
+
+/* ================= MERCADO E LESIONADOS (API-Football, site do GitHub) ================= */
+const BODY = {knee:'no joelho',ankle:'no tornozelo',hamstring:'na posterior da coxa',thigh:'na coxa',calf:'na panturrilha',groin:'na virilha',back:'nas costas',shoulder:'no ombro',foot:'no pé',hip:'no quadril',achilles:'no tendão de Aquiles',muscle:'muscular',head:'na cabeça',hand:'na mão',wrist:'no punho',arm:'no braço',elbow:'no cotovelo',leg:'na perna',toe:'no dedo do pé',adductor:'no adutor',abdominal:'abdominal',ribs:'nas costelas',chest:'no peito',neck:'no pescoço',face:'no rosto',nose:'no nariz',finger:'no dedo',heel:'no calcanhar',shin:'na canela',pelvis:'na pelve',cruciate:'nos ligamentos cruzados',ligament:'nos ligamentos',meniscus:'no menisco',tendon:'no tendão',quadriceps:'no quadríceps'};
+function ptReason(r){
+  if(!r) return '—'; const s = r.toLowerCase();
+  const fixed = {'suspended':'Suspenso','red card':'Cartão vermelho','yellow cards':'Cartões amarelos','illness':'Doença','lack of fitness':'Sem condição física','personal reasons':'Motivos pessoais','rest':'Poupado','knock':'Pancada','inactive':'Inativo','coach\'s decision':'Decisão técnica','international duty':'Seleção','concussion':'Concussão','surgery':'Cirurgia','virus':'Virose','covid-19':'Covid-19','broken leg':'Fratura na perna','broken ankle':'Fratura no tornozelo','broken foot':'Fratura no pé','injury':'Lesão','muscle injury':'Lesão muscular','muscle strain':'Distensão muscular'};
+  if(fixed[s]) return fixed[s];
+  const part = Object.keys(BODY).find(k=>s.includes(k));
+  const kind = /fracture|broken/.test(s) ? 'Fratura' : /strain/.test(s) ? 'Distensão' : /sprain/.test(s) ? 'Entorse' : /surgery/.test(s) ? 'Cirurgia' : /problem/.test(s) ? 'Problema' : 'Lesão';
+  return part ? `${kind} ${BODY[part]}` : r;
+}
+const isSusp = r => /suspend|red card|yellow card/i.test(r||'');
+function feeInfo(f){
+  const s = (f||'').trim(), m = /€\s*([\d.,]+)\s*([MK])?/i.exec(s);
+  if(m){ const v = parseFloat(m[1].replace(',','.')) * (/m/i.test(m[2]||'') ? 1e6 : /k/i.test(m[2]||'') ? 1e3 : 1); return {v, txt: fmtEur(v)}; }
+  const map = {'loan':'Empréstimo','free':'Sem custo','n/a':'—','back from loan':'Fim de empréstimo','return from loan':'Fim de empréstimo','swap':'Troca','end of loan':'Fim de empréstimo'};
+  return {v:0, txt: map[s.toLowerCase()] || (s || '—')};
+}
+const fmtEur = v => v>=1e6 ? `€${nf1.format(v/1e6)}M` : v>=1e3 ? `€${Math.round(v/1e3)}mil` : `€${Math.round(v)}`;
+function ghTeamMarket(L, t){
+  if(!IS_GH) return '';
+  const D = DATA[L.lg] || {}, inj = (D.inj||{})[t.i], tr = (D.tr||{})[t.i];
+  const af = DATA._af || {}, err = (af.errors||{})[L.lg];
+  const note = err ? `<p class="src">A API-Football recusou a consulta desta liga (${esc(err.slice(0,140))}). Se aparecer menção a temporada ou plano, o plano grátis não cobre a temporada atual.</p>` : '';
+  const season = L.cfg.season;
+  let out = '';
+  // vai e vem
+  if(tr){
+    const ins = tr.in||[], outs = tr.out||[], spent = ins.reduce((s,x)=>s+feeInfo(x.fee).v,0), got = outs.reduce((s,x)=>s+feeInfo(x.fee).v,0), bal = got-spent;
+    const tbl = (rows, label) => rows.length ? `<div class="tbl-wrap"><table class="mk"><thead><tr><th class="l">Jogador</th><th class="l">Data</th><th class="l">${label}</th><th class="r">Valor</th></tr></thead><tbody>
+      ${rows.map(x=>`<tr><td class="l"><b>${esc(x.n||'—')}</b></td><td class="l">${(x.date||'').split('-').reverse().join('/')}</td><td class="l">${esc(x.club||'—')}</td><td class="r">${feeInfo(x.fee).txt}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nenhuma movimentação registrada.</div>';
+    out += `<div data-mtab="mercado" class="panel span2"><h2>Vai e vem · janela ${season}</h2><p class="sub">Chegadas e saídas do clube na temporada.</p>
+      <div class="tiles mk-tiles"><div class="tile"><div class="v num">${fmtEur(spent)}</div><div class="k">Gasto em contratações</div></div><div class="tile"><div class="v num">${fmtEur(got)}</div><div class="k">Arrecadado em vendas</div></div>
+      <div class="tile"><div class="v num ${bal<0?'neg':bal>0?'pos':''}">${bal<0?'-':bal>0?'+':''}${fmtEur(Math.abs(bal))}</div><div class="k">Saldo da janela</div></div><div class="tile"><div class="v num">${ins.length+outs.length}</div><div class="k">Movimentações<br>${ins.length} entraram · ${outs.length} saíram</div></div></div>
+      <div class="grid g2 mk-grid"><div><h3 class="mk-h">Chegadas (${ins.length})</h3>${tbl(ins,'Veio de')}</div><div><h3 class="mk-h">Saídas (${outs.length})</h3>${tbl(outs,'Foi para')}</div></div>
+      <p class="src">Fonte: API-Football. Valores informados pela fonte; empréstimos e transferências sem custo não entram no gasto.</p></div>`;
+  } else {
+    out += `<div data-mtab="mercado" class="panel span2"><h2>Vai e vem · janela ${season}</h2><p class="sub">As transferências deste clube chegam aos poucos: o robô atualiza alguns times por dia para caber no limite grátis da fonte.</p>${note}</div>`;
+  }
+  // lesões e desfalques
+  if(inj){
+    const susp = inj.filter(x=>isSusp(x.reason)), doubt = inj.filter(x=>!isSusp(x.reason) && /question/i.test(x.type||'')), hurt = inj.filter(x=>!isSusp(x.reason) && !/question/i.test(x.type||''));
+    out += `<div data-mtab="mercado" class="panel span2"><h2>Lesões e desfalques</h2><p class="sub">Situação atual do elenco para os próximos jogos.</p>
+      <div class="tiles mk-tiles"><div class="tile"><div class="v num">${inj.length}</div><div class="k">Desfalques no total</div></div><div class="tile"><div class="v num neg">${hurt.length}</div><div class="k">Lesionados</div></div>
+      <div class="tile"><div class="v num warn">${susp.length}</div><div class="k">Suspensos</div></div><div class="tile"><div class="v num">${doubt.length}</div><div class="k">Dúvidas</div></div></div>
+      ${inj.length?`<div class="tbl-wrap"><table class="mk"><thead><tr><th class="l">Jogador</th><th class="l">Motivo</th><th class="l">Situação</th><th class="l">Desde</th><th class="r">Jogos perdidos</th></tr></thead><tbody>
+        ${inj.map(x=>`<tr><td class="l"><b>${esc(x.n||'—')}</b></td><td class="l">${esc(ptReason(x.reason))}</td><td class="l"><span class="mk-tag ${isSusp(x.reason)?'s':/question/i.test(x.type||'')?'d':'o'}">${isSusp(x.reason)?'Suspenso':/question/i.test(x.type||'')?'Dúvida':'Fora'}</span></td><td class="l">${(x.since||'').split('-').reverse().join('/')}</td><td class="r">${x.missed||0}</td></tr>`).join('')}</tbody></table></div>`
+        :'<div class="empty">Nenhum desfalque informado. Elenco completo.</div>'}
+      <p class="src">Fonte: API-Football${D.injAt?`, atualizado em ${new Date(D.injAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}. A fonte não informa a data prevista de retorno.</p></div>`;
+  } else {
+    out += `<div data-mtab="mercado" class="panel span2"><h2>Lesões e desfalques</h2><p class="sub">${D.injAt?'Nenhum desfalque informado. Elenco completo.':'Os desfalques aparecem na próxima atualização automática.'}</p>${note}</div>`;
+  }
+  return out;
+}
 
 /* ---------- render / events ---------- */
 function applyTheme(){
