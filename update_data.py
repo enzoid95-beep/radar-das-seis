@@ -147,7 +147,8 @@ AF_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 AF_API = "https://v3.football.api-sports.io"
 AF_LEAGUES = {"br": 71, "en": 39, "es": 140, "it": 135, "de": 78, "fr": 61}
 AF_EVERY = 12 * 3600          # atualiza lesionados e transferências a cada 12 horas
-AF_TRANSFER_BATCH = 20        # times por rodada (rodízio), para caber no limite grátis de 100/dia
+AF_TRANSFER_BATCH = 18        # times por rodada (rodízio), para caber no limite grátis de 100/dia
+AF_PLAYER_PAGES = 22          # páginas de estatísticas de jogadores por rodada (20 jogadores por página)
 
 
 def af_get(path):
@@ -198,6 +199,90 @@ def match_teams(ours, theirs):
 
 def season_start_year(label):
     return int(str(label or datetime.datetime.now(BRT).year)[:4])
+
+
+def af_raw(path):
+    req = urllib.request.Request(AF_API + path, headers={"x-apisports-key": AF_KEY, "User-Agent": "radar-das-seis"})
+    with urllib.request.urlopen(req, timeout=40) as resp:
+        payload = json.load(resp)
+    time.sleep(PAUSE)
+    return payload
+
+def af_player_row(item, lid, idmap):
+    p = item.get("player") or {}
+    stats = [x for x in (item.get("statistics") or []) if (x.get("league") or {}).get("id") == lid]
+    if not stats:
+        return None
+    # se jogou por dois times na mesma liga, fica o time onde mais atuou
+    st = max(stats, key=lambda x: ((x.get("games") or {}).get("appearences") or 0))
+    team = idmap.get(str((st.get("team") or {}).get("id")))
+    if not team:
+        return None
+    tot = lambda path: sum(((x.get(path[0]) or {}).get(path[1]) or 0) for x in stats)
+    g = st.get("games") or {}
+    rating = None
+    try:
+        rating = round(float(g.get("rating")), 2) if g.get("rating") else None
+    except (TypeError, ValueError):
+        rating = None
+    acc = (st.get("passes") or {}).get("accuracy")
+    try:
+        acc = int(acc) if acc is not None else None
+    except (TypeError, ValueError):
+        acc = None
+    return {
+        "n": p.get("name"), "fn": p.get("firstname"), "ln": p.get("lastname"), "age": p.get("age"), "nat": p.get("nationality"),
+        "team": team, "pos": g.get("position"), "num": g.get("number"),
+        "mp": tot(("games", "appearences")), "xi": tot(("games", "lineups")), "min": tot(("games", "minutes")), "rat": rating,
+        "g": tot(("goals", "total")), "a": tot(("goals", "assists")), "gc": tot(("goals", "conceded")), "sv": tot(("goals", "saves")),
+        "sh": tot(("shots", "total")), "sot": tot(("shots", "on")), "pas": tot(("passes", "total")), "kp": tot(("passes", "key")), "acc": acc,
+        "tk": tot(("tackles", "total")), "blk": tot(("tackles", "blocks")), "int": tot(("tackles", "interceptions")),
+        "du": tot(("duels", "total")), "duw": tot(("duels", "won")), "dra": tot(("dribbles", "attempts")), "drs": tot(("dribbles", "success")),
+        "fc": tot(("fouls", "committed")), "fd": tot(("fouls", "drawn")), "yc": tot(("cards", "yellow")), "rc": tot(("cards", "red")),
+        "ps": tot(("penalty", "scored")), "pm": tot(("penalty", "missed")), "psv": tot(("penalty", "saved")),
+    }
+
+
+def update_af_players(out, extra, af):
+    """Estatísticas de todos os jogadores, em rodízio: algumas páginas por rodada, liga após liga."""
+    keys = [k for k in AF_LEAGUES if out["leagues"].get(k)]
+    if not keys:
+        return
+    pc = af.setdefault("players", {"i": 0, "page": 1})
+    budget = AF_PLAYER_PAGES
+    while budget > 0:
+        key = keys[pc["i"] % len(keys)]
+        league = out["leagues"][key]
+        lid, season = AF_LEAGUES[key], season_start_year(league.get("season"))
+        idmap = af.get("teams", {}).get(f"{key}:{season}")
+        ex = extra.setdefault(key, {"inj": {}, "tr": {}})
+        if not idmap:
+            pc["i"] += 1; pc["page"] = 1
+            if all(not af.get("teams", {}).get(f"{k}:{season_start_year(out['leagues'][k].get('season'))}") for k in keys):
+                return
+            continue
+        try:
+            payload = af_raw(f"/players?league={lid}&season={season}&page={pc['page']}")
+            budget -= 1
+            errs = payload.get("errors")
+            if errs:
+                raise RuntimeError(json.dumps(errs, ensure_ascii=False))
+            pl = ex.setdefault("pl", {})
+            for item in payload.get("response", []):
+                row = af_player_row(item, lid, idmap)
+                if row:
+                    pl[str((item.get("player") or {}).get("id"))] = row
+            total = (payload.get("paging") or {}).get("total") or 1
+            if pc["page"] >= total:
+                ex["plAt"] = datetime.datetime.now(BRT).isoformat(timespec="minutes")
+                pc["i"] = (pc["i"] + 1) % len(keys); pc["page"] = 1
+            else:
+                pc["page"] += 1
+        except Exception as err:
+            af.setdefault("errors", {})[key + ":jogadores"] = str(err)[:300]
+            print(f"  aviso API-Football jogadores {key}: {err}")
+            pc["i"] = (pc["i"] + 1) % len(keys); pc["page"] = 1
+            budget -= 1
 
 
 def update_api_football(out, previous):
@@ -283,6 +368,10 @@ def update_api_football(out, previous):
         except Exception as err:  # não derruba a atualização principal
             af["errors"][key] = str(err)[:300]
             print(f"  aviso API-Football {key}: {err}")
+    try:
+        update_af_players(out, extra, af)
+    except Exception as err:
+        print(f"  aviso API-Football jogadores: {err}")
     extra["_af"] = af
     return extra
 

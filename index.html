@@ -2430,9 +2430,10 @@ function adapt(raw){
     const teams = (L.teams||[]).map((t,i)=>{ const m = mm[i];
       return m ? {n:m.n, f:t.full||m.f, a:t.tla||m.a, c:m.h, h:m.h, col:m.col, hc:m.hc}
                : {n:t.name, f:t.full||t.name, a:t.tla||t.name.slice(0,3).toUpperCase(), c:t.crest, h:t.crest, col:LEAGUES[lg].g[0], hc:null}; });
-    const ex = ((raw.extra||{})[lg]) || {}, inj = {}, tr = {};
-    (L.teams||[]).forEach((t,i)=>{ const k = t.full || t.name; if(ex.inj && ex.inj[k]) inj[i] = ex.inj[k]; if(ex.tr && ex.tr[k]) tr[i] = ex.tr[k]; });
-    D[lg] = {teams, matches:L.matches||[], scorers:L.scorers||[], squads:L.squads||[], refs:L.refs||[], inj, tr, injAt: ex.injAt || null};
+    const ex = ((raw.extra||{})[lg]) || {}, inj = {}, tr = {}, afpl = [];
+    const tIdx = {}; (L.teams||[]).forEach((t,i)=>{ const k = t.full || t.name; tIdx[k] = i; if(ex.inj && ex.inj[k]) inj[i] = ex.inj[k]; if(ex.tr && ex.tr[k]) tr[i] = ex.tr[k]; });
+    Object.entries(ex.pl||{}).forEach(([id,p])=>{ const ti = tIdx[p.team]; if(ti!=null) afpl.push({...p, id, t:ti}); });
+    D[lg] = {teams, matches:L.matches||[], scorers:L.scorers||[], squads:L.squads||[], refs:L.refs||[], inj, tr, injAt: ex.injAt || null, afpl, plAt: ex.plAt || null};
   });
   return D;
 }
@@ -2800,6 +2801,20 @@ function gIndex(L){
   squads.forEach(sq=>{ byTeam[sq.t]=sq; (sq.players||[]).forEach(p=>{ players[p.id]={...p, t:sq.t}; }); });
   scorers.forEach((s,i)=>{ const p = s.id!=null && players[s.id]; const st={mp:s.mp,g:s.g,a:s.a||0,p:s.p||0};
     if(p) p.st=st; else if(s.id!=null) players[s.id]={id:s.id,n:s.n,pos:s.pos,nat:s.nat,t:s.t,st,stub:true}; });
+  const afpl = ((DATA[L.lg]||{}).afpl)||[];
+  if(afpl.length){
+    const nrm = s => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+    const byT = {}; Object.values(players).forEach(p=>{ (byT[p.t] = byT[p.t] || []).push(p); });
+    afpl.forEach(ap=>{
+      const cand = byT[ap.t] || [], ln = nrm(ap.ln), fn = nrm(ap.fn), full = nrm(ap.n);
+      const lnTok = ln.split(' ').filter(w=>w.length>2 || /\d/.test(w)), last = lnTok[lnTok.length-1] || nrm(ap.n).split(' ').pop();
+      let best = cand.find(p=>nrm(p.n)===full || nrm(p.n)===`${fn} ${ln}`.trim());
+      if(!best) best = cand.find(p=>{ const pn = nrm(p.n); return last && pn.split(' ').includes(last) && (!fn || pn[0]===fn[0] || pn.includes(fn.split(' ')[0])); });
+      if(!best) best = cand.find(p=>last && nrm(p.n).split(' ').includes(last));
+      if(best && !best.af){ best.af = ap; if(best.num==null && ap.num!=null) best.num = ap.num; if(!best.pos && ap.pos) best.pos = ap.pos; }
+      else if(!best){ const id = 'a'+ap.id; players[id] = {id, n: [ap.fn, ap.ln].filter(Boolean).join(' ') || ap.n, pos: ap.pos, nat: ap.nat, t: ap.t, num: ap.num, af: ap, afOnly: true}; }
+    });
+  }
   return L._g={players, byTeam, list:Object.values(players)};
 }
 const gRank = (L,p) => { const sc=gData(L).scorers; if(!p.st) return null; return 1+sc.filter(s=>s.g>p.st.g).length; };
@@ -2826,6 +2841,22 @@ function viewGSquad(L){
    : gEmpty('Elenco não informado','A fonte ainda não publicou os jogadores deste clube.')}
   <p class="src">Fonte: football-data.org. Gols e assistências para jogadores que estão na lista de artilheiros da liga.</p>`;
 }
+
+function gAfTiles(L, p){
+  const s = p.af, g = posGroup(p.pos || s.pos), n = x => x ?? 0;
+  const t = (v,k,sub) => `<div class="tile"><div class="v num">${v}</div><div class="k">${k}</div>${sub?`<div class="rk"><span>${sub}</span></div>`:''}</div>`;
+  const per90 = v => s.min ? nf2.format(v/s.min*90) : '—';
+  const base = t(n(s.mp),'Jogos',`${n(s.xi)} como titular`) + t(n(s.min).toLocaleString('pt-BR'),'Minutos') + (s.rat?t(nf2.format(s.rat),'Nota média'):'');
+  let mid = '';
+  if(g==='GK') mid = t(n(s.sv),'Defesas') + t(n(s.gc),'Gols sofridos', s.mp?`${nf2.format(n(s.gc)/s.mp)} por jogo`:'') + t(n(s.psv),'Pênaltis defendidos');
+  else if(g==='DEF') mid = t(n(s.tk),'Desarmes',`${per90(n(s.tk))} por 90 min`) + t(n(s.int),'Interceptações') + t(n(s.duw),'Duelos ganhos', s.du?`${Math.round(s.duw/s.du*100)}% dos duelos`:'') + t(n(s.blk),'Bloqueios') + t(n(s.g),'Gols') + t(n(s.fc),'Faltas cometidas');
+  else if(g==='MID') mid = t(n(s.a),'Assistências') + t(n(s.kp),'Passes decisivos',`${per90(n(s.kp))} por 90 min`) + t(n(s.pas).toLocaleString('pt-BR'),'Passes', s.acc!=null?`${s.acc}% de precisão`:'') + t(n(s.g),'Gols') + t(n(s.tk),'Desarmes') + t(n(s.drs),'Dribles certos', s.dra?`de ${s.dra} tentativas`:'');
+  else mid = t(n(s.g),'Gols',`${per90(n(s.g))} por 90 min`) + t(n(s.a),'Assistências') + t(n(s.sh),'Finalizações', s.sh?`${n(s.sot)} no alvo`:'') + t(n(s.drs),'Dribles certos', s.dra?`de ${s.dra} tentativas`:'') + t(n(s.kp),'Passes decisivos') + t(n(s.ps),'Gols de pênalti');
+  const cards = t(n(s.yc),'Cartões amarelos') + t(n(s.rc),'Cartões vermelhos');
+  const at = (DATA[L.lg]||{}).plAt;
+  return `<div class="panel" style="margin-bottom:16px"><h2>Números na liga</h2><p class="sub">Temporada ${L.cfg.season}, com os indicadores principais da posição.</p><div class="tiles">${base}${mid}${cards}</div>
+    <p class="src">Fonte: API-Football${at?`, atualizado em ${new Date(at).toLocaleDateString('pt-BR')}`:''}. Renovado em rodízio a cada 5 ou 6 dias.</p></div>`;
+}
 function viewGPlayer(L){
   const G=gIndex(L);
   const search=`<div class="psearch"><input id="gq" type="search" placeholder="Buscar jogador pelo nome" autocomplete="off" value="${esc(S.gq||'')}" aria-label="Buscar jogador"><div id="gq-res" class="pq-res"></div></div>`;
@@ -2835,7 +2866,7 @@ function viewGPlayer(L){
     const top=gData(L).scorers.slice(0,8);
     return head('Perfil do jogador','Busque um atleta ou comece pelos artilheiros')+search+`<div class="panel" style="margin-top:14px"><h2>Artilheiros</h2><div class="mini">${top.map((s,i)=>{const t=L.T[s.t];return `<div class="mini-row" ${s.id!=null?`data-gplayer="${s.id}"`:''}><span class="pos">${i+1}</span>${t?crest(t):''}<span class="nm">${esc(s.n)}<small class="tm">${t?esc(t.name):''}</small></span><span class="vl num">${s.g}<small>gols</small></span></div>`}).join('')||'<div class="empty">Sem artilharia ainda.</div>'}</div></div>`;
   }
-  const t=L.T[p.t], n=nat(p.nat), age=ageOf(p.dob), st=p.st, rk=gRank(L,p), grp=gGroup(p.pos);
+  const t=L.T[p.t], n=nat(p.nat || (p.af&&p.af.nat)), age=ageOf(p.dob) ?? (p.af?p.af.age:null), st=p.af?{mp:p.af.mp,g:p.af.g,a:p.af.a,p:p.af.ps}:p.st, rk=gRank(L,p), grp=gGroup(p.pos);
   const posName = POSPT[p.pos] || (grp<4 ? GPOS[grp][0].replace(/s$/,'') : (p.pos||'—'));
   const mates=(G.byTeam[p.t]?.players||[]).map(x=>G.players[x.id]).filter(x=>x&&x.id!==p.id&&x.st).sort((a,b)=>b.st.g-a.st.g).slice(0,5);
   return search+`
@@ -2847,7 +2878,8 @@ function viewGPlayer(L){
       ${st?`<div class="line"><div><b class="num">${st.mp??'—'}</b><span>jogos</span></div><div><b class="num">${st.g}</b><span>gols</span></div><div><b class="num">${st.a}</b><span>assistências</span></div><div><b class="num">${st.p}</b><span>de pênalti</span></div></div>`:''}</div>
     <div class="posbig"><b class="num">${rk?ord(rk):'—'}</b><span>na artilharia</span></div>
   </section>
-  ${st?`<div class="panel" style="margin-bottom:16px"><h2>Números na liga</h2><p class="sub">Temporada ${L.cfg.season}.</p><div class="tiles">
+  ${p.af ? gAfTiles(L, p) : ''}
+  ${p.af ? '' : st?`<div class="panel" style="margin-bottom:16px"><h2>Números na liga</h2><p class="sub">Temporada ${L.cfg.season}.</p><div class="tiles">
     <div class="tile"><div class="v num">${st.mp??'—'}</div><div class="k">Jogos disputados</div></div>
     <div class="tile"><div class="v num">${st.g}</div><div class="k">Gols</div><div class="rk"><span>${ord(rk)} na artilharia</span></div></div>
     <div class="tile"><div class="v num">${st.a}</div><div class="k">Assistências</div></div>
@@ -3210,15 +3242,21 @@ document.addEventListener('change', e=>{
 
 /* ================= COMPARAR JOGADORES ================= */
 function pcPlayers(L){
-  if(IS_GH){ const G = gIndex(L); return G.list.filter(p=>!p.stub || p.st).map(p=>({id:'g'+p.id, n:p.n, t:p.t, num:p.num, g:posGroup(p.pos), age:ageOf(p.dob), nat:p.nat,
-    st:p.st ? {mp:p.st.mp, g:p.st.g, a:p.st.a, p:p.st.p} : null})); }
+  if(IS_GH){ const G = gIndex(L); return G.list.filter(p=>!p.stub || p.st || p.af).map(p=>({id:'g'+p.id, n:p.n, t:p.t, num:p.num, g:posGroup(p.pos || (p.af&&p.af.pos)), age:ageOf(p.dob) ?? (p.af?p.af.age:null), nat:p.nat || (p.af&&p.af.nat),
+    st: p.af ? {...p.af, p:p.af.ps} : p.st ? {mp:p.st.mp, g:p.st.g, a:p.st.a, p:p.st.p} : null, full: !!p.af})); }
   if(typeof OPTA!=='undefined' && OPTA[L.lg]){ ensurePlayers(L.lg); const st = PL[L.lg]; if(st && st.status==='ready'){
     return st.list.filter(p=>!p.stub && p.active).map(p=>{ const tm = st.teams[p.team]; return {id:'o'+p.id, n:p.name, t: tm && tm.ti>=0 ? tm.ti : null, num:p.num, g:posGroup(p.pos), age:ageOf(p.dob), nat:p.nat,
       st:{g:p.st.g, a:p.st.a, a2:p.st.a2, gw:p.st.gw, pg:p.st.pg, yc:p.st.yc, rc:p.st.rc, on:p.st.on, off:p.st.off}}; }); } }
   return null;
 }
 /* indicadores por posição, conforme a fonte de dados */
-function pcRows(g){
+function pcRows(g, full){
+  if(IS_GH && full){
+    if(g==='GK') return [['Jogos','mp'],['Minutos','min'],['Defesas','sv'],['Gols sofridos','gc',true],['Pênaltis defendidos','psv'],['Nota média','rat']];
+    if(g==='DEF') return [['Jogos','mp'],['Minutos','min'],['Desarmes','tk'],['Interceptações','int'],['Duelos ganhos','duw'],['Aproveitamento nos duelos','duwp'],['Faltas cometidas','fc',true],['Cartões amarelos','yc',true],['Nota média','rat']];
+    if(g==='MID') return [['Jogos','mp'],['Minutos','min'],['Assistências','a'],['Passes decisivos','kp'],['Passes','pas'],['Precisão de passe','acc'],['Desarmes','tk'],['Dribles certos','drs'],['Nota média','rat']];
+    return [['Jogos','mp'],['Minutos','min'],['Gols','g'],['Assistências','a'],['Finalizações','sh'],['Finalizações no alvo','sot'],['Dribles certos','drs'],['Faltas sofridas','fd'],['Nota média','rat']];
+  }
   if(IS_GH){
     const off = [['Jogos','mp'],['Gols','g'],['Assistências','a'],['Gols + assistências','ga'],['Gols por jogo','gpm'],['Gols de pênalti','p']];
     const def = [['Jogos','mp'],['Gols','g'],['Assistências','a'],['Gols + assistências','ga']];
@@ -3229,7 +3267,7 @@ function pcRows(g){
   const def = [['Cartões amarelos','yc',true],['Expulsões','rc',true],['Gols','g'],['Assistências','a'],['Entradas no decorrer','on'],['Vezes substituído','off',true]];
   return g==='ATT' ? att : g==='MID' ? mid : def;
 }
-const pcVal = (p,k) => { const s = p.st || {}; if(k==='ga') return (s.g||0)+(s.a||0); if(k==='gpm') return s.mp ? (s.g||0)/s.mp : 0; return s[k] ?? 0; };
+const pcVal = (p,k) => { const s = p.st || {}; if(k==='ga') return (s.g||0)+(s.a||0); if(k==='gpm') return s.mp ? (s.g||0)/s.mp : 0; if(k==='duwp') return s.du ? s.duw/s.du*100 : 0; return s[k] ?? 0; };
 function viewPCompare(L){
   const list = pcPlayers(L);
   if(!list) return head('Comparar jogadores',`${L.cfg.full} ${L.cfg.season}`)+(OPTA && OPTA[L.lg] && !IS_GH ? (playerGate(L)||'') : `<div class="panel empty-state"><h2>Jogadores indisponíveis nesta liga</h2><p>Os dados de jogadores desta liga ainda não chegaram por aqui.</p></div>`);
@@ -3240,7 +3278,7 @@ function viewPCompare(L){
   const byId = Object.fromEntries(list.map(p=>[p.id,p]));
   if(!byId[ia]) ia = ranked[0].id; if(!byId[ib]) ib = (ranked[1]||ranked[0]).id; S.pc[L.lg] = [ia, ib];
   const A = byId[ia], B = byId[ib];
-  const grpA = A.g, rows = pcRows(grpA==='GK' ? 'DEF' : grpA);
+  const bothFull = IS_GH && A.full && B.full, grpA = A.g, rows = bothFull ? pcRows(grpA, true) : pcRows(grpA==='GK' ? 'DEF' : grpA);
   const teams = [...new Set(list.map(p=>p.t))].filter(t=>t!=null).sort((x,y)=>L.T[x].name.localeCompare(L.T[y].name));
   const teamOpts = sel => teams.map(ti=>`<option value="${ti}" ${ti===sel?'selected':''}>${esc(L.T[ti].name)}</option>`).join('');
   const playerOpts = (ti, sel) => list.filter(p=>p.t===ti).sort((a,b)=>a.n.localeCompare(b.n)).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${p.num!=null?p.num+' · ':''}${esc(p.n)}</option>`).join('');
@@ -3249,14 +3287,15 @@ function viewPCompare(L){
     return `<div class="cmp-team ${side}" style="background:linear-gradient(${side==='b'?'240deg':'120deg'},color-mix(in srgb,${col} 45%,#070a10),#0e141f)">${t?`<img src="${t.hi}" alt="">`:''}<div class="pc-sel" style="min-width:0"><select data-pcteam="${side==='b'?1:0}" data-crests="team" aria-label="Time">${teamOpts(p.t)}</select><select data-pc="${side==='b'?1:0}" aria-label="Jogador">${playerOpts(p.t, p.id)}</select>
       <small>${p.num!=null?`<span class="shirt">${p.num}</span>`:''}${gname[p.g]||''}${p.age!=null?` · ${p.age} anos`:''}${n.f?` · ${n.f} ${esc(n.pt)}`:''}</small></div></div>`; };
   let wa=0, wb=0;
-  const crows = rows.map(([l,k,low])=>{ const va=pcVal(A,k), vb=pcVal(B,k), mx=Math.max(va,vb,1e-9), aw=low?va<vb:va>vb, bw=low?vb<va:vb>va; if(aw) wa++; if(bw) wb++;
-    const f = v => k==='gpm' ? nf2.format(v) : v;
-    return `<div class="crow"><div class="clab">${l}</div><div class="cbars"><span class="vv ${aw?'win':bw?'lose':''}">${f(va)}</span><div class="bar a"><i class="${aw?'w':bw?'l':'n'}" style="width:${va/mx*100}%"></i></div><div class="bar b"><i class="${bw?'w':aw?'l':'n'}" style="width:${vb/mx*100}%"></i></div><span class="vv ${bw?'win':aw?'lose':''}">${f(vb)}</span></div></div>`; }).join('');
+  const hasA = !!A.st, hasB = !!B.st;
+  const crows = rows.map(([l,k,low])=>{ const va=hasA?pcVal(A,k):0, vb=hasB?pcVal(B,k):0, mx=Math.max(va,vb,1e-9), both=hasA&&hasB, aw=both&&(low?va<vb:va>vb), bw=both&&(low?vb<va:vb>va); if(aw) wa++; if(bw) wb++;
+    const f0 = v => k==='gpm'||k==='rat' ? nf2.format(v) : (k==='acc'||k==='duwp') ? Math.round(v)+'%' : Math.round(v)===v ? v : nf1.format(v), fa = v => hasA ? f0(v) : '—', fb = v => hasB ? f0(v) : '—';
+    return `<div class="crow"><div class="clab">${l}</div><div class="cbars"><span class="vv ${aw?'win':bw?'lose':''}">${fa(va)}</span><div class="bar a"><i class="${aw?'w':bw?'l':'n'}" style="width:${va/mx*100}%"></i></div><div class="bar b"><i class="${bw?'w':aw?'l':'n'}" style="width:${vb/mx*100}%"></i></div><span class="vv ${bw?'win':aw?'lose':''}">${fb(vb)}</span></div></div>`; }).join('');
   const ca = A.t!=null ? L.T[A.t].col : '#8a94a6', cb = B.t!=null ? L.T[B.t].col : '#8a94a6';
   return head('Comparar jogadores',`${L.cfg.full} ${L.cfg.season} · indicadores escolhidos pela posição do primeiro jogador`)+`
   <div class="cmp-head fade">${card(A,'a')}<div class="vs">×</div>${card(B,'b')}</div>
-  <div class="panel cmp-ind" style="--ca:${ca};--cb:${cb}"><h2>Indicadores de ${gname[grpA]?gname[grpA].toLowerCase():'jogador'}</h2><p class="sub">${esc(A.n)} vence em ${wa} · ${esc(B.n)} vence em ${wb}. A barra mais forte indica o melhor dos dois.</p><div class="crows">${crows}</div>
-    <p class="src" style="margin-top:12px">${IS_GH ? 'Fonte: football-data.org. Jogos, gols e assistências aparecem para quem está na lista de artilheiros da liga; desarmes, passes e outros números de defesa não fazem parte da fonte.' : 'Fonte: eventos das partidas registrados pela Opta. Sem escalações, a fonte não informa minutos, desarmes nem passes.'}</p></div>`;
+  <div class="panel cmp-ind" style="--ca:${ca};--cb:${cb}"><h2>Indicadores de ${gname[grpA]?gname[grpA].toLowerCase():'jogador'}</h2><p class="sub">${hasA&&hasB?`${esc(A.n)} vence em ${wa} · ${esc(B.n)} vence em ${wb}. A barra mais forte indica o melhor dos dois.`:`${[!hasA?esc(A.n):'',!hasB?esc(B.n):''].filter(Boolean).join(' e ')} ${(!hasA&&!hasB)?'estão':'está'} fora da lista de artilheiros da liga, e a fonte não publica números para quem não está nela. Por isso aparece “—”.`}</p><div class="crows">${crows}</div>
+    <p class="src" style="margin-top:12px">${IS_GH ? (bothFull ? `Fonte: API-Football${(DATA[L.lg]||{}).plAt?`, atualizado em ${new Date(DATA[L.lg].plAt).toLocaleDateString('pt-BR')}`:''}. As estatísticas de cada liga são renovadas em rodízio a cada 5 ou 6 dias.` : 'Fonte: football-data.org. As estatísticas completas (minutos, passes, desarmes…) desta liga ainda estão chegando pela API-Football, em rodízio de 5 ou 6 dias.') : 'Fonte: eventos das partidas registrados pela Opta. Sem escalações, a fonte não informa minutos, desarmes nem passes.'}</p></div>`;
 }
 document.addEventListener('change', e=>{
   const ts = e.target.closest && e.target.closest('[data-pcteam]');
