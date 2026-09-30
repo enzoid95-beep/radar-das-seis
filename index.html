@@ -1126,6 +1126,7 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 .brand-hint::before{content:"↑";margin-right:5px;color:color-mix(in srgb,var(--g1) 60%,var(--dim))}
 @media (max-width:760px){.brand-hint{display:none}}
 .side.tight .brand-hint,.side.tight .side-foot{display:none}
+#sim-probs.settled .pcell i{animation:none!important}
 </style>
 </head>
 <body>
@@ -2407,7 +2408,7 @@ const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)'
 let lastPageKey = null, quietRender = false, spinLeague = false, indPos = null;
 const FRESH = new Map();
 const pageKey = () => [S.lg, S.view, S.view==='team'?S.team[S.lg]:'', S.view==='player'?S.player[S.lg]:'', S.view==='refs'?S.ref[S.lg]:'',
-  S.view==='matches'?S.round[S.lg]:'', S.view==='squad'?S.squad[S.lg]:'', S.view==='compare'?JSON.stringify(S.cmp[S.lg]||''):'', S.view==='gsquad'?S.gteam[S.lg]:'', S.view==='gplayer'?S.gplayer[S.lg]:'', S.view==='grefs'?S.gref[S.lg]:'', S.view==='sim'?(S.simRound||{})[S.lg]:''].join('|');
+  S.view==='matches'?S.round[S.lg]:'', S.view==='squad'?S.squad[S.lg]:'', S.view==='compare'?JSON.stringify(S.cmp[S.lg]||''):'', S.view==='gsquad'?S.gteam[S.lg]:'', S.view==='gplayer'?S.gplayer[S.lg]:'', S.view==='grefs'?S.gref[S.lg]:''].join('|');
 
 /* troca de tabela/ranking: linhas deslizam até a nova posição */
 const FLIP_SEL = '#view tr.row[data-team], #view tr.row[data-ref], #view .ritem[data-team], #view .ritem[data-player]';
@@ -2819,7 +2820,8 @@ function simTableUpdate(L, tbl){
 function simProbsUpdate(L, cnt, tbl){
   const pEl = document.getElementById('sim-probs'); if(!pEl) return;
   const table = pEl.querySelector('table.probs');
-  if(!table || table.dataset.lg !== L.lg){ pEl.innerHTML = simProbsHTML(L, cnt, tbl); return; }
+  if(!table || table.dataset.lg !== L.lg){ pEl.classList.remove('settled'); pEl.innerHTML = simProbsHTML(L, cnt, tbl); setTimeout(()=>pEl.classList.add('settled'), 1100); return; }
+  pEl.classList.add('settled');
   const cols = SIM_COLS[L.lg] || SIM_COLS.en, tbody = table.tBodies[0], rows = {};
   [...tbody.rows].forEach(r=>rows[r.dataset.team] = r);
   const pr = (i,a,b) => { let s=0; for(let p=a-1;p<b;p++) s+=cnt[i][p]; return s/SIM_N; };
@@ -2828,8 +2830,8 @@ function simProbsUpdate(L, cnt, tbl){
       row.querySelector('td.pts').textContent = r.P;
       const cells = row.querySelectorAll('.pcell');
       cols.forEach((c,ci)=>{ const p = pr(r.i,c[1],c[2]), cell = cells[ci]; if(!cell) return;
-        cell.querySelector('i').style.width = Math.min(100,p*100)+'%'; cell.querySelector('span').textContent = fmtProb(p); cell.classList.toggle('zero', p<=0); });
-      tbody.appendChild(row); });
+        cell.querySelector('i').style.width = Math.min(100,p*100)+'%'; cell.querySelector('span').textContent = fmtProb(p); cell.classList.toggle('zero', p<=0); }); });
+    tbl.forEach((r,k)=>{ const row = rows[r.i]; if(row && tbody.rows[k] !== row) tbody.insertBefore(row, tbody.rows[k] || null); });
   });
 }
 function simRefresh(full){
@@ -2907,7 +2909,9 @@ function render(){
   const key = pageKey(), wasLoading = !!document.querySelector('#view .empty-state .spinner, #view .empty .spinner');
   const pageChanged = key!==lastPageKey || wasLoading, snap = pageChanged ? null : captureFlip();
   lastPageKey = key;
+  const keepProbs = (S.view==='sim' && !pageChanged) ? document.getElementById('sim-probs') : null;
   $('#view').innerHTML = V(L);
+  if(keepProbs && keepProbs.querySelector('table.probs') && keepProbs.querySelector('table.probs').dataset.lg===S.lg){ const n = document.getElementById('sim-probs'); if(n){ n.replaceWith(keepProbs); keepProbs.classList.add('settled'); } }
   document.title = S.view==='overview' ? 'Radar das Seis · by Enzo Monteiro' : `${LEAGUES[S.lg].name} · Radar das Seis`;
   if(S.view==='player') renderSearch();
   if(S.view==='gplayer') renderGSearch();
