@@ -1232,6 +1232,35 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 #view.team-mode .pbar .tr{background:color-mix(in srgb,var(--tm) 12%,rgba(255,255,255,.04))}
 #view.team-mode .picker button[aria-pressed="true"]{border-color:var(--tm)}
 #view.team-mode .view-head h1::after{background:var(--tm)}
+
+/* ---------- seletor no padrão do site ---------- */
+select{color-scheme:dark}
+select option,select optgroup{background:#10141b;color:#f3f5f8}
+.dd{position:relative;display:inline-block;min-width:170px;max-width:100%}
+.dd > select{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;left:0;top:0}
+.dd-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:11px;text-align:left;color:#fff;font:600 14.5px Barlow,sans-serif;
+  background:linear-gradient(180deg,#171c25,#0c0f14);border:1px solid color-mix(in srgb,var(--g1) 45%,rgba(255,255,255,.1));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 rgba(0,0,0,.55);text-shadow:0 1px 0 rgba(0,0,0,.9);cursor:pointer}
+.dd-btn span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-btn svg{width:16px;height:16px;flex:none;color:var(--g2);transition:transform .2s}
+.dd.open .dd-btn{border-color:var(--g1)}
+.dd.open .dd-btn svg{transform:rotate(180deg)}
+.dd-ic{width:20px;height:20px;object-fit:contain;flex:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+.dd-menu{position:absolute;left:0;top:calc(100% + 6px);z-index:80;min-width:100%;width:max-content;max-width:min(92vw,340px);max-height:320px;overflow-y:auto;padding:6px;border-radius:12px;
+  background:var(--noise),linear-gradient(180deg,#141922,#0a0c10);border:1px solid color-mix(in srgb,var(--g1) 50%,transparent);box-shadow:0 18px 40px rgba(0,0,0,.75);animation:rise .18s ease-out}
+.dd-menu.up{top:auto;bottom:calc(100% + 6px)}
+.dd-opt{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;text-align:left;color:#e9edf3;font:500 14px Barlow,sans-serif;background:none;border:0;cursor:pointer}
+.dd-opt:hover,.dd-opt:focus-visible{background:rgba(255,255,255,.06);color:#fff}
+.dd-opt.on{background:color-mix(in srgb,var(--g1) 22%,transparent);color:#fff;font-weight:700}
+.dd-grp{padding:8px 10px 4px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:color-mix(in srgb,var(--g1) 55%,var(--dim))}
+.dd-find{width:100%;margin-bottom:6px;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#07090c;color:#fff;font:500 14px Barlow,sans-serif}
+.tk-bar .dd{min-width:170px}
+.cmp-team .dd{min-width:0;width:100%;max-width:260px}
+.pc-sel{display:flex;flex-direction:column;gap:6px}
+.cmp-team.b .pc-sel{align-items:flex-end}
+.cmp-team.b .dd-menu{left:auto;right:0}
+@media (max-width:620px){.cmp-team .dd{max-width:100%}.cmp-team.b .pc-sel{align-items:stretch}}
+.dd-opt[hidden],.dd-grp[hidden]{display:none!important}.cmp-team .dd-ic{width:20px!important;height:20px!important}.cmp-team .dd-menu img{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -1798,9 +1827,9 @@ function viewCompare(L){
   return `
   <div class="view-head"><div><h1>Comparar times</h1><p>Frente a frente nos principais indicadores da temporada.</p></div></div>
   <div class="cmp-head fade">
-    <div class="cmp-team" style="background:linear-gradient(120deg,color-mix(in srgb,${A.col} 45%,#070a10),#0e141f)"><img src="${A.hi}" alt=""><div style="min-width:0"><select data-cmp="0" aria-label="Primeiro clube">${opts(ai)}</select><small>${A.pos}º · ${A.all.P} pts · vence em ${wa} indicadores</small></div></div>
+    <div class="cmp-team" style="background:linear-gradient(120deg,color-mix(in srgb,${A.col} 45%,#070a10),#0e141f)"><img src="${A.hi}" alt=""><div style="min-width:0"><select data-cmp="0" data-crests="team" aria-label="Primeiro clube">${opts(ai)}</select><small>${A.pos}º · ${A.all.P} pts · vence em ${wa} indicadores</small></div></div>
     <div class="vs">×</div>
-    <div class="cmp-team b" style="background:linear-gradient(240deg,color-mix(in srgb,${B.col} 45%,#070a10),#0e141f)"><img src="${B.hi}" alt=""><div style="min-width:0"><select data-cmp="1" aria-label="Segundo clube">${opts(bi)}</select><small>${B.pos}º · ${B.all.P} pts · vence em ${wb} indicadores</small></div></div>
+    <div class="cmp-team b" style="background:linear-gradient(240deg,color-mix(in srgb,${B.col} 45%,#070a10),#0e141f)"><img src="${B.hi}" alt=""><div style="min-width:0"><select data-cmp="1" data-crests="team" aria-label="Segundo clube">${opts(bi)}</select><small>${B.pos}º · ${B.all.P} pts · vence em ${wb} indicadores</small></div></div>
   </div>
   <div class="grid g2">
     <div class="panel cmp-ind" style="--ca:${A.col};--cb:${B.col}"><h2>Indicadores</h2><p class="sub">A barra mais forte indica o melhor dos dois em cada número.</p>
@@ -2726,6 +2755,7 @@ function sizeTrophy(){
 window.addEventListener('resize', ()=>{ clearTimeout(window.__tz); window.__tz = setTimeout(()=>{ sizeTrophy(); fitTitles(); }, 100); });
 function afterRender(pageChanged, snap){
   const view = $('#view');
+  try{ enhanceSelects(view); }catch(e){}
   sizeTrophy(); fitTitles();
   try{ mobileAfterRender(pageChanged); }catch(e){ console.error(e); }
   const mob = isMobile();
@@ -3108,8 +3138,8 @@ function viewTactic(L){
   const gname = {GK:'Goleiros',DEF:'Defensores',MID:'Meio-campistas',ATT:'Atacantes'};
   return head('Campo tático',`${L.cfg.full} ${L.cfg.season} · escolha o time e a formação e arraste os jogadores`)+`
   <div class="tk-bar">
-    <label>Liga<select data-tklg>${ORDER.map(k=>`<option value="${k}" ${k===L.lg?'selected':''}>${LEAGUES[k].name}</option>`).join('')}</select></label>
-    <label>Time<select data-tkteam>${L.table.map(x=>`<option value="${x.i}" ${x.i===ti?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
+    <label>Liga<select data-tklg data-crests="league">${ORDER.map(k=>`<option value="${k}" ${k===L.lg?'selected':''}>${LEAGUES[k].name}</option>`).join('')}</select></label>
+    <label>Time<select data-tkteam data-crests="team">${L.table.map(x=>`<option value="${x.i}" ${x.i===ti?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
     <label>Formação<select data-tkfm>${Object.keys(FORMATIONS).map(f=>`<option ${f===fm?'selected':''}>${f}</option>`).join('')}</select></label>
     <button class="mchip" data-tkreset>Reiniciar posições</button>
   </div>
@@ -3195,10 +3225,11 @@ function viewPCompare(L){
   const A = byId[ia], B = byId[ib];
   const grpA = A.g, rows = pcRows(grpA==='GK' ? 'DEF' : grpA);
   const teams = [...new Set(list.map(p=>p.t))].filter(t=>t!=null).sort((x,y)=>L.T[x].name.localeCompare(L.T[y].name));
-  const opts = sel => teams.map(ti=>`<optgroup label="${esc(L.T[ti].name)}">${list.filter(p=>p.t===ti).sort((a,b)=>a.n.localeCompare(b.n)).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.n)}</option>`).join('')}</optgroup>`).join('');
+  const teamOpts = sel => teams.map(ti=>`<option value="${ti}" ${ti===sel?'selected':''}>${esc(L.T[ti].name)}</option>`).join('');
+  const playerOpts = (ti, sel) => list.filter(p=>p.t===ti).sort((a,b)=>a.n.localeCompare(b.n)).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${p.num!=null?p.num+' · ':''}${esc(p.n)}</option>`).join('');
   const gname = {GK:'Goleiro',DEF:'Defensor',MID:'Meio-campista',ATT:'Atacante'};
   const card = (p, side) => { const t = p.t!=null ? L.T[p.t] : null, col = t ? t.col : '#8a94a6', n = nat(p.nat);
-    return `<div class="cmp-team ${side}" style="background:linear-gradient(${side==='b'?'240deg':'120deg'},color-mix(in srgb,${col} 45%,#070a10),#0e141f)">${t?`<img src="${t.hi}" alt="">`:''}<div style="min-width:0"><select data-pc="${side==='b'?1:0}" aria-label="Jogador">${opts(p.id)}</select>
+    return `<div class="cmp-team ${side}" style="background:linear-gradient(${side==='b'?'240deg':'120deg'},color-mix(in srgb,${col} 45%,#070a10),#0e141f)">${t?`<img src="${t.hi}" alt="">`:''}<div class="pc-sel" style="min-width:0"><select data-pcteam="${side==='b'?1:0}" data-crests="team" aria-label="Time">${teamOpts(p.t)}</select><select data-pc="${side==='b'?1:0}" aria-label="Jogador">${playerOpts(p.t, p.id)}</select>
       <small>${p.num!=null?`<span class="shirt">${p.num}</span>`:''}${gname[p.g]||''}${p.age!=null?` · ${p.age} anos`:''}${n.f?` · ${n.f} ${esc(n.pt)}`:''}</small></div></div>`; };
   let wa=0, wb=0;
   const crows = rows.map(([l,k,low])=>{ const va=pcVal(A,k), vb=pcVal(B,k), mx=Math.max(va,vb,1e-9), aw=low?va<vb:va>vb, bw=low?vb<va:vb>va; if(aw) wa++; if(bw) wb++;
@@ -3211,9 +3242,54 @@ function viewPCompare(L){
     <p class="src" style="margin-top:12px">${IS_GH ? 'Fonte: football-data.org. Jogos, gols e assistências aparecem para quem está na lista de artilheiros da liga; desarmes, passes e outros números de defesa não fazem parte da fonte.' : 'Fonte: eventos das partidas registrados pela Opta. Sem escalações, a fonte não informa minutos, desarmes nem passes.'}</p></div>`;
 }
 document.addEventListener('change', e=>{
+  const ts = e.target.closest && e.target.closest('[data-pcteam]');
+  if(ts && S.view==='pcompare'){ const L = league(S.lg), list = pcPlayers(L)||[], ti = +ts.value;
+    const best = list.filter(p=>p.t===ti).sort((a,b)=>pcVal(b,'ga')-pcVal(a,'ga')||a.n.localeCompare(b.n))[0];
+    if(best){ const c = (S.pc && S.pc[L.lg]) || []; c[+ts.dataset.pcteam] = best.id; S.pc[L.lg] = [...c]; go({}, false); } return; }
   const s = e.target.closest && e.target.closest('[data-pc]'); if(!s || S.view!=='pcompare') return;
   const L = league(S.lg); const c = (S.pc && S.pc[L.lg]) || []; c[+s.dataset.pc] = s.value; S.pc[L.lg] = [...c]; go({}, false);
 });
+
+
+/* ================= SELETOR NO PADRÃO DO SITE ================= */
+function ddIcon(sel, value){
+  const kind = sel.dataset.crests; if(!kind) return '';
+  if(kind==='league') return DATA._lg[value] ? `<img class="dd-ic" src="${DATA._lg[value]}" alt="">` : '';
+  const t = league(S.lg).T[+value]; return t ? `<img class="dd-ic" src="${t.crest}" alt="">` : '';
+}
+function enhanceSelects(root){
+  root.querySelectorAll('select:not([data-dd])').forEach(sel=>{
+    sel.dataset.dd = '1';
+    const wrap = document.createElement('div'); wrap.className = 'dd'; sel.parentNode.insertBefore(wrap, sel); wrap.appendChild(sel);
+    const cur = sel.options[sel.selectedIndex];
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'dd-btn'; btn.setAttribute('aria-haspopup','listbox'); btn.setAttribute('aria-label', sel.getAttribute('aria-label') || 'Selecionar');
+    btn.innerHTML = `${cur?ddIcon(sel, cur.value):''}<span>${cur?esc(cur.textContent):''}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>`;
+    wrap.appendChild(btn);
+  });
+}
+function ddOpen(wrap){
+  ddClose(); const sel = wrap.querySelector('select'), many = sel.options.length > 12;
+  const menu = document.createElement('div'); menu.className = 'dd-menu'; menu.setAttribute('role','listbox');
+  const opt = o => `<button type="button" class="dd-opt${o.selected?' on':''}" role="option" aria-selected="${o.selected}" data-ddv="${esc(o.value)}">${ddIcon(sel,o.value)}<span>${esc(o.textContent)}</span></button>`;
+  let html = many ? '<input class="dd-find" type="search" placeholder="Buscar…" aria-label="Buscar">' : '';
+  [...sel.children].forEach(c=>{ html += c.tagName==='OPTGROUP' ? `<div class="dd-grp">${esc(c.label)}</div>${[...c.children].map(opt).join('')}` : opt(c); });
+  menu.innerHTML = html; wrap.appendChild(menu); wrap.classList.add('open');
+  const r = wrap.getBoundingClientRect(); if(window.innerHeight - r.bottom < 260 && r.top > 300) menu.classList.add('up');
+  const on = menu.querySelector('.dd-opt.on'); if(on) on.scrollIntoView({block:'center'});
+  const f = menu.querySelector('.dd-find'); if(f){ f.focus(); f.addEventListener('input', ()=>{ const q = f.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    menu.querySelectorAll('.dd-opt').forEach(b=>{ b.hidden = q && !b.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q); });
+    menu.querySelectorAll('.dd-grp').forEach(g=>{ let n = g.nextElementSibling, any = false; while(n && !n.classList.contains('dd-grp')){ if(!n.hidden) any = true; n = n.nextElementSibling; } g.hidden = !any; }); }); }
+}
+function ddClose(){ document.querySelectorAll('.dd.open').forEach(w=>{ w.classList.remove('open'); const m = w.querySelector('.dd-menu'); m && m.remove(); }); }
+document.addEventListener('click', e=>{
+  const o = e.target.closest('.dd-opt');
+  if(o){ e.stopImmediatePropagation(); const wrap = o.closest('.dd'), sel = wrap.querySelector('select'); ddClose();
+    if(sel.value !== o.dataset.ddv){ sel.value = o.dataset.ddv; sel.dispatchEvent(new Event('change', {bubbles:true})); } return; }
+  const b = e.target.closest('.dd-btn');
+  if(b){ e.stopImmediatePropagation(); const wrap = b.closest('.dd'); if(wrap.classList.contains('open')) ddClose(); else ddOpen(wrap); return; }
+  if(!e.target.closest('.dd-menu')) ddClose();
+}, true);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') ddClose(); });
 
 /* ---------- render / events ---------- */
 function applyTheme(){
