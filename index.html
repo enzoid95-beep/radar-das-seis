@@ -831,6 +831,29 @@ body{text-shadow:0 1px 0 rgba(0,0,0,.9),0 -1px 0 rgba(255,255,255,.035),0 2px 8p
   #mteam .mtabs.mtabs-mini button{padding:7px 13px;font-size:13.5px}
 }
 @media (max-width:760px){#mteam .mtabs.mtabs-mini{display:flex;overflow-x:auto}#mteam .mtabs.mtabs-mini button{width:auto;flex:none}}
+
+/* ---------- lateral: ligas em lista, itens mais próximos, marca maior (desktop) ---------- */
+.side{justify-content:flex-start;gap:clamp(8px,1.6vh,16px)}
+.side-group,.side-group.lg-group{flex:none}
+.side-group > .nav-btn{flex:none;height:clamp(32px,4.3vh,40px);min-height:0;max-height:none;padding:0 12px}
+.nav-btn{font-size:clamp(14.5px,1.9vh,16px)}
+.lg-list{grid-template-columns:1fr;gap:2px;grid-auto-rows:clamp(32px,4.5vh,42px)}
+.lg-list .lg-btn{gap:12px;padding:0 10px;font-size:clamp(14.5px,1.95vh,16px)}
+.lg-list .lg-logo{width:clamp(22px,3vh,28px);height:clamp(22px,3vh,28px)}
+.lg-list .lg-btn small{margin-left:auto;font-size:11.5px;color:var(--dim);font-weight:500}
+.lg-list .lg-btn[aria-current="true"] small{color:var(--muted)}
+.side-foot{margin-top:auto}
+.brand{gap:13px}
+.brand-mark{width:clamp(42px,5.8vh,50px);height:clamp(42px,5.8vh,50px);border-radius:14px}
+.brand b{font-size:clamp(24px,3.4vh,28px)}
+.brand span{font-size:clamp(12.5px,1.7vh,14px)}
+@media (max-height:680px){.brand span{display:block}}
+.brand-mark{flex:none}
+.side{--rowh:clamp(26px,calc((100vh - 110px - var(--groups,4) * 34px) / var(--rows,14)),40px)}
+@supports (height:100dvh){.side{--rowh:clamp(26px,calc((100dvh - 110px - var(--groups,4) * 34px) / var(--rows,14)),40px)}}
+.side-group > .nav-btn{height:var(--rowh)}
+.lg-list{grid-auto-rows:calc(var(--rowh) + 2px)}
+.brand b{font-size:clamp(22px,3.2vh,26px)}.brand > div{min-width:0}
 </style>
 </head>
 <body>
@@ -1052,19 +1075,29 @@ const NAV_ALL = [
 const IS_GH = typeof GH!=='undefined' && GH === true;
 const NAV = IS_PUBLIC ? NAV_ALL.map(([g,items])=> g==='Jogadores' ? (IS_GH ? [g,[['scorers','Artilharia','user']]] : null) : [g, items.filter(([v])=>v!=='refs')]).filter(Boolean) : NAV_ALL;
 const SOON = [];
+/* ajusta a altura dos itens para toda a lateral caber na tela, sem rolagem */
+function fitSide(){
+  const s = document.getElementById('side'); if(!s || (typeof isMobile==='function' && isMobile())) return;
+  s.style.removeProperty('--rowh');
+  const rows = +s.style.getPropertyValue('--rows') || 14, over = s.scrollHeight - s.clientHeight;
+  if(over > 0){ const b = s.querySelector('.side-group > .nav-btn'); if(!b) return; const cur = b.getBoundingClientRect().height;
+    s.style.setProperty('--rowh', Math.max(24, cur - Math.ceil(over / rows) - .5) + 'px'); }
+}
+window.addEventListener('resize', ()=>{ clearTimeout(window.__fs); window.__fs = setTimeout(()=>{ fitSide(); if(typeof indPos!=='undefined'){ indPos = null; } const s=document.getElementById('side'); const old=s&&s.querySelector('.nav-ind'); old&&old.remove(); if(typeof placeIndicator==='function') placeIndicator(); }, 120); });
 function renderSide(){
   const lastDate = ORDER.map(k=>league(k).byDate.slice(-1)[0]?.[1]||'').sort().pop();
   $('#side').innerHTML = `
     <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 19V11M10 19V6M16 19v-5M21 19H3"/></svg></div>
       <div><b>Radar das Seis</b><span>by Enzo Monteiro</span></div></div>
     <div class="side-group lg-group"><div class="side-title">Ligas</div>
-      <div class="lg-list">${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}" title="${LEAGUES[k].name} ${LEAGUES[k].season}">${lgDot(k)}<span class="lg-n">${LG_SHORT[k]}</span></button>`).join('')}</div>
+      <div class="lg-list">${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}">${lgDot(k)}<span class="lg-n">${LEAGUES[k].name}</span><small>${LEAGUES[k].season}</small></button>`).join('')}</div>
     </div>
     ${NAV.map(([g,items])=>`<nav class="side-group" style="--n:${items.length}" aria-label="${g}"><div class="side-title">${g}</div>
       ${items.map(([v,l,ic])=>`<button class="nav-btn" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}${l}</button>`).join('')}</nav>`).join('')}
     ${SOON.length?`<div class="side-group"><div class="side-title">Próximas etapas</div>
       ${SOON.map(([l,ic])=>`<button class="nav-btn" disabled>${icon(ic)}${l}<span class="soon">em breve</span></button>`).join('')}</div>`:''}
     <div class="side-foot">${IS_GH && DATA._updated ? `Atualizado em ${DATA._updated}. Dados: ${esc(DATA._source)}.` : `Resultados até ${fdate(lastDate)}/${lastDate.slice(0,4)}. Estatísticas calculadas a partir dos placares finais e de intervalo.${IS_PUBLIC?' Resultados: openfootball.':''}`}</div>`;
+  const side=$('#side'); side.style.setProperty('--rows', ORDER.length + NAV.reduce((n,[,it])=>n+it.length,0) + SOON.length); side.style.setProperty('--groups', 1 + NAV.length + (SOON.length?1:0)); fitSide();
 }
 
 /* ---------- views ---------- */
