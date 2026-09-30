@@ -1276,6 +1276,12 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 .cmp-team{transform:none!important}
 .dd.open{z-index:100}
 .dd-menu{z-index:100}
+.gp-bar{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;margin-bottom:14px;position:relative;z-index:30}
+.gp-sel{flex-direction:row;gap:10px}
+.gp-sel .dd{min-width:200px}
+.gp-bar .psearch{flex:1;min-width:220px;max-width:420px;margin:0}
+@media (max-width:620px){.gp-sel{flex-direction:column;width:100%}.gp-sel .dd{width:100%}.gp-bar .psearch{max-width:none;width:100%}}
+.thero h1 .shirt.big{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:1.35em;max-width:2.4em;height:1.3em;padding:0 .16em;font-size:.48em;line-height:1;vertical-align:.25em;filter:none;background:linear-gradient(180deg,#fff,#cfd5de)!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#07090d;-webkit-text-fill-color:#07090d}
 </style>
 </head>
 <body>
@@ -2625,7 +2631,7 @@ const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)'
 let lastPageKey = null, quietRender = false, spinLeague = false, indPos = null;
 const FRESH = new Map();
 const pageKey = () => [S.lg, S.view, S.view==='team'?S.team[S.lg]:'', S.view==='player'?S.player[S.lg]:'', S.view==='refs'?S.ref[S.lg]:'',
-  S.view==='matches'?S.round[S.lg]:'', S.view==='squad'?S.squad[S.lg]:'', S.view==='compare'?JSON.stringify(S.cmp[S.lg]||''):'', S.view==='gsquad'?S.gteam[S.lg]:'', S.view==='gplayer'?S.gplayer[S.lg]:'', S.view==='grefs'?S.gref[S.lg]:'', S.view==='pcompare'?JSON.stringify((S.pc||{})[S.lg]||''):''].join('|');
+  S.view==='matches'?S.round[S.lg]:'', S.view==='squad'?S.squad[S.lg]:'', S.view==='compare'?JSON.stringify(S.cmp[S.lg]||''):'', S.view==='gsquad'?S.gteam[S.lg]:'', S.view==='gplayer'?String(S.gplayer[S.lg]??''):'', S.view==='grefs'?S.gref[S.lg]:'', S.view==='pcompare'?JSON.stringify((S.pc||{})[S.lg]||''):''].join('|');
 
 /* troca de tabela/ranking: linhas deslizam até a nova posição */
 const FLIP_SEL = '#view tr.row[data-team], #view tr.row[data-ref], #view .ritem[data-team], #view .ritem[data-player]';
@@ -2859,7 +2865,15 @@ function gAfTiles(L, p){
 }
 function viewGPlayer(L){
   const G=gIndex(L);
-  const search=`<div class="psearch"><input id="gq" type="search" placeholder="Buscar jogador pelo nome" autocomplete="off" value="${esc(S.gq||'')}" aria-label="Buscar jogador"><div id="gq-res" class="pq-res"></div></div>`;
+  const selP = G.players[S.gplayer[L.lg]];
+  if(!S.gpteam || typeof S.gpteam!=='object') S.gpteam = {};
+  let pti = selP ? selP.t : (S.gpteam[L.lg] ?? L.table[0].i); if(!L.T[pti]) pti = L.table[0].i;
+  const teamList = [...L.T].sort((x,y)=>x.name.localeCompare(y.name));
+  const roster = G.list.filter(p=>p.t===pti).sort((x,y)=>(x.num??999)-(y.num??999)||x.n.localeCompare(y.n));
+  const search=`<div class="gp-bar">
+    <div class="pc-sel gp-sel"><select data-gpteam data-crests="team" aria-label="Time">${teamList.map(x=>`<option value="${x.i}" ${x.i===pti?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+      <select data-gpsel aria-label="Jogador">${selP?'':'<option value="" selected>Escolha um jogador</option>'}${roster.map(p=>`<option value="${p.id}" ${selP&&p.id===selP.id?'selected':''}>${p.num!=null?p.num+' · ':''}${esc(p.n)}</option>`).join('')}</select></div>
+    <div class="psearch"><input id="gq" type="search" placeholder="Ou busque pelo nome" autocomplete="off" value="${esc(S.gq||'')}" aria-label="Buscar jogador"><div id="gq-res" class="pq-res"></div></div></div>`;
   if(!G.list.length) return head('Perfil do jogador','Dados da temporada')+gEmpty('Jogadores aparecem na próxima atualização','Os elencos chegam junto com a próxima atualização automática dos dados.');
   const p=G.players[S.gplayer[L.lg]];
   if(!p){
@@ -3307,6 +3321,13 @@ document.addEventListener('change', e=>{
 });
 
 
+document.addEventListener('change', e=>{
+  if(S.view!=='gplayer') return; const t = e.target;
+  if(t.matches && t.matches('[data-gpteam]')){ const L = league(S.lg), G = gIndex(L), ti = +t.value; S.gpteam[L.lg] = ti;
+    const first = G.list.filter(p=>p.t===ti).sort((x,y)=>((y.af?y.af.min:0)||0)-((x.af?x.af.min:0)||0)||((y.st?y.st.g:0)||0)-((x.st?x.st.g:0)||0))[0];
+    S.gplayer[L.lg] = first ? first.id : null; return go({}, false); }
+  if(t.matches && t.matches('[data-gpsel]')){ if(!t.value) return; const v=t.value; S.gplayer[S.lg] = /^\d+$/.test(v) ? +v : v; return go({}, false); }
+});
 /* ================= SELETOR NO PADRÃO DO SITE ================= */
 function ddIcon(sel, value){
   const kind = sel.dataset.crests; if(!kind) return '';
@@ -3445,7 +3466,7 @@ document.addEventListener('click', e=>{
   if(b.dataset.rsort) return go({rsort:b.dataset.rsort},false);
   if(b.dataset.smet) return go({smet:b.dataset.smet},false);
   if(b.dataset.gteam!==undefined){ S.gteam[S.lg]=+b.dataset.gteam; return go({view:'gsquad'},false); }
-  if(b.dataset.gplayer!==undefined){ S.gplayer[S.lg]=+b.dataset.gplayer; S.gq=''; return go({view:'gplayer'}); }
+  if(b.dataset.gplayer!==undefined){ const v=b.dataset.gplayer; S.gplayer[S.lg]= /^\d+$/.test(v) ? +v : v; S.gq=''; return go({view:'gplayer'}); }
   if(b.dataset.gref!==undefined){ S.gref[S.lg]=b.dataset.gref||null; return go({view:'grefs'}); }
   if(b.dataset.reloadPlayers!==undefined){ delete PL[S.lg]; getMcp().then(m=>m&&m.invalidate&&m.invalidate('Opta').catch(()=>{})); return go({},false); }
   if(b.dataset.league){ spinLeague = b.dataset.league!==S.lg; return go(b.dataset.ovgo!==undefined ? {lg:b.dataset.league, view:'home'} : {lg:b.dataset.league}); }
