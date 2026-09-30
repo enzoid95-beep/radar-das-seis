@@ -913,6 +913,11 @@ body::after{background:
   var(--noise)}
 .panel{background:var(--noise),linear-gradient(180deg,rgba(15,19,26,.95) 0%,rgba(8,10,14,.97) 100%)}
 .side{background:var(--noise),linear-gradient(180deg,color-mix(in srgb,var(--g1) 7%,rgba(6,8,11,.92)),rgba(3,4,6,.95))}
+/* ---------- tabela: coluna do clube com o mesmo fundo das demais ---------- */
+.sticky,th.sticky,td.sticky,tr.row:hover .sticky{background:transparent!important}
+tr.row.zoned td.sticky{background:color-mix(in srgb,var(--zc) 7%,transparent)!important}
+tr.row.zoned:hover td.sticky{background:color-mix(in srgb,var(--zc) 12%,transparent)!important}
+tr.row.mopen td.sticky{background:color-mix(in srgb,var(--g1) 10%,transparent)!important}
 </style>
 </head>
 <body>
