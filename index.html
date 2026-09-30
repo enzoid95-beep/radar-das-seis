@@ -517,9 +517,9 @@ tr.row:hover{background:rgba(255,255,255,.025)}
    ========================================================= */
 @property --g1{syntax:'<color>';inherits:true;initial-value:#00c46a}
 @property --g2{syntax:'<color>';inherits:true;initial-value:#f5d000}
-:root{transition:--g1 .7s ease,--g2 .7s ease}
+
 .fade{animation:none}
-@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.985)}}
+@keyframes rise{from{opacity:0;transform:translate3d(0,14px,0)}}
 @keyframes fadeIn{from{opacity:0}}
 @keyframes growX{from{transform:scaleX(0)}}
 @keyframes growY{from{transform:scaleY(0)}}
@@ -532,7 +532,7 @@ tr.row:hover{background:rgba(255,255,255,.025)}
 @keyframes freshGlow{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 0 0 1px color-mix(in srgb,var(--g2) 55%,transparent),0 0 0 0 color-mix(in srgb,var(--g2) 40%,transparent)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 0 0 1px var(--g2),0 0 26px 2px color-mix(in srgb,var(--g2) 35%,transparent)}}
 
 /* entrada em cascata */
-#view.enter .cascade{animation:rise .6s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--d,0ms)}
+#view.enter .cascade{animation:rise .6s cubic-bezier(.25,1,.5,1) backwards;animation-delay:var(--d,0ms)}
 #view.enter .hero h1,#view.enter .thero h1{animation:reveal .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 120ms)}
 #view.enter .thero .big,#view.enter .hero-side img{animation:crestIn .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 80ms)}
 #view.enter .form .f{animation:pop .4s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 320ms + var(--k,0) * 60ms)}
@@ -543,9 +543,9 @@ tr.row:hover{background:rgba(255,255,255,.025)}
 #view.enter .matches.big .dg{animation:flipD .75s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms + var(--k,0) * 110ms)}
 
 /* barras crescendo (também ao trocar filtros e métricas) */
-#view:not(.quiet) .rkb i,#view:not(.quiet) .pbar .tr i,#view:not(.quiet) .ritem .b i,#view:not(.quiet) .split .b .bar i,#view:not(.quiet) .dist > div{transform-origin:left center;animation:growX .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 180ms)}
-#view:not(.quiet) .split .a .bar i{transform-origin:right center;animation:growX .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 180ms)}
-#view:not(.quiet) .bt i,#view:not(.quiet) .bt2 i{transform-origin:center bottom;animation:growY .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
+#view:not(.quiet) .rkb i,#view:not(.quiet) .pbar .tr i,#view:not(.quiet) .ritem .b i,#view:not(.quiet) .split .b .bar i,#view:not(.quiet) .dist > div{transform-origin:left center;animation:growX 1s cubic-bezier(.25,1,.5,1) backwards;animation-delay:calc(var(--d,0ms) + 180ms)}
+#view:not(.quiet) .split .a .bar i{transform-origin:right center;animation:growX 1s cubic-bezier(.25,1,.5,1) backwards;animation-delay:calc(var(--d,0ms) + 180ms)}
+#view:not(.quiet) .bt i,#view:not(.quiet) .bt2 i{transform-origin:center bottom;animation:growY 1s cubic-bezier(.25,1,.5,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
 #view:not(.quiet) .bcol:nth-child(2) .bt i,#view:not(.quiet) .bcg:nth-child(2) i{animation-delay:calc(var(--d,0ms) + 260ms)}
 #view:not(.quiet) .bcol:nth-child(3) .bt i,#view:not(.quiet) .bcg:nth-child(3) i{animation-delay:calc(var(--d,0ms) + 320ms)}
 #view:not(.quiet) .bcol:nth-child(4) .bt i,#view:not(.quiet) .bcg:nth-child(4) i{animation-delay:calc(var(--d,0ms) + 380ms)}
@@ -557,8 +557,9 @@ tr.row:hover{background:rgba(255,255,255,.025)}
 #view:not(.quiet) .ritem:nth-child(n+11) .b i{animation-delay:calc(var(--d,0ms) + 340ms)}
 
 /* cards 3D com reflexo de luz */
-.tile,.lcard,.match,.fact,.sq-card,.hero-side,.cmp-team,.thero,.hero{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .2s}
-.tilting{transition:transform .08s linear,border-color .2s}
+.tilting,.tilt-out{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+.tilting{transition:transform .1s linear,border-color .2s}
+.tilt-out{transition:transform .45s cubic-bezier(.25,1,.5,1),border-color .2s}
 .tile.tilting,.lcard.tilting,.match.tilting,.fact.tilting,.sq-card.tilting{border-color:color-mix(in srgb,var(--g1) 45%,transparent)}
 .fact,.sq-card,.hero-side,.cmp-team{position:relative}
 .tile::after,.lcard::after,.match::after,.fact::after,.sq-card::after,.hero-side::after,.cmp-team::after,.thero::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
@@ -620,8 +621,8 @@ tr.row:hover{background:rgba(255,255,255,.025)}
 .cmp-ind .bar.b i{background:linear-gradient(90deg,var(--cb),color-mix(in srgb,var(--cb) 50%,#000))}
 .cmp-ind .bar i.l{opacity:.3}.cmp-ind .bar i.n{opacity:.65}
 .cmp-ind .bar.a i.w{box-shadow:0 0 18px -3px var(--ca)}.cmp-ind .bar.b i.w{box-shadow:0 0 18px -3px var(--cb)}
-#view:not(.quiet) .cmp-ind .bar.b i{transform-origin:left center;animation:growX .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
-#view:not(.quiet) .cmp-ind .bar.a i{transform-origin:right center;animation:growX .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
+#view:not(.quiet) .cmp-ind .bar.b i{transform-origin:left center;animation:growX 1s cubic-bezier(.25,1,.5,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
+#view:not(.quiet) .cmp-ind .bar.a i{transform-origin:right center;animation:growX 1s cubic-bezier(.25,1,.5,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
 @media (max-width:620px){.cmp-ind .vv{font-size:19px;min-width:44px}.cmp-ind .bar{height:11px}.cmp-ind .clab{font-size:13.5px}}
 
 /* =========================================================
@@ -675,6 +676,14 @@ body{text-shadow:0 1px 0 rgba(0,0,0,.9),0 -1px 0 rgba(255,255,255,.035),0 2px 8p
 @media (prefers-reduced-motion:reduce){body::before{opacity:.1}}
 .view-head h1,.hero h1,.thero h1,.tile .v,.hero-meta b,.thero .line b,.posbig b,.brand b{padding-top:.14em;margin-top:-.14em;padding-bottom:.06em;margin-bottom:-.06em;padding-right:.04em}
 .view-head h1{padding-bottom:calc(10px + .06em)}
+
+/* ---------- desempenho: animações mais leves ---------- */
+/* números que contam: relevo com sombra de texto (barato de redesenhar) em vez de filtro */
+.tile .v,.hero-meta b,.thero .line b,.posbig b{background:none;-webkit-text-fill-color:currentColor;color:#f4f6fa;filter:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.12),0 2px 0 rgba(0,0,0,.95),0 5px 12px rgba(0,0,0,.6)}
+.lcard em{filter:none}
+.side{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--noise),linear-gradient(180deg,rgba(5,7,10,.93),rgba(2,3,5,.96))}
+.rkb i,.pbar .tr i,.ritem .b i,.split .bar i,.cmp-ind .bar i,.dist > div,.bt i,.bt2 i{backface-visibility:hidden}
 </style>
 </head>
 <body>
@@ -1792,19 +1801,36 @@ function markCascade(view){
 }
 const delayOf = el => parseInt(getComputedStyle(el).getPropertyValue('--d')) || 0;
 
-/* números que contam até o valor final */
-function countUp(el){
-  const node = [...el.childNodes].find(n=>n.nodeType===3 && n.textContent.trim()); if(!node) return;
-  const txt = node.textContent, m = /^(\s*[+\-−]?)(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?([^\d]*)$/.exec(txt); if(!m) return;
+/* números que contam até o valor final: um único laço de animação para todos */
+const easeOut = p => 1 - Math.pow(1-p, 4);
+function prepCount(el){
+  const node = [...el.childNodes].find(n=>n.nodeType===3 && n.textContent.trim()); if(!node) return null;
+  const txt = node.textContent, m = /^(\s*[+\-−]?)(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?([^\d]*)$/.exec(txt); if(!m) return null;
   const [, pre, intp, dec, suf] = m, dots = intp.includes('.'), places = dec ? dec.length : 0;
-  const target = parseFloat(intp.replace(/\./g,'') + (dec ? '.'+dec : '')); if(!isFinite(target) || target===0) return;
+  const target = parseFloat(intp.replace(/\./g,'') + (dec ? '.'+dec : '')); if(!isFinite(target) || target===0) return null;
   const fmt = v => { let s = places ? v.toFixed(places) : String(Math.round(v)); let [i,d] = s.split('.'); if(dots) i = i.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return pre+i+(d?','+d:'')+suf; };
-  node.textContent = fmt(0);
-  setTimeout(()=>{ const t0 = performance.now();
-    const step = now => { const p = Math.min(1,(now-t0)/800), e = 1-Math.pow(1-p,3); node.textContent = fmt(target*e); if(p<1) requestAnimationFrame(step); else node.textContent = txt; };
-    requestAnimationFrame(step); }, delayOf(el) + 120);
+  const first = fmt(0); node.textContent = first;
+  return {node, txt, fmt, target, last:first, done:false};
 }
-const COUNT_SEL = '#view .tile .v, #view .hero-meta b, #view .thero .line b, #view .posbig b, #view .lcard em, #view .fact b, #view .mini-row .vl, #view .ritem .v, #view td.pts';
+function countAll(els){
+  const t0 = performance.now(), items = [];
+  els.forEach(el=>{ const it = prepCount(el); if(it){ it.start = t0 + delayOf(el) + 160; items.push(it); } });
+  if(!items.length) return;
+  const DUR = 1000;
+  const tick = t => {
+    let active = false;
+    for(const it of items){
+      if(it.done) continue;
+      const p = Math.min(1, Math.max(0, (t - it.start) / DUR));
+      const s = p >= 1 ? it.txt : it.fmt(it.target * easeOut(p));
+      if(s !== it.last){ it.node.textContent = s; it.last = s; }
+      if(p >= 1) it.done = true; else active = true;
+    }
+    if(active) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+const COUNT_SEL = '#view .tile .v, #view .hero-meta b, #view .thero .line b, #view .posbig b, #view .lcard em, #view .fact b, #view .ritem .v';
 
 /* linha do gráfico de posição se desenhando e pontos surgindo */
 function drawCharts(view){
@@ -1838,11 +1864,15 @@ function placeIndicator(){
 /* cards 3D que acompanham o dedo ou o mouse */
 const TILT_SEL = '.tile,.lcard,.match,.fact,.sq-card,.hero-side,.cmp-team,.thero,.hero';
 let tiltEl = null, tiltTimer = null;
-function tiltReset(){ if(tiltEl){ tiltEl.classList.remove('tilting'); ['--rx','--ry'].forEach(p=>tiltEl.style.removeProperty(p)); } tiltEl = null; }
+function tiltReset(){
+  const el = tiltEl; tiltEl = null; if(!el) return;
+  el.classList.add('tilt-out'); el.classList.remove('tilting'); el.style.setProperty('--rx','0deg'); el.style.setProperty('--ry','0deg');
+  clearTimeout(el._tt); el._tt = setTimeout(()=>{ if(el!==tiltEl){ el.classList.remove('tilt-out'); ['--rx','--ry'].forEach(p=>el.style.removeProperty(p)); } }, 480);
+}
 function tiltMove(e){
   if(RM) return;
   const el = e.target.closest && e.target.closest(TILT_SEL);
-  if(el!==tiltEl){ tiltReset(); tiltEl = el; if(el) el.classList.add('tilting'); }
+  if(el!==tiltEl){ tiltReset(); tiltEl = el; if(el){ clearTimeout(el._tt); el.classList.remove('tilt-out'); el.classList.add('tilting'); } }
   if(!el) return;
   const r = el.getBoundingClientRect(), x = (e.clientX-r.left)/r.width, y = (e.clientY-r.top)/r.height;
   const max = (el.classList.contains('thero') || el.classList.contains('hero')) ? 2.5 : 7;
@@ -1881,7 +1911,7 @@ function afterRender(pageChanged, snap){
   if(RM || quietRender) return;
   if(pageChanged){
     markCascade(view); splitScores(view); void view.offsetWidth; view.classList.add('enter');
-    view.querySelectorAll(COUNT_SEL).forEach((el,i)=>{ if(i<80) countUp(el); });
+    countAll([...view.querySelectorAll(COUNT_SEL)].slice(0,60));
     drawCharts(view);
   } else playFlip(snap);
 }
