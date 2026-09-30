@@ -588,6 +588,93 @@ tr.row:hover{background:rgba(255,255,255,.025)}
   .tile,.lcard,.match,.fact,.sq-card,.hero-side,.cmp-team,.thero,.hero{transform:none}
   :root{transition:none}
 }
+
+/* ---------- comparador: indicadores maiores ocupando o painel todo ---------- */
+.cmp-ind{display:flex;flex-direction:column}
+.cmp-ind .split{flex:1;grid-auto-rows:minmax(40px,1fr);row-gap:4px;column-gap:14px;align-content:stretch}
+.cmp-ind .split .lab{font-size:clamp(14px,1.35vw,16px);font-weight:600;color:#c3cad6;min-width:130px;line-height:1.2}
+.cmp-ind .split .vv{font-size:clamp(20px,2vw,25px);min-width:52px}
+.cmp-ind .split .bar{height:14px;border-radius:8px;background:rgba(255,255,255,.05);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+.cmp-ind .split .bar i{border-radius:8px}
+.cmp-ind .split .a .bar i{background:linear-gradient(270deg,var(--ca),color-mix(in srgb,var(--ca) 55%,#000))!important}
+.cmp-ind .split .b .bar i{background:linear-gradient(90deg,var(--cb),color-mix(in srgb,var(--cb) 55%,#000))!important}
+.cmp-ind .split .bar i.l{opacity:.32}
+.cmp-ind .split .bar i.n{opacity:.62}
+.cmp-ind .split .bar i.w{box-shadow:0 0 14px -2px color-mix(in srgb,currentColor 0%,transparent)}
+.cmp-ind .split .a .bar i.w{box-shadow:0 0 16px -3px var(--ca)}
+.cmp-ind .split .b .bar i.w{box-shadow:0 0 16px -3px var(--cb)}
+.cmp-ind .split .vv.lose{color:#6f7888}
+@media (max-width:620px){.cmp-ind .split .lab{min-width:92px;font-size:13px}.cmp-ind .split .vv{font-size:18px;min-width:40px}.cmp-ind .split .bar{height:10px}}
+.cmp-ind .crows{flex:1;display:flex;flex-direction:column;gap:2px}
+.cmp-ind .crow{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:5px;min-height:46px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.035)}
+.cmp-ind .crow:last-child{border-bottom:0}
+.cmp-ind .clab{text-align:center;font-size:clamp(14px,1.3vw,16px);font-weight:600;color:#c3cad6;line-height:1.2}
+.cmp-ind .cbars{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) auto;align-items:center;gap:8px}
+.cmp-ind .vv{font:700 clamp(20px,2vw,26px)/1 "Barlow Condensed",sans-serif;min-width:58px;font-variant-numeric:tabular-nums}
+.cmp-ind .cbars .vv:first-child{text-align:left}.cmp-ind .cbars .vv:last-child{text-align:right}
+.cmp-ind .vv.lose{color:#6f7888}
+.cmp-ind .bar{height:16px;border-radius:9px;background:rgba(255,255,255,.05);box-shadow:inset 0 1px 2px rgba(0,0,0,.6);display:flex;overflow:hidden}
+.cmp-ind .bar.a{justify-content:flex-end}
+.cmp-ind .bar i{display:block;height:100%;border-radius:9px}
+.cmp-ind .bar.a i{background:linear-gradient(270deg,var(--ca),color-mix(in srgb,var(--ca) 50%,#000))}
+.cmp-ind .bar.b i{background:linear-gradient(90deg,var(--cb),color-mix(in srgb,var(--cb) 50%,#000))}
+.cmp-ind .bar i.l{opacity:.3}.cmp-ind .bar i.n{opacity:.65}
+.cmp-ind .bar.a i.w{box-shadow:0 0 18px -3px var(--ca)}.cmp-ind .bar.b i.w{box-shadow:0 0 18px -3px var(--cb)}
+#view:not(.quiet) .cmp-ind .bar.b i{transform-origin:left center;animation:growX .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
+#view:not(.quiet) .cmp-ind .bar.a i{transform-origin:right center;animation:growX .9s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms)}
+@media (max-width:620px){.cmp-ind .vv{font-size:19px;min-width:44px}.cmp-ind .bar{height:11px}.cmp-ind .clab{font-size:13.5px}}
+
+/* =========================================================
+   TEXTURA DA LIGA NO FUNDO + RELEVO NAS FONTES
+   ========================================================= */
+:root{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 -.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23g%29'/%3E%3C/svg%3E")}
+:root[data-lg='br']{--lgpat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M22 1L43 22L22 43L1 22Z' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Ccircle cx='22' cy='22' r='1.6' fill='%23000'/%3E%3C/svg%3E");--lgpat-size:44px 44px}
+:root[data-lg='en']{--lgpat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M-2 28L28 -2M-15 15L15 -15M11 41L41 11' stroke='%23000' stroke-width='1.1'/%3E%3C/svg%3E");--lgpat-size:26px 26px}
+:root[data-lg='es']{--lgpat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Cpath d='M0 15L20 5L40 15' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E");--lgpat-size:40px 20px}
+:root[data-lg='it']{--lgpat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='52'%3E%3Cpath d='M15 0L30 8.66V26L15 34.64L0 26V8.66Z M15 34.64V52 M0 26L-15 34.64 M30 26L45 34.64' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E");--lgpat-size:30px 52px}
+:root[data-lg='de']{--lgpat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cpath d='M0 .5H36M.5 0V36' stroke='%23000' stroke-width='1'/%3E%3Cpath d='M16 18H20M18 16V20' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E");--lgpat-size:36px 36px}
+:root[data-lg='fr']{--lgpat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='1.7' fill='%23000'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%23000'/%3E%3Ccircle cx='22' cy='0' r='1' fill='%23000'/%3E%3Ccircle cx='0' cy='22' r='1' fill='%23000'/%3E%3Ccircle cx='22' cy='22' r='1' fill='%23000'/%3E%3C/svg%3E");--lgpat-size:22px 22px}
+
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none}
+body::before{z-index:-2;background:linear-gradient(135deg,var(--g1),var(--g2));opacity:.13;
+  -webkit-mask-image:var(--lgpat);mask-image:var(--lgpat);-webkit-mask-size:var(--lgpat-size);mask-size:var(--lgpat-size)}
+body::after{z-index:-1;background:
+  radial-gradient(60% 55% at 100% 0%,color-mix(in srgb,var(--g2) 16%,transparent),transparent 70%),
+  radial-gradient(55% 60% at 0% 100%,color-mix(in srgb,var(--g1) 18%,transparent),transparent 72%),
+  radial-gradient(120% 90% at 50% 45%,transparent 35%,rgba(0,0,0,.72) 100%),
+  var(--noise)}
+body{background:var(--bg)}
+.app{position:relative;z-index:0}
+.side{background:var(--noise),linear-gradient(180deg,rgba(5,7,10,.9),rgba(2,3,5,.94));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.side::before{background:radial-gradient(120% 70% at 0% 0%,color-mix(in srgb,var(--g1) 26%,transparent),transparent 70%)}
+.topbar{background:rgba(2,3,5,.8);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+/* padrão da liga também, bem sutil, dentro dos painéis */
+.panel{background:var(--noise),linear-gradient(180deg,rgba(14,17,23,.97) 0%,rgba(7,9,12,.98) 100%)}
+
+/* relevo em todas as fontes: luz em cima, sombra embaixo */
+body{text-shadow:0 1px 0 rgba(0,0,0,.9),0 -1px 0 rgba(255,255,255,.035),0 2px 8px rgba(0,0,0,.35)}
+.panel h2,.brand b,.nav-btn,.lg-btn,.club,.match .t span,.mini-row .nm,.sq-main b,.ritem .n,.clab,.cmp-team select{
+  text-shadow:0 1px 0 rgba(0,0,0,.95),0 -1px 0 rgba(255,255,255,.06),0 3px 10px rgba(0,0,0,.55)}
+.score,.vv,td.pts,.mini-row .vl,.ritem .v,.fact b,.pbar .top b,.round-nav b{
+  text-shadow:0 1px 0 rgba(255,255,255,.08),0 2px 0 rgba(0,0,0,.95),0 4px 12px rgba(0,0,0,.6)}
+.f,.chip,.fresh-badge,.btn,.mchip[aria-pressed="true"],.seg button[aria-pressed="true"]{text-shadow:0 1px 1px rgba(0,0,0,.45)}
+.mchip[aria-pressed="true"],.fresh-badge{text-shadow:0 1px 0 rgba(255,255,255,.3)}
+
+/* títulos e números grandes: preenchimento metálico com granulado e sombra projetada */
+.view-head h1,.hero h1,.thero h1,.tile .v,.hero-meta b,.thero .line b,.posbig b,.brand b{
+  background:var(--grain),linear-gradient(180deg,#ffffff 0%,#eef1f6 48%,color-mix(in srgb,var(--g1) 22%,#aab2bf) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  text-shadow:none;filter:drop-shadow(0 1px 0 rgba(0,0,0,.95)) drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.hero h1,.thero h1{background:var(--grain),linear-gradient(180deg,#ffffff 0%,#f4f6fa 45%,#c9cfd9 75%,color-mix(in srgb,var(--g2) 30%,#9aa3b1) 100%);
+  -webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 2px 0 rgba(0,0,0,.9)) drop-shadow(0 8px 18px rgba(0,0,0,.6))}
+.thero h1{background:var(--grain),linear-gradient(180deg,#ffffff 0%,#f4f6fa 50%,color-mix(in srgb,var(--h2,var(--g2)) 35%,#b4bcc8) 100%);-webkit-background-clip:text;background-clip:text}
+.brand b{background:var(--grain),linear-gradient(180deg,#fff 0%,#e9edf3 55%,color-mix(in srgb,var(--g1) 45%,#b7bfcb) 100%);-webkit-background-clip:text;background-clip:text}
+.hero-meta span,.thero .line span,.posbig span{text-shadow:0 1px 0 rgba(0,0,0,.9)}
+.lcard em{filter:drop-shadow(0 1px 0 rgba(0,0,0,.9)) drop-shadow(0 3px 8px rgba(0,0,0,.5));text-shadow:none}
+.view-head h1::after{filter:none}
+@media (prefers-reduced-motion:reduce){body::before{opacity:.1}}
+.view-head h1,.hero h1,.thero h1,.tile .v,.hero-meta b,.thero .line b,.posbig b,.brand b{padding-top:.14em;margin-top:-.14em;padding-bottom:.06em;margin-bottom:-.06em;padding-right:.04em}
+.view-head h1{padding-bottom:calc(10px + .06em)}
 </style>
 </head>
 <body>
@@ -919,9 +1006,9 @@ function tile(L,t,k,label){
 function splitRow(label,a,b,fmt=v=>v,lowBetter=false,max){
   const m = max ?? Math.max(Math.abs(a),Math.abs(b),1e-9); const nt = lowBetter===null; const aw = !nt && (lowBetter? a<b : a>b), bw = !nt && (lowBetter? b<a : b>a);
   const w = v => Math.max(0,v)/m*100;
-  return `<div class="a"><span class="vv ${aw?'win':bw?'lose':''}">${fmt(a)}</span><div class="bar"><i style="width:${w(a)}%;background:${aw?'var(--tc)':'rgba(255,255,255,.22)'}"></i></div></div>
+  return `<div class="a"><span class="vv ${aw?'win':bw?'lose':''}">${fmt(a)}</span><div class="bar"><i class="${aw?'w':bw?'l':'n'}" style="width:${w(a)}%;background:${aw?'var(--tc)':'rgba(255,255,255,.22)'}"></i></div></div>
     <div class="lab">${label}</div>
-    <div class="b"><div class="bar"><i style="width:${w(b)}%;background:${bw?'var(--g2)':'rgba(255,255,255,.22)'}"></i></div><span class="vv ${bw?'win':aw?'lose':''}">${fmt(b)}</span></div>`;
+    <div class="b"><div class="bar"><i class="${bw?'w':aw?'l':'n'}" style="width:${w(b)}%;background:${bw?'var(--g2)':'rgba(255,255,255,.22)'}"></i></div><span class="vv ${bw?'win':aw?'lose':''}">${fmt(b)}</span></div>`;
 }
 
 function posChart(L,t){
@@ -1047,9 +1134,12 @@ function viewCompare(L){
     <div class="cmp-team b" style="background:linear-gradient(240deg,color-mix(in srgb,${B.col} 45%,#070a10),#0e141f)"><img src="${B.hi}" alt=""><div style="min-width:0"><select data-cmp="1" aria-label="Segundo clube">${opts(bi)}</select><small>${B.pos}º · ${B.all.P} pts · vence em ${wb} indicadores</small></div></div>
   </div>
   <div class="grid g2">
-    <div class="panel" style="--tc:${A.col};--g2:${B.col}"><h2>Indicadores</h2><p class="sub">Barra destacada indica o melhor dos dois.</p>
-      <div class="split">${rows.map(k=>{const m=METRICS[k],a=m.f(A.x),b=m.f(B.x); const mx = Math.max(Math.abs(a),Math.abs(b),1e-9);
-        return splitRow(m.l,a,b,v=>fmtM(k,v),m.neutral?null:!!m.low,mx);}).join('')}</div></div>
+    <div class="panel cmp-ind" style="--ca:${A.col};--cb:${B.col}"><h2>Indicadores</h2><p class="sub">A barra mais forte indica o melhor dos dois em cada número.</p>
+      <div class="crows">${rows.map(k=>{const m=METRICS[k],va=m.f(A.x),vb=m.f(B.x); const mx=Math.max(Math.abs(va),Math.abs(vb),1e-9);
+        const nt=!!m.neutral, aw=!nt&&(m.low?va<vb:va>vb), bw=!nt&&(m.low?vb<va:vb>va), w=v=>Math.max(0,v)/mx*100, cls=(x,y)=>nt?'n':x?'w':y?'l':'n';
+        return `<div class="crow"><div class="clab">${m.l}</div><div class="cbars"><span class="vv ${aw?'win':bw?'lose':''}">${fmtM(k,va)}</span>
+          <div class="bar a"><i class="${cls(aw,bw)}" style="width:${w(va)}%"></i></div><div class="bar b"><i class="${cls(bw,aw)}" style="width:${w(vb)}%"></i></div>
+          <span class="vv ${bw?'win':aw?'lose':''}">${fmtM(k,vb)}</span></div></div>`;}).join('')}</div></div>
     <div class="grid" style="gap:16px">
       <div class="panel"><h2>Radar</h2><p class="sub">Posição relativa na liga em seis frentes.</p>${radar(L,[[A,A.col],[B,B.col]])}
         <div class="legend" style="justify-content:center"><span><i style="background:${A.col}"></i>${esc(A.name)}</span><span><i style="background:${B.col}"></i>${esc(B.name)}</span></div></div>
@@ -1800,7 +1890,8 @@ function afterRender(pageChanged, snap){
 function applyTheme(){
   const g=LEAGUES[S.lg].g, r=document.documentElement.style;
   r.setProperty('--g1',g[0]); r.setProperty('--g2',g[1]); r.setProperty('--tc',g[0]);
-  document.querySelector('meta[name="theme-color"]').setAttribute('content', '#070a10');
+  document.documentElement.dataset.lg = S.lg;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', '#020305');
 }
 function render(){
   if(IS_GH && !DATA) return;
