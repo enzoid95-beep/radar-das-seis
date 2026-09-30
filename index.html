@@ -885,6 +885,19 @@ body{text-shadow:0 1px 0 rgba(0,0,0,.9),0 -1px 0 rgba(255,255,255,.035),0 2px 8p
 .seg button:not([aria-pressed="true"]){background:linear-gradient(180deg,#161b24,#0d1016);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 0 rgba(0,0,0,.6)}
 .seg button[aria-pressed="true"]{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.25),0 2px 0 rgba(0,0,0,.6)}
 .mfilter{background:linear-gradient(180deg,#171c25,#0c0f14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 rgba(0,0,0,.55)}
+/* ---------- tabela: leve sombreado na cor da zona de classificação ---------- */
+tr.row.zoned td{background:linear-gradient(90deg,color-mix(in srgb,var(--zc) 9%,transparent),color-mix(in srgb,var(--zc) 4.5%,transparent))}
+tr.row.zoned td.pos{background:linear-gradient(90deg,color-mix(in srgb,var(--zc) 16%,transparent),color-mix(in srgb,var(--zc) 10%,transparent))}
+tr.row.zoned td.pos{color:color-mix(in srgb,var(--zc) 70%,#fff)}
+tr.row.zoned td.sticky{background:linear-gradient(90deg,color-mix(in srgb,var(--zc) 10%,transparent),color-mix(in srgb,var(--zc) 7%,transparent)),#090b0f}
+tr.row.zoned:hover td{background:linear-gradient(90deg,color-mix(in srgb,var(--zc) 15%,transparent),color-mix(in srgb,var(--zc) 8%,transparent))}
+tr.row.zoned:hover td.sticky{background:linear-gradient(90deg,color-mix(in srgb,var(--zc) 15%,transparent),color-mix(in srgb,var(--zc) 10%,transparent)),#0e1117}
+tr.row.zoned + tr.row:not(.zoned) td,tr.row:not(.zoned) + tr.row.zoned td{border-top:1px solid rgba(255,255,255,.06)}
+tr.row.zoned td{background:color-mix(in srgb,var(--zc) 7%,transparent)}
+tr.row.zoned td.pos{background:color-mix(in srgb,var(--zc) 12%,transparent)}
+tr.row.zoned td.sticky{background:linear-gradient(color-mix(in srgb,var(--zc) 7%,transparent),color-mix(in srgb,var(--zc) 7%,transparent)),#0b0e13}
+tr.row.zoned:hover td{background:color-mix(in srgb,var(--zc) 12%,transparent)}
+tr.row.zoned:hover td.sticky{background:linear-gradient(color-mix(in srgb,var(--zc) 12%,transparent),color-mix(in srgb,var(--zc) 12%,transparent)),#0e1117}
 </style>
 </head>
 <body>
@@ -1228,7 +1241,7 @@ function viewTable(L){
   <div class="panel fade"><div class="tbl-wrap"><table>
     <thead><tr><th>#</th><th class="l sticky">Clube</th><th>PTS</th><th>J</th><th class="mx">V</th><th class="mx">E</th><th class="mx">D</th><th class="hide-sm mx">GP</th><th class="hide-sm mx">GC</th><th>SG</th><th class="mx">AP%</th><th class="hide-sm mform">Últimos 5</th></tr></thead>
     <tbody>${rows.map((t,k)=>{const r=t[key], z=S.mode==='geral'?zoneOf(cfg,k+1):null;
-      return `<tr class="row" data-team="${t.i}"><td class="pos">${z?`<i style="background:${z[3]}"></i>`:''}${k+1}</td>
+      return `<tr class="row${z?' zoned':''}" data-team="${t.i}"${z?` style="--zc:${z[3]}"`:''}><td class="pos">${z?`<i style="background:${z[3]}"></i>`:''}${k+1}</td>
       <td class="l sticky"><div class="club">${crest(t)}<span>${esc(t.name)}</span></div></td>
       <td class="pts">${r.P}</td><td>${r.J}</td><td class="mx">${r.V}</td><td class="mx">${r.E}</td><td class="mx">${r.D}</td><td class="hide-sm mx">${r.GP}</td><td class="hide-sm mx">${r.GC}</td>
       <td>${sgn(r.GP-r.GC)}</td><td class="mx">${r.J?Math.round(r.P/(3*r.J)*100):0}</td><td class="hide-sm mform">${form(games(t))}</td></tr>`}).join('')}</tbody></table></div>
