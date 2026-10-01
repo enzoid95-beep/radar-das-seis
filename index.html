@@ -1309,16 +1309,16 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 .ov-hl{display:flex;flex-direction:column;gap:clamp(3px,.7vh,7px)}
 .ov-hl > div{display:flex;align-items:center;gap:8px;min-width:0}
 .ov-hl .crest{flex:none;width:clamp(16px,2.3vh,20px);height:clamp(16px,2.3vh,20px)}
-.ov-hl .hl-l{flex:none;width:58px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 11.5px/1.2 Barlow,system-ui,sans-serif;color:var(--muted)}
-.ov-hl .hl-l .f{display:none}
-.ov-hl .hl-l .s{display:inline}
+.ov-hl .hl-l{flex:none;width:80px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 11.5px/1.2 Barlow,system-ui,sans-serif;color:var(--muted)}
+.ov-hl .hl-l .f{display:inline}
+.ov-hl .hl-l .s{display:none}
 .ov-hl .hl-n{flex:0 1 auto;width:var(--nw,auto);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:clamp(12.5px,1.7vh,14px)}
 .ov-hl b{flex:none;display:inline-flex;align-items:baseline;gap:4px;padding:2px 9px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);font:700 clamp(14px,2vh,16px)/1.2 "Barlow Condensed",sans-serif;color:#fff;white-space:nowrap}
 .ov-hl b i{font:500 10.5px/1 Barlow,system-ui,sans-serif;font-style:normal;color:var(--muted)}
 .ov-hl b .us{display:none}
 /* cards estreitos (janelas de 961 a 1100 px e tablets em pé): sem escudo na linha e unidade curta */
 @media (min-width:961px) and (max-width:1279px),(min-width:761px) and (max-width:860px){
-  .ov-hl .crest{display:none}
+  .ov-hl .hl-l{width:54px}.ov-hl .hl-l .f{display:none}.ov-hl .hl-l .s{display:inline}
   .ov-hl b .uf{display:none}.ov-hl b .us{display:inline}
 }
 /* se o card não couber na altura da tela: nada é removido; o conteúdo fica mais compacto,
@@ -3410,9 +3410,9 @@ function ovCard(lg){
     <div class="ov-top">${t.slice(1,4).map((x,k)=>`<div><span class="p">${k+2}</span>${crest(x)}<span class="n">${esc(x.name)}</span><b class="num">${x.all.P}</b></div>`).join('')}</div>
     <div class="ov-stats"><div><b class="num">${nf2.format(L.avg.gpg)}</b><span>gols/jogo</span></div><div><b class="num">${pct(L.avg.hw)}</b><span>vitórias casa</span></div><div><b class="num">${goals}</b><span>gols</span></div></div>
     <div class="ov-hl">
-      <div>${crest(atk)}<small class="hl-l"><span class="f">Melhor ataque</span><span class="s">Ataque</span></small><span class="hl-n">${esc(atk.name)}</span><b class="num">${atk.all.GP}<i>gols</i></b></div>
-      <div>${crest(dfn)}<small class="hl-l"><span class="f">Melhor defesa</span><span class="s">Defesa</span></small><span class="hl-n">${esc(dfn.name)}</span><b class="num">${dfn.all.GC}<i class="uf">sofridos</i><i class="us">sofr.</i></b></div>
-      ${sc?`<div>${scT?crest(scT):'<span class="crest"></span>'}<small class="hl-l"><span class="f">Artilheiro</span><span class="s">Artilheiro</span></small><span class="hl-n">${esc(sc.n)}</span><b class="num">${sc.g}<i>gols</i></b></div>`:''}
+      <div><small class="hl-l"><span class="f">Melhor ataque</span><span class="s">Ataque</span></small>${crest(atk)}<span class="hl-n">${esc(atk.name)}</span><b class="num">${atk.all.GP}<i>gols</i></b></div>
+      <div><small class="hl-l"><span class="f">Melhor defesa</span><span class="s">Defesa</span></small>${crest(dfn)}<span class="hl-n">${esc(dfn.name)}</span><b class="num">${dfn.all.GC}<i class="uf">sofridos</i><i class="us">sofr.</i></b></div>
+      ${sc?`<div><small class="hl-l"><span class="f">Artilheiro</span><span class="s">Artilheiro</span></small>${scT?crest(scT):'<span class="crest"></span>'}<span class="hl-n">${esc(sc.n)}</span><b class="num">${sc.g}<i>gols</i></b></div>`:''}
     </div>
   </button>`;
 }
