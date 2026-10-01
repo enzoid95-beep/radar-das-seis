@@ -1413,6 +1413,11 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 @media (max-width:1000px){.st-ph{width:120px;height:80px}.st-item{height:104px}}
 .st-body{overflow:hidden}
 .st-body > b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* link do site oficial da liga, abaixo dos números do topo */
+.hero-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 12px;border-radius:20px;font:600 13.5px/1 Barlow,system-ui,sans-serif;color:#fff;text-decoration:none;
+  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);text-shadow:0 1px 0 rgba(0,0,0,.6);transition:background .2s,border-color .2s}
+.hero-link svg{width:14px;height:14px;opacity:.85}
+.hero-link:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35)}
 </style>
 </head>
 <body>
@@ -1735,6 +1740,14 @@ function homeExtra(L){
 }
 
 /* ---------- views ---------- */
+const LEAGUE_SITE = {
+  br:'https://www.cbf.com.br/futebol-brasileiro/noticias/campeonato-brasileiro/serie-a',
+  en:'https://www.premierleague.com/',
+  es:'https://www.laliga.com/en-GB',
+  it:'https://www.legaseriea.it/',
+  de:'https://www.bundesliga.com/pt/bundesliga',
+  fr:'https://ligue1.com/en',
+};
 function viewHome(L){
   const cfg=L.cfg, lead=L.table[0];
   const goals = L.played.reduce((s,m)=>s+m[5]+m[6],0);
@@ -1754,7 +1767,8 @@ function viewHome(L){
         <div><b class="num">${goals}</b><span>gols</span></div>
         <div><b class="num">${nf2.format(L.avg.gpg)}</b><span>gols por jogo</span></div>
         <div><b class="num">${pct(L.avg.hw)}</b><span>vitórias do mandante</span></div>
-      </div></div>
+      </div>
+      ${LEAGUE_SITE[L.lg]?`<a class="hero-link" href="${LEAGUE_SITE[L.lg]}" target="_blank" rel="noopener noreferrer">Site oficial da liga<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>`:''}</div>
     <div class="hero-right">${trophyHTML(L.lg)}<div class="hero-side" data-team="${lead.i}"><small>Líder</small><img src="${lead.hi}" alt=""><div><b>${esc(lead.name)}</b><br><small>${lead.all.P} pts · ${lead.all.J} jogos</small></div></div></div>
   </section>
   ${homeExtra(L)}
