@@ -21,7 +21,7 @@ TOKEN = os.environ.get("FOOTBALL_DATA_TOKEN", "").strip()
 COMPETITIONS = {"br": "BSA", "en": "PL", "es": "PD", "it": "SA", "de": "BL1", "fr": "FL1"}
 BRT = datetime.timezone(datetime.timedelta(hours=-3))  # horário de Brasília
 PAUSE = 6.5  # plano gratuito: no máximo 10 requisições por minuto
-SKIP_SQUADS = {"BSA"}  # elencos e técnicos do Brasileirão na fonte gratuita estão desatualizados
+SKIP_SQUADS = set()  # o Brasileirão volta a ser baixado e fica guardado no data.json; o site não exibe (veja NO_SQUADS no index.html)
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 
 
