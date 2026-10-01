@@ -1359,6 +1359,23 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
   .ov-lead em small{display:none}
 }
 
+
+/* ---------- estádios ---------- */
+.st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.st-item{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:12px;background:var(--noise),linear-gradient(180deg,#11151c,#090b0f);border:1px solid color-mix(in srgb,var(--g1) 30%,rgba(255,255,255,.06))}
+.st-rank{flex:none;width:20px;font:700 14px/1.3 "Barlow Condensed",sans-serif;color:var(--muted);text-align:right}
+.st-body{min-width:0;display:flex;flex-direction:column;gap:3px}
+.st-body b{font:700 15px/1.2 "Barlow Condensed",sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-teams{display:flex;flex-wrap:wrap;gap:4px 10px}
+.st-team{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:#e6eaf0;cursor:pointer}
+.st-team .crest{width:16px;height:16px}
+.st-body small{font-size:12px;color:var(--muted)}
+.st-body small .num{color:#fff;font-weight:700}
+@media (max-width:620px){.st-grid{grid-template-columns:1fr}}
+/* jogos futuros: link de onde assistir */
+.match .tv-link{grid-column:1/-1;justify-self:center;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;color:#cfd6e0;text-decoration:none;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.match .tv-link:hover{color:#fff;border-color:color-mix(in srgb,var(--g1) 60%,transparent)}
 </style>
 </head>
 <body>
@@ -1424,6 +1441,7 @@ const LG_SHORT = {br:'Brasileirão', en:'Premier', es:'La Liga', it:'Serie A', d
 const S = {lg:'br', view:'home', team:{}, cmp:{}, mode:'geral', round:{}, metric:'pts', player:{}, squad:{}, pmetric:'g', pq:'', ref:{}, rsort:'j', gteam:{}, gplayer:{}, gref:{}, gq:''};
 try { Object.assign(S, JSON.parse(localStorage.getItem('cdl-state')||'{}')); } catch(e){}
 if(!LEAGUES[S.lg]) S.lg='br';
+if(S.view==='pcompare') S.view='home';
 S.view = 'overview';
 if(typeof PUBLIC!=='undefined' && PUBLIC===true && ['player','squad','prank','refs'].includes(S.view)) S.view='home';
 if(!(typeof GH!=='undefined' && GH===true) && ['scorers','gsquad','gplayer','grefs'].includes(S.view)) S.view='home';
@@ -1609,10 +1627,10 @@ const NAV_ALL = [
   ['Liga',[['home','Visão geral','home'],['table','Classificação','table'],['matches','Partidas','cal'],['stats','Dados gerais','pie'],['refs','Árbitros','whistle']]],
   ['Simulação',[['sim','Simulador','dice']]],
   ['Times',[['team','Perfil do time','shield'],['rank','Ranking de times','rank'],['compare','Comparar times','cmp']]],
-  ['Jogadores',[['player','Perfil do jogador','user'],['squad','Elencos','shirt'],['prank','Ranking de jogadores','rank'],['pcompare','Comparar jogadores','cmp']]],
+  ['Jogadores',[['player','Perfil do jogador','user'],['squad','Elencos','shirt'],['prank','Ranking de jogadores','rank']]],
 ];
 const IS_GH = typeof GH!=='undefined' && GH === true;
-const NAV = IS_PUBLIC ? NAV_ALL.map(([g,items])=> g==='Jogadores' ? (IS_GH ? [g,[['gplayer','Perfil do jogador','user'],['gsquad','Elencos','shirt'],['scorers','Artilharia','rank'],['pcompare','Comparar jogadores','cmp']]] : null) : [g, items.filter(([v])=>v!=='refs').concat(IS_GH && g==='Liga' ? [['grefs','Árbitros','whistle']] : [])]).filter(Boolean) : NAV_ALL;
+const NAV = IS_PUBLIC ? NAV_ALL.map(([g,items])=> g==='Jogadores' ? (IS_GH ? [g,[['gplayer','Perfil do jogador','user'],['gsquad','Elencos','shirt'],['scorers','Artilharia','rank']]] : null) : [g, items.filter(([v])=>v!=='refs').concat(IS_GH && g==='Liga' ? [['grefs','Árbitros','whistle']] : [])]).filter(Boolean) : NAV_ALL;
 const SOON = [];
 /* ajusta a altura dos itens para toda a lateral caber na tela, sem rolagem */
 function fitSide(){
@@ -1685,13 +1703,7 @@ function viewHome(L){
   const goals = L.played.reduce((s,m)=>s+m[5]+m[6],0);
   const best = k => sorted(L,k)[0];
   const cards = [['Melhor ataque','gp','gols'],['Melhor defesa','gc','sofridos'],['Melhor mandante','homeAp',''],['Em alta','f5','pts em 5 jogos']];
-  if(!S.hround || typeof S.hround!=='object') S.hround = {};
-  const nextR = simDefaultRound(L), anyOpen = L.matches.some(m=>!isPlayed(m));
-  let hr = S.hround[L.lg] ?? L.latest; hr = Math.min(Math.max(1, +hr || L.latest), L.totalRounds);
-  const round = L.matches.filter(m=>m[0]===hr).sort((x,y)=>(x[1]+(x[2]||'')).localeCompare(y[1]+(y[2]||'')));
-  const doneN = round.filter(isPlayed).length, dates = round.map(m=>m[1]).filter(Boolean).sort();
-  const hrSub = !round.length ? 'Sem jogos nesta rodada' : doneN===round.length ? (hr===L.latest ? 'Resultados mais recentes' : 'Resultados da rodada')
-    : doneN===0 ? `Próximos jogos${dates.length?` · ${fdate(dates[0])}${dates[dates.length-1]!==dates[0]?` a ${fdate(dates[dates.length-1])}`:''}`:''}` : `${doneN} de ${round.length} jogos disputados`;
+
   const top = L.table.slice(0,6), bottom = L.table.slice(-4);
   const mini = rows => rows.map(t=>`<div class="mini-row" data-team="${t.i}"><span class="pos">${t.pos}</span>${crest(t)}<span class="nm">${esc(t.name)}</span>${form(t.games)}<span class="vl num">${t.all.P}<small>pts</small></span></div>`).join('');
   const bigWins = [...L.played].sort((a,b)=>Math.abs(b[5]-b[6])-Math.abs(a[5]-a[6])||(b[5]+b[6])-(a[5]+a[6])).slice(0,5);
@@ -1710,8 +1722,7 @@ function viewHome(L){
   </section>
   ${homeExtra(L)}
   <div class="grid g2">
-    <div class="panel"><h2>Topo da tabela</h2><p class="sub">Toque em um clube para abrir o perfil.</p><div class="mini">${mini(top)}</div>
-      <div class="mini" style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--line2)">${mini(bottom)}</div></div>
+    ${stadiumsPanel(L)}
     <div class="grid" style="gap:16px">
       <div class="panel"><h2>Como terminam os jogos</h2><p class="sub">Distribuição dos resultados na temporada.</p>
         <div class="dist" style="display:flex;height:34px;border-radius:10px;overflow:hidden;font:700 14px/34px 'Barlow Condensed';text-align:center">
@@ -1726,13 +1737,7 @@ function viewHome(L){
       </div></div>
     </div>
   </div>
-  <div class="panel" style="margin-top:16px"><div class="hr-head"><div><h2>${hr}ª rodada</h2><p class="sub" style="margin:0">${hrSub}</p></div>
-      <div class="hr-ctl">
-        <div class="hr-tabs" role="group" aria-label="Escolher rodada"><button data-hround="${L.latest}" aria-pressed="${hr===L.latest}">Última rodada</button>${anyOpen?`<button data-hround="${nextR}" aria-pressed="${hr===nextR && hr!==L.latest}">Próxima rodada</button>`:''}</div>
-        <div class="round-nav"><button data-hround="${hr-1}" ${hr<=1?'disabled':''} aria-label="Rodada anterior">‹</button><b>${hr}ª</b><button data-hround="${hr+1}" ${hr>=L.totalRounds?'disabled':''} aria-label="Próxima rodada">›</button></div>
-        <button class="mchip" data-hgo="${hr}">Abrir em Partidas</button>
-      </div></div>
-    <div class="matches">${round.map(m=>matchCard(L,m)).join('')}</div></div>`;
+  ${homeRoundCard(L)}`;
 }
 
 /* troféu da liga: usa a imagem enviada, se houver; senão, um troféu ilustrado nas cores da liga */
@@ -1764,12 +1769,31 @@ function trophyHTML(lg){
     <rect x="34" y="143" width="52" height="5" rx="2.5" fill="url(#${id}c)"/>
   </svg></div>`;
 }
-function matchCard(L,m){
+/* card da rodada no resumo da liga (trocar de rodada só atualiza este card) */
+function homeRoundCard(L){
+  if(!S.hround || typeof S.hround!=='object') S.hround = {};
+  const nextR = simDefaultRound(L), anyOpen = L.matches.some(m=>!isPlayed(m));
+  let hr = S.hround[L.lg] ?? L.latest; hr = Math.min(Math.max(1, +hr || L.latest), L.totalRounds);
+  const round = L.matches.filter(m=>m[0]===hr).sort((x,y)=>(x[1]+(x[2]||'')).localeCompare(y[1]+(y[2]||'')));
+  const doneN = round.filter(isPlayed).length, dates = round.map(m=>m[1]).filter(Boolean).sort();
+  const hrSub = !round.length ? 'Sem jogos nesta rodada' : doneN===round.length ? (hr===L.latest ? 'Resultados mais recentes' : 'Resultados da rodada')
+    : doneN===0 ? `Próximos jogos${dates.length?` · ${fdate(dates[0])}${dates[dates.length-1]!==dates[0]?` a ${fdate(dates[dates.length-1])}`:''}`:''}` : `${doneN} de ${round.length} jogos disputados`;
+  return `<div class="panel" id="hr-card" style="margin-top:16px"><div class="hr-head"><div><h2>${hr}ª rodada</h2><p class="sub" style="margin:0">${hrSub}</p></div>
+      <div class="hr-ctl">
+        <div class="hr-tabs" role="group" aria-label="Escolher rodada"><button data-hround="${L.latest}" aria-pressed="${hr===L.latest}">Última rodada</button>${anyOpen?`<button data-hround="${nextR}" aria-pressed="${hr===nextR && hr!==L.latest}">Próxima rodada</button>`:''}</div>
+        <div class="round-nav"><button data-hround="${hr-1}" ${hr<=1?'disabled':''} aria-label="Rodada anterior">‹</button><b>${hr}ª</b><button data-hround="${hr+1}" ${hr>=L.totalRounds?'disabled':''} aria-label="Próxima rodada">›</button></div>
+        <button class="mchip" data-hgo="${hr}">Abrir em Partidas</button>
+      </div></div>
+    <div class="matches">${round.map(m=>matchCard(L,m,{tv:true})).join('')}</div></div>`;
+}
+
+function matchCard(L,m,opt){
   const h=L.T[m[3]], a=L.T[m[4]], p=isPlayed(m);
   const sc = p ? `<div class="score num">${m[5]} – ${m[6]}<small>${m[7]!=null?`int. ${m[7]}–${m[8]} · `:''}${fdate(m[1])}</small></div>`
                : `<div class="score pending">${m[5]==='adiado'?'Adiado':(m[2]||'—')}<small>${fdate(m[1],true)}</small></div>`;
   const fk = freshKey(L.lg, m, h, a), fresh = p && ((FRESH.has(fk) && Date.now()-FRESH.get(fk) < 45*60e3) || recentlyEnded(m));
-  return `<div class="match${fresh?' fresh':''}">${fresh?'<span class="fresh-badge">encerrado agora</span>':''}<div class="t" data-team="${h.i}">${crest(h)}<span>${esc(h.name)}</span></div>${sc}<div class="t away" data-team="${a.i}">${crest(a)}<span>${esc(a.name)}</span></div></div>`;
+  const tv = opt && opt.tv && !p && m[5]!=='adiado' ? `<a class="tv-link" href="https://futnatv.net/" target="_blank" rel="noopener" title="Canais e horários no FUTNATV">📺 Onde assistir · FUTNATV ↗</a>` : '';
+  return `<div class="match${fresh?' fresh':''}">${fresh?'<span class="fresh-badge">encerrado agora</span>':''}<div class="t" data-team="${h.i}">${crest(h)}<span>${esc(h.name)}</span></div>${sc}<div class="t away" data-team="${a.i}">${crest(a)}<span>${esc(a.name)}</span></div>${tv}</div>`;
 }
 
 function viewTable(L){
@@ -3556,6 +3580,44 @@ function ghTeamMarket(L, t){
   return out;
 }
 
+/* ================= ESTÁDIOS (fontes: Wikipedia das temporadas 2026 e 2026/27; Premier League: premierleague.com, 26/09/2026) ================= */
+const STADIA = {
+  br:[['Maracanã',78838,['FLA','FLU']],['MorumBIS',66671,['SAO']],['Mineirão',66658,['CRU']],['Arena do Grêmio',60540,['GRE']],['Mangueirão',53645,['REM']],
+      ['Arena Fonte Nova',50052,['BAH']],['Beira-Rio',49055,['INT']],['Neo Química Arena',47252,['COR']],['Arena MRV',44892,['CAM']],['Nilton Santos',44661,['BOT']],
+      ['Nubank Parque',43713,['PAL']],['Arena da Baixada',42372,['CAP']],['Couto Pereira',40502,['CFC']],['Barradão',30793,['VIT']],['São Januário',24584,['VAS']],
+      ['Arena Condá',20089,['CHA']],['Vila Belmiro',16068,['SAN']],['Campos Maia',14534,['MIR']],['Cícero de Souza Marques',12000,['RBB']]],
+  en:[['Old Trafford',74158,['MUN']],['Tottenham Hotspur Stadium',62850,['TOT']],['Anfield',61276,['LIV']],['Etihad Stadium',61038,['MCI']],['Emirates Stadium',60704,['ARS']],
+      ['Hill Dickinson Stadium',52769,['EVE']],['St James\u2019 Park',52729,['NEW']],['Stadium of Light',48095,['SUN']],['Stamford Bridge',40044,['CHE']],['Elland Road',37633,['LEE']],
+      ['Villa Park',36887,['AVL']],['Coventry Building Society Arena',32609,['COV']],['American Express Stadium',32176,['BHA']],['City Ground',31212,['NFO']],['Portman Road',30294,['IPS']],
+      ['Craven Cottage',28107,['FUL']],['Selhurst Park',25194,['CRY']],['MKM Stadium',24983,['HUL']],['Gtech Community Stadium',17250,['BRE']],['Vitality Stadium',12357,['BOU']]],
+  es:[['Santiago Bernabéu',83186,['RMA']],['Riyadh Air Metropolitano',70692,['ATM']],['La Cartuja',70000,['BET']],['Spotify Camp Nou',62652,['BAR']],['San Mamés',53289,['ATH']],
+      ['Mestalla',49430,['VAL']],['Ramón Sánchez-Pizjuán',43883,['SEV']],['Reale Arena',39313,['RSO']],['RCDE Stadium',37776,['ESP']],['Abanca-Riazor',32660,['DEP']],
+      ['Martínez Valero',31388,['ELC']],['La Rosaleda',30044,['MAL']],['Ciutat de València',26354,['LEV']],['Abanca Balaídos',24870,['CEL']],['El Sadar',23576,['OSA']],
+      ['Estadio de la Cerámica',23008,['VIL']],['El Sardinero',22308,['RAC']],['Mendizorrotza',19840,['ALA']],['Coliseum',16500,['GET']],['Butarque',14500,['RAY']]],
+  it:[['San Siro',75710,['INT','MIL']],['Olimpico',70634,['ROM','LAZ']],['Diego Armando Maradona',54732,['NAP']],['Artemio Franchi',43118,['FIO']],['Allianz Stadium',41507,['JUV']],
+      ['Renato Dall\u2019Ara',38279,['BOL']],['Luigi Ferraris',33205,['GEN']],['Via del Mare',30354,['LEC']],['Olimpico Grande Torino',28177,['TOR']],['Bluenergy Stadium',25132,['UDI']],
+      ['New Balance Arena',23439,['ATA']],['Ennio Tardini',22352,['PAR']],['Mapei Stadium',21515,['SAS']],['Brianteo',17102,['MON']],['Unipol Domus',16416,['CAG']],
+      ['Benito Stirpe',16227,['FRO']],['Giuseppe Sinigaglia',13602,['COM']],['Pier Luigi Penzo',12048,['VEN']]],
+  de:[['Signal Iduna Park',81365,['BVB']],['Allianz Arena',75000,['FCB']],['Veltins-Arena',62271,['S04']],['MHPArena',60058,['VFB']],['Deutsche Bank Park',59500,['SGE']],
+      ['Volksparkstadion',57000,['HSV']],['Borussia-Park',54057,['BMG']],['RheinEnergieStadion',49698,['KOE']],['Red Bull Arena',47800,['RBL']],['Weserstadion',42100,['SVW']],
+      ['Europa-Park Stadion',34700,['SCF']],['MEWA Arena',33305,['M05']],['WWK Arena',30660,['FCA']],['BayArena',30210,['B04']],['PreZero Arena',30150,['TSG']],
+      ['An der Alten Försterei',22012,['FCU']],['Home Deluxe Arena',15000,['SCP']],['Waldstadion an der Kaiserlinde',10000,['SVE']]],
+  fr:[['Vélodrome',67394,['OM']],['Groupama Stadium',59186,['OL']],['Pierre-Mauroy',50186,['LIL']],['Parc des Princes',47926,['PSG']],['Bollaert-Delelis',37705,['RCL']],
+      ['Allianz Riviera',35624,['NIC']],['Stadium de Toulouse',33150,['TFC']],['Roazhon Park',29778,['SRF']],['La Meinau',29230,['RCS']],['Stade Océane',25178,['HAC']],
+      ['Marie-Marvingt',25000,['LMF']],['Abbé-Deschamps',21379,['AJA']],['Stade de l\u2019Aube',20400,['ETR']],['Jean-Bouin',20000,['PFC']],['Moustoir',18890,['FCL']],
+      ['Raymond-Kopa',18752,['SCO']],['Louis II',18523,['ASM']],['Francis-Le Blé',15931,['SB29']]],
+};
+function stadiumsPanel(L){
+  const list = STADIA[L.lg] || [], byAbbr = Object.fromEntries(L.T.map(t=>[t.abbr,t]));
+  if(!list.length) return '';
+  return `<div class="panel"><h2>Estádios</h2><p class="sub">${list.length} estádios da temporada ${L.cfg.season}, do maior para o menor.</p>
+    <div class="st-grid">${list.map(([name,cap,abbrs],k)=>{ const ts = abbrs.map(a=>byAbbr[a]).filter(Boolean);
+      return `<div class="st-item"><span class="st-rank num">${k+1}</span><div class="st-body"><b>${esc(name)}</b>
+        <span class="st-teams">${ts.map(t=>`<span class="st-team" data-team="${t.i}">${crest(t)}${esc(t.name)}</span>`).join('')}</span>
+        <small><span class="num">${cap.toLocaleString('pt-BR')}</span> lugares</small></div></div>`; }).join('')}</div>
+    <p class="src">Fontes: Wikipedia (temporada ${L.cfg.season})${L.lg==='en'?' e premierleague.com':''}. Capacidade oficial informada pelos clubes; pode mudar com reformas.</p></div>`;
+}
+
 /* ---------- render / events ---------- */
 function applyTheme(){
   const g=LEAGUES[S.lg].g, r=document.documentElement.style;
@@ -3599,13 +3661,13 @@ document.addEventListener('click', e=>{
   if(b.dataset.ref!==undefined){ S.ref[S.lg]=b.dataset.ref||null; return go({view:'refs'}); }
   if(b.dataset.rsort) return go({rsort:b.dataset.rsort},false);
   if(b.dataset.smet) return go({smet:b.dataset.smet},false);
-  if(b.dataset.hround!==undefined){ if(!S.hround) S.hround = {}; S.hround[S.lg] = +b.dataset.hround; return go({}, false); }
+  if(b.dataset.hround!==undefined){ if(!S.hround) S.hround = {}; S.hround[S.lg] = +b.dataset.hround; const c = document.getElementById('hr-card'); if(c && S.view==='home'){ c.outerHTML = homeRoundCard(league(S.lg)); return; } return go({}, false); }
   if(b.dataset.hgo!==undefined){ S.round[S.lg] = +b.dataset.hgo; return go({view:'matches'}); }
   if(b.dataset.gteam!==undefined){ S.gteam[S.lg]=+b.dataset.gteam; return go({view:'gsquad'},false); }
   if(b.dataset.gplayer!==undefined){ const v=b.dataset.gplayer; S.gplayer[S.lg]= /^\d+$/.test(v) ? +v : v; S.gq=''; return go({view:'gplayer'}); }
   if(b.dataset.gref!==undefined){ S.gref[S.lg]=b.dataset.gref||null; return go({view:'grefs'}); }
   if(b.dataset.reloadPlayers!==undefined){ delete PL[S.lg]; getMcp().then(m=>m&&m.invalidate&&m.invalidate('Opta').catch(()=>{})); return go({},false); }
-  if(b.dataset.league){ spinLeague = b.dataset.league!==S.lg; return go(b.dataset.ovgo!==undefined ? {lg:b.dataset.league, view:'home'} : {lg:b.dataset.league}); }
+  if(b.dataset.league){ spinLeague = b.dataset.league!==S.lg; return go((b.dataset.ovgo!==undefined || S.view==='overview') ? {lg:b.dataset.league, view:'home'} : {lg:b.dataset.league}); }
   if(b.dataset.nav) return go({view:b.dataset.nav});
   if(b.dataset.mode) return go({mode:b.dataset.mode},false);
   if(b.dataset.round){ S.round[S.lg]=+b.dataset.round; return go({},false); }
