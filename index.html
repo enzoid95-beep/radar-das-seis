@@ -2800,11 +2800,11 @@ const GPOS = [['Goleiros',['goalkeeper']],['Defensores',['defence','defender','c
   ['Meio-campistas',['midfield','midfielder','defensive midfield','central midfield','attacking midfield','left midfield','right midfield']],
   ['Atacantes',['offence','attacker','forward','centre-forward','left winger','right winger','second striker','winger','striker']]];
 const gGroup = pos => { const p=(pos||'').toLowerCase(); const i=GPOS.findIndex(([,ks])=>ks.some(k=>p===k||p.includes(k))); return i<0?4:i; };
-const NO_SQUADS = {br:true};  // elencos do Brasileirão na fonte gratuita estão desatualizados
-function gData(L){ const D=DATA[L.lg]||{}; return {squads: NO_SQUADS[L.lg] ? [] : (D.squads||[]), scorers:D.scorers||[], refs:D.refs||[]}; }
-function gIndex(L){
-  if(L._g) return L._g;
-  const {squads,scorers}=gData(L), players={}, byTeam={};
+const NO_SQUADS = {br:true};  // elencos do Brasileirão ficam guardados no data.json, mas não aparecem no site (dados desatualizados na fonte). Para exibir de novo, remova 'br' daqui.
+function gData(L, all){ const D=DATA[L.lg]||{}; return {squads: (NO_SQUADS[L.lg] && !all) ? [] : (D.squads||[]), scorers:D.scorers||[], refs:D.refs||[]}; }
+function gIndex(L, all){
+  const ck = all ? '_gAll' : '_g'; if(L[ck]) return L[ck];
+  const {squads,scorers}=gData(L, all), players={}, byTeam={};
   squads.forEach(sq=>{ byTeam[sq.t]=sq; (sq.players||[]).forEach(p=>{ players[p.id]={...p, t:sq.t}; }); });
   scorers.forEach((s,i)=>{ const p = s.id!=null && players[s.id]; const st={mp:s.mp,g:s.g,a:s.a||0,p:s.p||0};
     if(p) p.st=st; else if(s.id!=null) players[s.id]={id:s.id,n:s.n,pos:s.pos,nat:s.nat,t:s.t,st,stub:true}; });
@@ -2822,7 +2822,7 @@ function gIndex(L){
       else if(!best){ const id = 'a'+ap.id; players[id] = {id, n: [ap.fn, ap.ln].filter(Boolean).join(' ') || ap.n, pos: ap.pos, nat: ap.nat, t: ap.t, num: ap.num, af: ap, afOnly: true}; }
     });
   }
-  return L._g={players, byTeam, list:Object.values(players)};
+  return L[ck]={players, byTeam, list:Object.values(players)};
 }
 const gRank = (L,p) => { const sc=gData(L).scorers; if(!p.st) return null; return 1+sc.filter(s=>s.g>p.st.g).length; };
 const gEmpty = (t,s) => `<div class="panel empty-state"><h2>${t}</h2><p>${s}</p></div>`;
@@ -2866,7 +2866,7 @@ function gAfTiles(L, p){
     <p class="src">Fonte: API-Football${at?`, atualizado em ${new Date(at).toLocaleDateString('pt-BR')}`:''}. Renovado em rodízio a cada 5 ou 6 dias.</p></div>`;
 }
 function viewGPlayer(L){
-  const G=gIndex(L);
+  const G=gIndex(L, true);
   const selP = G.players[S.gplayer[L.lg]];
   if(!S.gpteam || typeof S.gpteam!=='object') S.gpteam = {};
   let pti = selP ? selP.t : (S.gpteam[L.lg] ?? L.table[0].i); if(!L.T[pti]) pti = L.table[0].i;
@@ -2894,6 +2894,7 @@ function viewGPlayer(L){
       ${st?`<div class="line"><div><b class="num">${st.mp??'—'}</b><span>jogos</span></div><div><b class="num">${st.g}</b><span>gols</span></div><div><b class="num">${st.a}</b><span>assistências</span></div><div><b class="num">${st.p}</b><span>de pênalti</span></div></div>`:''}</div>
     <div class="posbig"><b class="num">${rk?ord(rk):'—'}</b><span>na artilharia</span></div>
   </section>
+  ${NO_SQUADS[L.lg] && !p.st && !p.af ? `<p class="src" style="margin:-6px 0 14px">Jogador do elenco cadastrado na fonte. Os elencos do Brasileirão nela podem estar desatualizados, então ele pode já ter deixado o clube.</p>` : ''}
   ${p.af ? gAfTiles(L, p) : ''}
   ${p.af ? '' : st?`<div class="panel" style="margin-bottom:16px"><h2>Números na liga</h2><p class="sub">Temporada ${L.cfg.season}.</p><div class="tiles">
     <div class="tile"><div class="v num">${st.mp??'—'}</div><div class="k">Jogos disputados</div></div>
@@ -2915,7 +2916,7 @@ function viewGPlayer(L){
 }
 function renderGSearch(){
   const box=document.getElementById('gq-res'); if(!box) return; const q=(S.gq||'').trim(); if(q.length<2){ box.innerHTML=''; return; }
-  const L=league(S.lg), G=gIndex(L), norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const L=league(S.lg), G=gIndex(L, true), norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const hits=G.list.filter(p=>norm(p.n).includes(norm(q))).sort((a,b)=>((b.st?.g||0)-(a.st?.g||0))).slice(0,8);
   box.innerHTML = hits.length ? hits.map(p=>{const t=L.T[p.t];return `<button class="pq-item" data-gplayer="${p.id}">${t?crest(t):''}<span><b>${esc(p.n)}</b><small>${t?esc(t.name):''}</small></span></button>`}).join('') : `<div class="pq-none">Nenhum jogador com “${esc(q)}”.</div>`;
 }
@@ -3325,7 +3326,7 @@ document.addEventListener('change', e=>{
 
 document.addEventListener('change', e=>{
   if(S.view!=='gplayer') return; const t = e.target;
-  if(t.matches && t.matches('[data-gpteam]')){ const L = league(S.lg), G = gIndex(L), ti = +t.value; S.gpteam[L.lg] = ti;
+  if(t.matches && t.matches('[data-gpteam]')){ const L = league(S.lg), G = gIndex(L, true), ti = +t.value; S.gpteam[L.lg] = ti;
     const first = G.list.filter(p=>p.t===ti).sort((x,y)=>((y.af?y.af.min:0)||0)-((x.af?x.af.min:0)||0)||((y.st?y.st.g:0)||0)-((x.st?x.st.g:0)||0))[0];
     S.gplayer[L.lg] = first ? first.id : null; return go({}, false); }
   if(t.matches && t.matches('[data-gpsel]')){ if(!t.value) return; const v=t.value; S.gplayer[S.lg] = /^\d+$/.test(v) ? +v : v; return go({}, false); }
