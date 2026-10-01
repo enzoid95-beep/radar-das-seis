@@ -7,6 +7,7 @@ algum dado mudou, para não gerar commits vazios.
 
 Uso: FOOTBALL_DATA_TOKEN=sua_chave python3 update_data.py
 """
+import copy
 import datetime
 import hashlib
 import json
@@ -289,15 +290,29 @@ def update_af_players(out, extra, af):
 
 
 def update_api_football(out, previous):
-    extra = previous.get("extra", {}) if previous else {}
-    af = extra.get("_af", {})
+    # cópia independente: assim a comparação com o arquivo anterior enxerga as mudanças e elas são gravadas
+    extra = copy.deepcopy(previous.get("extra", {})) if previous else {}
+    af = extra.setdefault("_af", {})
     now = time.time()
     if not AF_KEY:
         return extra
-    if now - af.get("last", 0) < AF_EVERY:
-        return extra
-    # plano sem acesso à temporada atual: só tenta de novo uma vez por semana (caso o plano mude)
-    if af.get("blocked") and now - af.get("blockedAt", 0) < 7 * 24 * 3600:
+    if af.get("blocked"):
+        # plano sem acesso à temporada atual: uma sondagem barata (1 consulta) a cada 12 horas.
+        # Quando o plano passar a cobrir a temporada, o robô libera tudo sozinho.
+        if now - af.get("probeAt", 0) < AF_EVERY:
+            return extra
+        af["probeAt"] = now
+        extra["_af"] = af
+        try:
+            lg = out["leagues"].get("en") or next(iter(out["leagues"].values()))
+            af_get(f"/teams?league=39&season={season_start_year(lg.get('season'))}")
+            af["blocked"] = False
+            af["errors"] = {}
+            print("  API-Football: plano liberado para a temporada atual. Voltando à rotina normal.")
+        except Exception as err:
+            print(f"  API-Football: plano ainda sem acesso à temporada atual ({str(err)[:90]})")
+            return extra
+    elif now - af.get("last", 0) < AF_EVERY:
         return extra
     af["last"] = now
     af["errors"] = {}
@@ -378,7 +393,7 @@ def update_api_football(out, previous):
     if plan_block and len(plan_block) >= len([k for k in AF_LEAGUES if out["leagues"].get(k)]):
         af["blocked"] = True
         af["blockedAt"] = now
-        print("  API-Football: o plano atual não cobre a temporada; nova tentativa em 7 dias.")
+        print("  API-Football: o plano atual não cobre a temporada; o robô verifica a cada 12 horas se isso mudou.")
     else:
         af["blocked"] = False
         try:
