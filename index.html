@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>:root{
   --bg:#070a10; --bg2:#0b1019; --panel:#0e141f; --panel2:#131a27; --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
-  --text:#e9edf4; --muted:#8a94a6; --dim:#5b6475;
+  --text:#e9edf4; --muted:#8a94a6; --dim:#7d889b;
   --win:#22c55e; --draw:#8b95a7; --loss:#ef4444;
   --g1:#00c16e; --g2:#f7d600; --tc:#00c16e;
   --r-lg:18px; --r-md:12px; --r-sm:8px;
@@ -454,7 +454,7 @@ tr.row:hover .sticky{background:#141b27}
 :root{
   --bg:#020305; --bg2:#05070a; --panel:#080a0e; --panel2:#0b0e13;
   --line:rgba(255,255,255,.045); --line2:rgba(255,255,255,.08);
-  --text:#eef1f6; --muted:#8a93a3; --dim:#586172;
+  --text:#eef1f6; --muted:#8a93a3; --dim:#7d889b;
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --accent-line:color-mix(in srgb,var(--g1) 55%,transparent);
   --edge:color-mix(in srgb,var(--g1) 16%,rgba(255,255,255,.035));
@@ -1282,6 +1282,14 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 .gp-bar .psearch{flex:1;min-width:220px;max-width:420px;margin:0}
 @media (max-width:620px){.gp-sel{flex-direction:column;width:100%}.gp-sel .dd{width:100%}.gp-bar .psearch{max-width:none;width:100%}}
 .thero h1 .shirt.big{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:1.35em;max-width:2.4em;height:1.3em;padding:0 .16em;font-size:.48em;line-height:1;vertical-align:.25em;filter:none;background:linear-gradient(180deg,#fff,#cfd5de)!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#07090d;-webkit-text-fill-color:#07090d}
+
+.early{margin:10px 0 0;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.45;color:#f3dca0;background:rgba(245,166,35,.10);border:1px solid rgba(245,166,35,.35)}
+.early b{color:#ffd277}
+/* visão geral em tablet em pé: 2 colunas para os cards caberem */
+@media (min-width:761px) and (max-width:960px){
+  .ov-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}
+  .ov-hl > div:nth-child(3){display:flex}
+}
 </style>
 </head>
 <body>
@@ -1561,7 +1569,7 @@ function renderSide(){
       ${items.filter(([v])=>!(v==='gsquad' && NO_SQUADS[S.lg])).map(([v,l,ic])=>`<button class="nav-btn" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}${l}</button>`).join('')}</nav>`).join('')}
     ${SOON.length?`<div class="side-group"><div class="side-title">Próximas etapas</div>
       ${SOON.map(([l,ic])=>`<button class="nav-btn" disabled>${icon(ic)}${l}<span class="soon">em breve</span></button>`).join('')}</div>`:''}
-    <div class="side-foot">${IS_GH && DATA._updated ? `Atualizado em ${DATA._updated}. Dados: ${esc(DATA._source)}.` : `Resultados até ${fdate(lastDate)}/${lastDate.slice(0,4)}. Estatísticas calculadas a partir dos placares finais e de intervalo.${IS_PUBLIC?' Resultados: openfootball.':''}`}</div>`;
+    <div class="side-foot">${IS_GH && DATA._updated ? `Último dado novo em ${DATA._updated}. O robô confere a cada 30 min. Fonte: ${esc(DATA._source)}.` : `Resultados até ${fdate(lastDate)}/${lastDate.slice(0,4)}. Estatísticas calculadas a partir dos placares finais e de intervalo.${IS_PUBLIC?' Resultados: openfootball.':''}`}</div>`;
   const side=$('#side'); side.style.setProperty('--rows', ORDER.length + NAV.reduce((n,[,it])=>n+it.length,0) + SOON.length); side.style.setProperty('--groups', 1 + NAV.length + (SOON.length?1:0)); fitSide();
 }
 
@@ -1699,7 +1707,7 @@ function viewTable(L){
       <td class="l sticky"><div class="club">${crest(t)}<span>${esc(t.name)}</span></div></td>
       <td class="pts">${r.P}</td><td>${r.J}</td><td class="mx">${r.V}</td><td class="mx">${r.E}</td><td class="mx">${r.D}</td><td class="hide-sm mx">${r.GP}</td><td class="hide-sm mx">${r.GC}</td>
       <td>${sgn(r.GP-r.GC)}</td><td class="mx">${r.J?Math.round(r.P/(3*r.J)*100):0}</td><td class="hide-sm mform">${form(games(t))}</td></tr>`}).join('')}</tbody></table></div>
-    ${S.mode==='geral'?`<div class="legend">${cfg.zones.map(z=>`<span><i style="background:${z[3]}"></i>${z[2]}</span>`).join('')}</div>`
+    ${S.mode==='geral'?`<div class="legend">${cfg.zones.map(z=>`<span><i style="background:${z[3]}"></i>${z[2]}</span>`).join('')}</div><p class="src" style="margin-top:10px">Empate em pontos: ${L.lg==='br'?'mais vitórias, saldo de gols e gols marcados':(L.lg==='es'||L.lg==='it')?'saldo de gols e gols marcados. A liga usa o confronto direto primeiro, então a ordem oficial pode diferir em empates':'saldo de gols e gols marcados'}.${L.lg==='br'?'':' As vagas europeias seguem o regulamento padrão e podem mudar na temporada.'}</p>`
       :`<div class="legend"><span>${S.mode==='1t'?'Tabela considerando apenas o placar do intervalo.':S.mode==='2t'?'Tabela considerando apenas os gols do segundo tempo.':'Somente jogos '+(S.mode==='casa'?'como mandante.':'como visitante.')}</span></div>`}
   </div>`;
 }
@@ -2450,6 +2458,7 @@ async function boot(){
   try{
     const raw = await fetchData(); lastRawUpdated = raw.updated; DATA = adapt(raw); render(); if(introDone){ lastPageKey = null; render(); }
   }catch(e){
+    window.__dataFailed = true;
     $('#view').innerHTML = `<div class="panel empty-state"><h2>Não foi possível carregar os dados</h2><p>O arquivo de dados não respondeu (${esc(e.message)}). Recarregue a página em alguns instantes.</p><button class="btn" onclick="location.reload()">Recarregar</button></div>`;
     return;
   }
@@ -2980,8 +2989,8 @@ function simModel(L){
   const n = L.T.length, pl = L.played, G = pl.length || 1;
   const muH = Math.max(.6, pl.reduce((s,m)=>s+m[5],0)/G), muA = Math.max(.5, pl.reduce((s,m)=>s+m[6],0)/G);
   const gf = new Float64Array(n), ga = new Float64Array(n), j = new Float64Array(n);
-  pl.forEach(m=>{ gf[m[3]]+=m[5]/muH; ga[m[3]]+=m[6]/muA; gf[m[4]]+=m[6]/muA; ga[m[4]]+=m[5]/muH; j[m[3]]++; j[m[4]]++; });
-  const K = 6, att = [], def = [];
+  pl.forEach(m=>{ const x=Math.min(m[5],4), y=Math.min(m[6],4); gf[m[3]]+=x/muH; ga[m[3]]+=y/muA; gf[m[4]]+=y/muA; ga[m[4]]+=x/muH; j[m[3]]++; j[m[4]]++; });
+  const K = 14, att = [], def = [];
   for(let i=0;i<n;i++){ att[i] = (gf[i] + K)/(j[i] + K); def[i] = (ga[i] + K)/(j[i] + K); }
   return {muH, muA, att, def};
 }
@@ -3068,6 +3077,7 @@ function viewSim(L){
     <div class="panel sim-side"><h2>Classificação simulada</h2><p class="sub">Tabela real mais os seus placares. As setas mostram a mudança em relação à tabela de hoje.</p><div id="sim-table">${simTableHTML(L, tbl)}</div></div>
   </div>
   <div class="panel sim-probs-panel"><div class="probs-head"><div><h2>Probabilidades</h2><p class="sub">Recalculadas com os seus placares, em ${SIM_N.toLocaleString('pt-BR')} simulações do restante do campeonato.</p></div><span class="est">Estimativa</span></div>
+    ${(L.played.length*2/L.T.length) < 10 ? `<p class="early"><b>Início de temporada:</b> com menos de 10 jogos por time, as chances ainda são pouco confiáveis. O modelo só conhece os jogos de agora e não sabe a força histórica de cada clube.</p>` : ''}
     <div id="sim-probs"><div class="empty"><div class="spinner"></div>Calculando probabilidades…</div></div>
     <p class="src">Modelo do Radar das Seis: cada time recebe uma força de ataque e de defesa a partir dos gols marcados e sofridos na temporada, separando casa e fora, com peso para a média da liga enquanto há poucos jogos. Cada partida restante é sorteada muitas vezes com essas forças, na mesma linha dos métodos usados por grupos acadêmicos como o da UFMG. Resultados reais entram sozinhos assim que o jogo termina. Os números são estimativas, não previsões certas.</p></div>`;
 }
@@ -3113,7 +3123,8 @@ function simRefresh(full){
 document.addEventListener('input', e=>{
   const t = e.target; if(!t.dataset || !t.dataset.simk) return;
   const L = league(S.lg), st = simStore(L), k = t.dataset.simk, cur = st[k] || [null,null];
-  cur[+t.dataset.side] = simVal(t.value); if(cur[0]==null && cur[1]==null) delete st[k]; else st[k] = cur;
+  const nv = simVal(t.value); cur[+t.dataset.side] = nv; if(nv!=null && String(nv)!==t.value.trim()) t.value = nv;
+  if(cur[0]==null && cur[1]==null) delete st[k]; else st[k] = cur;
   const row = t.closest('.simrow'); if(row) row.classList.toggle('filled', cur[0]!=null && cur[1]!=null);
   save(); clearTimeout(simTimer); simTimer = setTimeout(()=>simRefresh(), 350);
 });
@@ -3508,7 +3519,7 @@ function runIntro(){
 function scheduleIntroEnd(){
   clearTimeout(introEndTimer);
   const wait = Math.max(0, introMinAt - performance.now());
-  introEndTimer = setTimeout(()=>{ if(typeof IS_GH!=='undefined' && IS_GH && !DATA){ introEndTimer = setTimeout(scheduleIntroEnd, 200); return; } endIntro(false); }, wait);
+  introEndTimer = setTimeout(()=>{ if(typeof IS_GH!=='undefined' && IS_GH && !DATA && !window.__dataFailed && performance.now() < introMinAt + 9000){ introEndTimer = setTimeout(scheduleIntroEnd, 200); return; } endIntro(false); }, wait);
 }
 function endIntro(skipped){
   if(introDone) return; introDone = true; clearTimeout(introEndTimer);
