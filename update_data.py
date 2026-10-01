@@ -21,6 +21,7 @@ TOKEN = os.environ.get("FOOTBALL_DATA_TOKEN", "").strip()
 COMPETITIONS = {"br": "BSA", "en": "PL", "es": "PD", "it": "SA", "de": "BL1", "fr": "FL1"}
 BRT = datetime.timezone(datetime.timedelta(hours=-3))  # horário de Brasília
 PAUSE = 6.5  # plano gratuito: no máximo 10 requisições por minuto
+SKIP_SQUADS = {"BSA"}  # elencos e técnicos do Brasileirão na fonte gratuita estão desatualizados
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 
 
@@ -115,6 +116,8 @@ def build_league(code):
 
     squads = []
     try:
+        if code in SKIP_SQUADS:
+            raise RuntimeError("elencos desta liga desativados (fonte desatualizada)")
         data_teams = get(f"/competitions/{code}/teams")
         for team in data_teams.get("teams", []):
             if not team.get("id"):

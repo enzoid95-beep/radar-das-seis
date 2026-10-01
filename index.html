@@ -1558,7 +1558,7 @@ function renderSide(){
       <div class="lg-list">${ORDER.map(k=>`<button class="lg-btn" data-league="${k}" aria-current="${k===S.lg}">${lgDot(k)}<span class="lg-n">${LEAGUES[k].name}</span><small>${LEAGUES[k].season}</small></button>`).join('')}</div>
     </div>
     ${NAV.map(([g,items])=>`<nav class="side-group" style="--n:${items.length}" aria-label="${g}"><div class="side-title">${g}</div>
-      ${items.map(([v,l,ic])=>`<button class="nav-btn" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}${l}</button>`).join('')}</nav>`).join('')}
+      ${items.filter(([v])=>!(v==='gsquad' && NO_SQUADS[S.lg])).map(([v,l,ic])=>`<button class="nav-btn" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}${l}</button>`).join('')}</nav>`).join('')}
     ${SOON.length?`<div class="side-group"><div class="side-title">Próximas etapas</div>
       ${SOON.map(([l,ic])=>`<button class="nav-btn" disabled>${icon(ic)}${l}<span class="soon">em breve</span></button>`).join('')}</div>`:''}
     <div class="side-foot">${IS_GH && DATA._updated ? `Atualizado em ${DATA._updated}. Dados: ${esc(DATA._source)}.` : `Resultados até ${fdate(lastDate)}/${lastDate.slice(0,4)}. Estatísticas calculadas a partir dos placares finais e de intervalo.${IS_PUBLIC?' Resultados: openfootball.':''}`}</div>`;
@@ -1575,7 +1575,7 @@ function hlPlayer(title, name, t, val){
 function homeExtra(L){
   const best = (k, low) => [...L.T].sort((a,b)=> low ? METRICS[k].f(a.x)-METRICS[k].f(b.x) : METRICS[k].f(b.x)-METRICS[k].f(a.x))[0];
   const goals = L.played.reduce((s,m)=>s+m[5]+m[6],0);
-  const D = (typeof DATA!=='undefined' && DATA[L.lg]) || {}, sc = D.scorers || [], sq = D.squads || [];
+  const D = (typeof DATA!=='undefined' && DATA[L.lg]) || {}, sc = D.scorers || [], sq = (typeof NO_SQUADS!=='undefined' && NO_SQUADS[L.lg]) ? [] : (D.squads || []);
   const nPlayers = sq.reduce((s,x)=>s+(x.players||[]).length,0);
   const topG = sc.length ? [...sc].sort((a,b)=>b.g-a.g)[0] : null, topA = sc.length ? [...sc].sort((a,b)=>(b.a||0)-(a.a||0)||b.g-a.g)[0] : null;
   const atk=best('gpm'), dfn=best('gcm',true), cs=best('cs'), home=best('homeAp'), away=best('awayAp'), form=best('f5'), rec=best('recov'), h2=best('gp2');
@@ -2517,7 +2517,7 @@ function openSheet(html, title){
 }
 function closeSheet(){ const s = document.getElementById('msheet'); if(s){ s.classList.remove('open'); document.body.classList.remove('sheet-open'); } }
 function openMore(){
-  const items = NAV.flatMap(([g,its])=>its.map(it=>[g,...it])).filter(([,v])=>!TAB_MAIN.some(([m])=>m===v));
+  const items = NAV.flatMap(([g,its])=>its.map(it=>[g,...it])).filter(([,v])=>!TAB_MAIN.some(([m])=>m===v) && !(v==='gsquad' && NO_SQUADS[S.lg]));
   const groups = [...new Set(items.map(x=>x[0]))];
   openSheet(`<div class="msheet-group"><button class="msheet-item" data-nav="overview" ${S.view==='overview'?'aria-current="page"':''}>${icon('home')}<span>As seis ligas</span></button></div>` + groups.map(g=>`<div class="msheet-group"><small>${g}</small>${items.filter(x=>x[0]===g).map(([,v,l,ic])=>`<button class="msheet-item" data-nav="${v}" ${S.view===v?'aria-current="page"':''}>${icon(ic)}<span>${l}</span></button>`).join('')}</div>`).join(''), 'Mais seções');
 }
@@ -2800,7 +2800,8 @@ const GPOS = [['Goleiros',['goalkeeper']],['Defensores',['defence','defender','c
   ['Meio-campistas',['midfield','midfielder','defensive midfield','central midfield','attacking midfield','left midfield','right midfield']],
   ['Atacantes',['offence','attacker','forward','centre-forward','left winger','right winger','second striker','winger','striker']]];
 const gGroup = pos => { const p=(pos||'').toLowerCase(); const i=GPOS.findIndex(([,ks])=>ks.some(k=>p===k||p.includes(k))); return i<0?4:i; };
-function gData(L){ const D=DATA[L.lg]||{}; return {squads:D.squads||[], scorers:D.scorers||[], refs:D.refs||[]}; }
+const NO_SQUADS = {br:true};  // elencos do Brasileirão na fonte gratuita estão desatualizados
+function gData(L){ const D=DATA[L.lg]||{}; return {squads: NO_SQUADS[L.lg] ? [] : (D.squads||[]), scorers:D.scorers||[], refs:D.refs||[]}; }
 function gIndex(L){
   if(L._g) return L._g;
   const {squads,scorers}=gData(L), players={}, byTeam={};
@@ -2826,6 +2827,7 @@ function gIndex(L){
 const gRank = (L,p) => { const sc=gData(L).scorers; if(!p.st) return null; return 1+sc.filter(s=>s.g>p.st.g).length; };
 const gEmpty = (t,s) => `<div class="panel empty-state"><h2>${t}</h2><p>${s}</p></div>`;
 function viewGSquad(L){
+  if(NO_SQUADS[L.lg]) return head('Elencos',`${L.cfg.full} ${L.cfg.season}`)+gEmpty('Elencos do Brasileirão indisponíveis','A fonte gratuita traz elencos e técnicos desatualizados para os clubes brasileiros. Para não mostrar informação errada, esta seção fica fora do ar no Brasileirão.');
   const G=gIndex(L); if(!Object.keys(G.byTeam).length) return head('Elencos',`${L.cfg.full} ${L.cfg.season}`)+gEmpty('Elencos aparecem na próxima atualização','Os jogadores de cada clube chegam junto com a próxima atualização automática dos dados.');
   let sel = S.gteam[L.lg]; if(G.byTeam[sel]==null) sel = L.table[0].i; S.gteam[L.lg]=sel;
   const t=L.T[sel], sq=G.byTeam[sel]||{players:[]};
