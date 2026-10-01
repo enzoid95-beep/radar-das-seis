@@ -2967,9 +2967,10 @@ const SIM_COLS = {
 const SIM_N = 10000, simCache = {};
 const simKey = m => `${m[0]}|${m[3]}|${m[4]}`;
 const simStore = L => { if(!S.sim || typeof S.sim!=='object') S.sim = {}; return S.sim[L.lg] || (S.sim[L.lg] = {}); };
-const simVal = v => (v===''||v==null||isNaN(+v)) ? null : Math.max(0, Math.min(30, Math.round(+v)));
+const simVal = v => { const s = String(v ?? '').trim(); return /^\d{1,2}$/.test(s) ? parseInt(s,10) : null; };
 function simSplit(L){
   const sc = simStore(L), done = [], rest = [];
+  Object.keys(sc).forEach(k=>{ const v = sc[k]; if(!Array.isArray(v)){ delete sc[k]; return; } sc[k] = [simVal(v[0]), simVal(v[1])]; if(sc[k][0]==null && sc[k][1]==null) delete sc[k]; });
   L.matches.forEach(m=>{
     if(isPlayed(m)){ done.push([m[3],m[4],m[5],m[6]]); return; }
     const s = sc[simKey(m)];
@@ -3062,7 +3063,7 @@ function viewSim(L){
     return `<div class="simrow${p?' fixed':''}${!p&&s[0]!=null&&s[1]!=null?' filled':''}">
       <div class="st h"><span>${esc(h.name)}</span>${crest(h)}</div>
       ${p ? `<div class="simscore num"><b>${m[5]}</b><i>×</i><b>${m[6]}</b><small class="real">resultado real</small></div>`
-          : `<div class="simscore"><input class="num" type="number" inputmode="numeric" min="0" max="30" data-simk="${k}" data-side="0" value="${s[0]??''}" placeholder="–" aria-label="Gols do ${esc(h.name)}"><i>×</i><input class="num" type="number" inputmode="numeric" min="0" max="30" data-simk="${k}" data-side="1" value="${s[1]??''}" placeholder="–" aria-label="Gols do ${esc(a.name)}"><small>${when}<span class="prov"> · provável ${mostLikely(lh)}–${mostLikely(la)}</span></small></div>`}
+          : `<div class="simscore"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" data-simk="${k}" data-side="0" value="${s[0]??''}" placeholder="–" aria-label="Gols do ${esc(h.name)}"><i>×</i><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" data-simk="${k}" data-side="1" value="${s[1]??''}" placeholder="–" aria-label="Gols do ${esc(a.name)}"><small>${when}<span class="prov"> · provável ${mostLikely(lh)}–${mostLikely(la)}</span></small></div>`}
       <div class="st a">${crest(a)}<span>${esc(a.name)}</span></div></div>`; };
   const i = r==='late' ? -1 : rounds.indexOf(r);
   const prevR = r==='late' ? null : rounds[i-1], nextR = r==='late' ? cur : rounds[i+1];
@@ -3123,10 +3124,20 @@ function simRefresh(full){
 document.addEventListener('input', e=>{
   const t = e.target; if(!t.dataset || !t.dataset.simk) return;
   const L = league(S.lg), st = simStore(L), k = t.dataset.simk, cur = st[k] || [null,null];
-  const nv = simVal(t.value); cur[+t.dataset.side] = nv; if(nv!=null && String(nv)!==t.value.trim()) t.value = nv;
+  const clean = t.value.replace(/\D/g,'').slice(0,2); if(clean!==t.value) t.value = clean;
+  const nv = simVal(clean); cur[+t.dataset.side] = nv;
   if(cur[0]==null && cur[1]==null) delete st[k]; else st[k] = cur;
   const row = t.closest('.simrow'); if(row) row.classList.toggle('filled', cur[0]!=null && cur[1]!=null);
   save(); clearTimeout(simTimer); simTimer = setTimeout(()=>simRefresh(), 350);
+});
+document.addEventListener('keydown', e=>{
+  const t = e.target; if(!t || !t.dataset || !t.dataset.simk) return;
+  if(e.key && e.key.length===1 && !/\d/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) e.preventDefault();
+});
+document.addEventListener('paste', e=>{
+  const t = e.target; if(!t || !t.dataset || !t.dataset.simk) return;
+  e.preventDefault(); const txt = ((e.clipboardData||window.clipboardData).getData('text')||'').replace(/\D/g,'').slice(0,2);
+  t.value = txt; t.dispatchEvent(new Event('input',{bubbles:true}));
 });
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-simround],[data-simclear],[data-simfill]'); if(!b) return;
