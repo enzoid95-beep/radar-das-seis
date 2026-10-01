@@ -547,7 +547,6 @@ tr.row:hover{background:rgba(255,255,255,.025)}
 #view.enter .rshape{transform-box:fill-box;transform-origin:center;animation:radarIn 1s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 250ms)}
 #view.enter .chart circle{transform-box:fill-box;transform-origin:center;animation:pop .35s ease-out backwards;animation-delay:calc(var(--d,0ms) + 350ms + var(--ci,0) * 32ms)}
 .dg{display:inline-block;transform-origin:50% 60%}
-#view.enter .matches.big .dg{animation:flipD .75s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--d,0ms) + 200ms + var(--k,0) * 110ms)}
 
 /* barras crescendo (também ao trocar filtros e métricas) */
 #view:not(.quiet) .rkb i,#view:not(.quiet) .pbar .tr i,#view:not(.quiet) .ritem .b i,#view:not(.quiet) .split .b .bar i,#view:not(.quiet) .dist > div{transform-origin:left center;animation:growX 1s cubic-bezier(.25,1,.5,1) backwards;animation-delay:calc(var(--d,0ms) + 180ms)}
@@ -1068,15 +1067,6 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 .ov-stats > div{padding:clamp(5px,.9vh,8px) 8px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05);text-align:center}
 .ov-stats b{display:block;font:700 clamp(16px,2.3vh,20px)/1 "Barlow Condensed",sans-serif}
 .ov-stats span{font-size:clamp(10px,1.3vh,11.5px);color:var(--muted)}
-.ov-hl{display:flex;flex-direction:column;gap:clamp(3px,.6vh,6px)}
-.ov-hl > div{display:flex;align-items:center;gap:8px;font-size:clamp(12px,1.6vh,13.5px);font-weight:600}
-.ov-hl .crest{width:clamp(16px,2.2vh,20px);height:clamp(16px,2.2vh,20px)}
-.ov-hl span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ov-hl small{color:var(--muted);font-weight:500;margin-right:6px}
-.ov-hl b{font:700 clamp(14px,2vh,16px)/1 "Barlow Condensed",sans-serif}
-@media (max-height:760px){.ov-top > div:nth-child(3){display:none}}
-@media (max-height:680px){.ov-top{display:none}}
-@media (max-width:1100px) and (min-width:761px){.ov-hl > div:nth-child(3){display:none}}
 @media (max-width:760px){
   .ov-page{height:calc(100dvh - 232px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));min-height:420px;gap:8px}
   .ov-title p{display:none}
@@ -1095,12 +1085,7 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 .ov-stats span{white-space:nowrap}
 .ovcard{gap:clamp(4px,.85vh,10px);padding:clamp(11px,1.6vh,16px)}
 .ov-lead{padding:clamp(5px,.8vh,9px) 11px}
-.ov-hl{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
-.ov-hl > div:nth-child(3){grid-column:1/-1}
-.ov-hl span small{display:block;margin:0;font-size:10.5px;line-height:1.1}
 .ov-stats > div{padding:clamp(4px,.7vh,7px) 6px}
-@media (max-height:900px) and (min-width:761px){.ov-top > div:nth-child(3){display:none}}
-@media (max-height:720px) and (min-width:761px){.ov-top{display:none}}
 .tb-brand{display:flex!important;place-items:unset!important}
 @media (max-width:760px){.ov-hl,.ov-top,.ov-stats{display:none!important}}
 /* ---------- simulador: ajustes ---------- */
@@ -1170,7 +1155,6 @@ button.brand[aria-current="page"]{background:rgba(255,255,255,.05)}
 .hl-card.game{cursor:default}
 .hl-t{font-size:13px;font-weight:700;color:#e6eaf0;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07)}
 .hl-b{display:flex;align-items:center;gap:9px}
-.hl-n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .hl-b b{font:700 16px/1 "Barlow Condensed",sans-serif;color:var(--g2);white-space:nowrap}
 .hl-g{font-weight:600}
 .hl-card small{display:block;margin-top:6px;font-size:12px;color:var(--dim)}
@@ -1288,7 +1272,99 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 /* visão geral em tablet em pé: 2 colunas para os cards caberem */
 @media (min-width:761px) and (max-width:960px){
   .ov-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}
-  .ov-hl > div:nth-child(3){display:flex}
+}
+
+/* placares sem animação nos dígitos */
+.dg{animation:none!important;transform:none!important}
+/* datas dos jogos: mesmo formato, sem quebrar linha, colunas alinhadas */
+.glist .gi{grid-template-columns:76px minmax(0,1fr) auto 36px}
+.glist .gi .d{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:13px}
+.glist .gi .d:nth-of-type(2),.glist .gi .d:last-child{text-align:right}
+@media (max-width:420px){.glist .gi{grid-template-columns:70px minmax(0,1fr) auto 32px;gap:8px}}
+
+/* ---------- resumo da liga: card de rodadas com opção de ver as próximas ---------- */
+.hr-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 12px}
+.hr-ctl{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.hr-tabs{display:flex;gap:6px}
+.hr-tabs button{padding:8px 14px;border-radius:20px;font-size:13.5px;font-weight:600;color:var(--muted);border:1px solid var(--line2);background:linear-gradient(180deg,#161b24,#0d1016);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.hr-tabs button[aria-pressed="true"]{color:#fff;border-color:color-mix(in srgb,var(--g1) 55%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--g1) 30%,#0d1016),color-mix(in srgb,var(--g2) 15%,#0d1016))}
+.hr-ctl .round-nav b{min-width:46px;font-size:18px}
+@media (max-width:760px){.hr-head{flex-direction:column}.hr-ctl{width:100%;justify-content:space-between}.hr-ctl .mchip{flex:1 1 100%;text-align:center}}
+
+
+/* resumo das seis ligas: tudo em uma linha, sem quebrar, para os cards caberem na tela */
+.ov-head small,.ov-lead span,.ov-lead small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ov-head > div{min-width:0}
+@media (max-height:800px) and (min-width:761px){.ov-title p{display:none}}
+/* iPad em pé: a barra do topo aparece, então o resumo ganha uma altura menor e cards sem a lista do 2º e 3º lugares */
+@media (min-width:761px) and (max-width:920px){.ov-page{height:calc(100vh - 112px);height:calc(100dvh - 112px)}}
+@media (min-width:761px) and (max-width:920px){.main:has(.ov-page) .ov-page{height:calc(100vh - 112px);height:calc(100dvh - 112px)}}
+
+/* =========================================================
+   RESUMO DAS SEIS LIGAS · destaques (ataque, defesa, artilheiro)
+   Uma grade única: as três linhas dividem as colunas, então nomes e
+   números ficam alinhados e o número fica logo depois do maior nome.
+   ========================================================= */
+.ovcard{container-type:inline-size;container-name:ovc}
+.ov-hl{display:grid;grid-template-columns:20px max-content minmax(0,max-content) max-content;column-gap:8px;row-gap:clamp(3px,.7vh,7px);align-items:center;justify-content:start}
+.ov-hl > div{display:contents}
+.ov-hl .crest{width:clamp(16px,2.3vh,20px);height:clamp(16px,2.3vh,20px);justify-self:center}
+.ov-hl .hl-l{margin:0;font:500 11.5px/1.1 Barlow,sans-serif;color:var(--muted);white-space:nowrap}
+.ov-hl .hl-l .s{display:none}
+.ov-hl .hl-n{min-width:0;font-weight:700;font-size:clamp(12.5px,1.7vh,14px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-hl b{display:inline-flex;align-items:baseline;gap:4px;padding:2px 9px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);font:700 clamp(14px,2vh,16px)/1.2 "Barlow Condensed",sans-serif;color:#fff;white-space:nowrap}
+.ov-hl b i{font:500 10.5px/1 Barlow,sans-serif;font-style:normal;color:var(--muted)}
+.ov-hl b .us{display:none}
+@container ovc (max-width:330px){
+  .ov-hl .hl-l .f{display:none}.ov-hl .hl-l .s{display:inline}
+  .ov-hl b .uf{display:none}.ov-hl b .us{display:inline}
+}
+@container ovc (max-width:250px){
+  .ov-hl{grid-template-columns:max-content minmax(0,max-content) max-content}
+  .ov-hl .crest{display:none}
+}
+@container ovc (max-width:190px){
+  .ov-hl{grid-template-columns:20px minmax(0,max-content) max-content}
+  .ov-hl .crest{display:block}
+  .ov-hl .hl-l{display:none}
+  .ov-hl b i{display:none}
+}
+/* se o card não couber na altura da tela: nada é removido; o conteúdo fica mais compacto,
+   igual nos seis cards, e só em telas muito baixas a página passa a rolar */
+.ov-grid.c1 .ovcard{gap:5px}
+.ov-grid.c1 .ov-top{gap:1px}
+.ov-grid.c1 .ov-hl{row-gap:3px}
+.ov-grid.c1 .ov-lead{padding-top:5px;padding-bottom:5px}
+.ov-grid.c2 .ovcard{gap:4px;padding-top:10px;padding-bottom:10px}
+.ov-grid.c2 .ov-lead img{width:32px;height:32px}
+.ov-grid.c2 .ov-lead em{font-size:26px}
+.ov-grid.c2 .ov-lead b{font-size:16px}
+.ov-grid.c2 .ov-stats > div{padding:3px 6px}
+.ov-grid.c2 .ov-stats b{font-size:16px}
+.ov-grid.c2 .ov-top > div{font-size:12.5px}
+.ov-grid.c2 .ov-top b{font-size:14px}
+.ov-grid.c2 .ov-top .crest,.ov-grid.c2 .ov-hl .crest{width:16px;height:16px}
+.ov-grid.c3 .ovcard{gap:3px;padding:8px 12px}
+.ov-grid.c3 .ov-head .lg-logo{width:24px;height:24px}
+.ov-grid.c3 .ov-head b{font-size:17px}
+.ov-grid.c3 .ov-head small{font-size:10.5px}
+.ov-grid.c3 .ov-lead{padding:3px 9px}
+.ov-grid.c3 .ov-lead img{width:26px;height:26px}
+.ov-grid.c3 .ov-lead em{font-size:22px}
+.ov-grid.c3 .ov-lead small,.ov-grid.c3 .ov-lead span{font-size:10.5px}
+.ov-grid.c3 .ov-stats b{font-size:14px}
+.ov-grid.c3 .ov-stats span{font-size:10px}
+.ov-grid.c3 .ov-top > div{font-size:12px}
+.ov-grid.c3 .ov-hl b{padding:0 7px;font-size:13px}
+.ov-grid.c3 .ov-hl .hl-n{font-size:12px}
+.main:has(.ov-grid.grow) .ov-page{height:auto!important;min-height:0}
+.ov-grid.grow{grid-template-rows:none!important;grid-auto-rows:auto}
+/* cards estreitos (janela entre 960 e 1180 px): líder sem cortar o nome */
+@container ovc (max-width:250px){
+  .ov-lead{gap:8px;padding-left:9px;padding-right:9px}
+  .ov-lead img{width:30px;height:30px}
+  .ov-lead em{font-size:24px}
+  .ov-lead em small{display:none}
 }
 </style>
 </head>
@@ -1359,7 +1435,7 @@ S.view = 'overview';
 if(typeof PUBLIC!=='undefined' && PUBLIC===true && ['player','squad','prank','refs'].includes(S.view)) S.view='home';
 if(!(typeof GH!=='undefined' && GH===true) && ['scorers','gsquad','gplayer','grefs'].includes(S.view)) S.view='home';
 ['player','squad','ref','gteam','gplayer','gref'].forEach(k=>{ if(!S[k]||typeof S[k]!=='object') S[k]={}; }); S.pq='';
-const save = () => { try { const {pq,gq,squadOur,mtab,...keep}=S; localStorage.setItem('cdl-state', JSON.stringify(keep)); } catch(e){} };
+const save = () => { try { const {pq,gq,squadOur,mtab,hround,...keep}=S; localStorage.setItem('cdl-state', JSON.stringify(keep)); } catch(e){} };
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -1616,7 +1692,13 @@ function viewHome(L){
   const goals = L.played.reduce((s,m)=>s+m[5]+m[6],0);
   const best = k => sorted(L,k)[0];
   const cards = [['Melhor ataque','gp','gols'],['Melhor defesa','gc','sofridos'],['Melhor mandante','homeAp',''],['Em alta','f5','pts em 5 jogos']];
-  const round = L.matches.filter(m=>m[0]===L.latest);
+  if(!S.hround || typeof S.hround!=='object') S.hround = {};
+  const nextR = simDefaultRound(L), anyOpen = L.matches.some(m=>!isPlayed(m));
+  let hr = S.hround[L.lg] ?? L.latest; hr = Math.min(Math.max(1, +hr || L.latest), L.totalRounds);
+  const round = L.matches.filter(m=>m[0]===hr).sort((x,y)=>(x[1]+(x[2]||'')).localeCompare(y[1]+(y[2]||'')));
+  const doneN = round.filter(isPlayed).length, dates = round.map(m=>m[1]).filter(Boolean).sort();
+  const hrSub = !round.length ? 'Sem jogos nesta rodada' : doneN===round.length ? (hr===L.latest ? 'Resultados mais recentes' : 'Resultados da rodada')
+    : doneN===0 ? `Próximos jogos${dates.length?` · ${fdate(dates[0])}${dates[dates.length-1]!==dates[0]?` a ${fdate(dates[dates.length-1])}`:''}`:''}` : `${doneN} de ${round.length} jogos disputados`;
   const top = L.table.slice(0,6), bottom = L.table.slice(-4);
   const mini = rows => rows.map(t=>`<div class="mini-row" data-team="${t.i}"><span class="pos">${t.pos}</span>${crest(t)}<span class="nm">${esc(t.name)}</span>${form(t.games)}<span class="vl num">${t.all.P}<small>pts</small></span></div>`).join('');
   const bigWins = [...L.played].sort((a,b)=>Math.abs(b[5]-b[6])-Math.abs(a[5]-a[6])||(b[5]+b[6])-(a[5]+a[6])).slice(0,5);
@@ -1651,7 +1733,12 @@ function viewHome(L){
       </div></div>
     </div>
   </div>
-  <div class="panel" style="margin-top:16px"><div class="view-head" style="margin:0 0 12px"><div><h2>${L.latest}ª rodada</h2><p class="sub" style="margin:0">Resultados mais recentes</p></div><button class="seg" data-nav="matches"><span style="padding:6px 12px">Ver todas as rodadas</span></button></div>
+  <div class="panel" style="margin-top:16px"><div class="hr-head"><div><h2>${hr}ª rodada</h2><p class="sub" style="margin:0">${hrSub}</p></div>
+      <div class="hr-ctl">
+        <div class="hr-tabs" role="group" aria-label="Escolher rodada"><button data-hround="${L.latest}" aria-pressed="${hr===L.latest}">Última rodada</button>${anyOpen?`<button data-hround="${nextR}" aria-pressed="${hr===nextR && hr!==L.latest}">Próxima rodada</button>`:''}</div>
+        <div class="round-nav"><button data-hround="${hr-1}" ${hr<=1?'disabled':''} aria-label="Rodada anterior">‹</button><b>${hr}ª</b><button data-hround="${hr+1}" ${hr>=L.totalRounds?'disabled':''} aria-label="Próxima rodada">›</button></div>
+        <button class="mchip" data-hgo="${hr}">Abrir em Partidas</button>
+      </div></div>
     <div class="matches">${round.map(m=>matchCard(L,m)).join('')}</div></div>`;
 }
 
@@ -1768,12 +1855,12 @@ function viewTeam(L){
   const sel = S.team[L.lg] ?? L.table[0].i; const t = L.T[sel]; const cfg=L.cfg, x=t.x;
   document.documentElement.style.setProperty('--tc', t.col);
   const z = zoneOf(cfg,t.pos);
-  const upcoming = L.matches.filter(m=>!isPlayed(m)&&(m[3]===t.i||m[4]===t.i)).sort((a,b)=>(a[1]+a[2]).localeCompare(b[1]+b[2])).slice(0,5);
-  const g1=t.games.slice(-8).reverse();
+  const upcoming = L.matches.filter(m=>!isPlayed(m)&&(m[3]===t.i||m[4]===t.i)).sort((a,b)=>(a[1]+a[2]).localeCompare(b[1]+b[2])).slice(0,10);
+  const g1=t.games.slice(-10).reverse();
   const ht=t.ht, htTot = k => ht[k].V+ht[k].E+ht[k].D;
   const cellBg = (v,tot,res) => { if(!tot||!v) return 'rgba(255,255,255,.04)'; const a=.18+.6*(v/tot); return res==='V'?`rgba(34,197,94,${a})`:res==='D'?`rgba(239,68,68,${a})`:`rgba(139,149,167,${a})`; };
   const one=t.cur.n===1; const curTxt = ({V:one?'vitória':'vitórias seguidas',E:one?'empate':'empates seguidos',D:one?'derrota':'derrotas seguidas'})[t.cur.res]||'';
-  const gi = g => { const o=L.T[g.opp]; return `<div class="gi"><span class="d">${fdate(g.d)}</span><span class="o" data-team="${o.i}">${crest(o)}<span>${esc(o.name)}</span><em>${g.home?'casa':'fora'}</em></span><span class="s num">${g.gf} – ${g.ga}</span><span class="f ${g.res}">${g.res}</span></div>`; };
+  const gi = g => { const o=L.T[g.opp]; return `<div class="gi"><span class="d">${fdate(g.d,true)}</span><span class="o" data-team="${o.i}">${crest(o)}<span>${esc(o.name)}</span><em>${g.home?'casa':'fora'}</em></span><span class="s num">${g.gf} – ${g.ga}</span><span class="f ${g.res}">${g.res}</span></div>`; };
   const trend = (l,v,avg) => `<div class="pbar"><div class="top"><span>${l}</span><b class="num">${pct(v)}</b></div><div class="tr"><i style="width:${v*100}%"></i><u style="left:calc(${avg*100}% - 1px)" title="Média da liga ${pct(avg)}"></u></div></div>`;
   return `
   ${picker(L,t.i)}
@@ -1828,8 +1915,8 @@ function viewTeam(L){
       </div></div>
 
     ${optaTeamSection(L, t)}${IS_GH?ghTeamScorers(L,t):''}${ghTeamMarket(L,t)}
-    <div data-mtab="jogos" class="panel"><h2>Últimos jogos</h2><p class="sub">Mais recentes primeiro.</p><div class="glist">${g1.map(gi).join('')||'<div class="empty">Sem jogos.</div>'}</div></div>
-    <div data-mtab="jogos" class="panel"><h2>Próximos jogos</h2><p class="sub">Datas conforme o calendário da competição.</p><div class="glist">
+    <div data-mtab="jogos" class="panel"><h2>Últimos jogos</h2><p class="sub">Os 10 mais recentes, do último para o mais antigo.</p><div class="glist">${g1.map(gi).join('')||'<div class="empty">Sem jogos.</div>'}</div></div>
+    <div data-mtab="jogos" class="panel"><h2>Próximos jogos</h2><p class="sub">Os próximos 10 jogos, conforme o calendário da competição.</p><div class="glist">
       ${upcoming.map(m=>{const home=m[3]===t.i, o=L.T[home?m[4]:m[3]];return `<div class="gi"><span class="d">${fdate(m[1],true)}</span><span class="o" data-team="${o.i}">${crest(o)}<span>${esc(o.name)}</span><em>${home?'casa':'fora'}</em></span><span class="d">${m[5]==='adiado'?'adiado':(m[2]||'')}</span><span class="d">${o.pos}º</span></div>`}).join('')||'<div class="empty">Sem jogos marcados.</div>'}</div></div>
   </div>`;
 }
@@ -2781,6 +2868,16 @@ function fitTitles(){
   });
 }
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ sizeTrophy(); fitTitles(); });
+/* resumo das seis ligas: se algum card não couber na altura, todos perdem os mesmos detalhes (simetria) */
+function fitOverview(){
+  const g = document.querySelector('#view .ov-grid'); if(!g) return;
+  const steps = ['c1','c2','c3','grow'];
+  g.classList.remove(...steps);
+  const over = () => [...g.querySelectorAll('.ovcard')].some(c=>c.scrollHeight>c.clientHeight+1);
+  for(const s of steps){ if(!over()) break; g.classList.add(s); }
+}
+window.addEventListener('resize', ()=>{ clearTimeout(window.__fo); window.__fo = setTimeout(fitOverview, 120); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>fitOverview());
 function sizeTrophy(){
   const t = document.querySelector('#view .trophy.has-img'), c = document.querySelector('#view .hero-side'); if(!t || !c) return;
   const h = c.getBoundingClientRect().height, ar = parseFloat(t.style.getPropertyValue('--ar')) || .75; if(!h) return;
@@ -2790,7 +2887,7 @@ window.addEventListener('resize', ()=>{ clearTimeout(window.__tz); window.__tz =
 function afterRender(pageChanged, snap){
   const view = $('#view');
   try{ enhanceSelects(view); }catch(e){}
-  sizeTrophy(); fitTitles();
+  sizeTrophy(); fitTitles(); fitOverview();
   try{ mobileAfterRender(pageChanged); }catch(e){ console.error(e); }
   const mob = isMobile();
   view.classList.remove('enter');
@@ -2799,7 +2896,7 @@ function afterRender(pageChanged, snap){
   if(spinLeague){ spinLeague = false; if(!RM) document.querySelectorAll('.lg-btn[aria-current="true"] .lg-logo, #topbar-title .lg-logo, #view .hero-kick .lg-logo').forEach(l=>{ l.classList.remove('spin'); void l.offsetWidth; l.classList.add('spin'); }); }
   if(RM || quietRender) return;
   if(pageChanged){
-    markCascade(view, mob ? 8 : 16); splitScores(view); void view.offsetWidth; view.classList.add('enter');
+    markCascade(view, mob ? 8 : 16); void view.offsetWidth; view.classList.add('enter');
     countAll([...view.querySelectorAll(COUNT_SEL)].slice(0, mob ? 14 : 60));
     drawCharts(view);
   } else playFlip(snap);
@@ -3168,9 +3265,9 @@ function ovCard(lg){
     <div class="ov-top">${t.slice(1,4).map((x,k)=>`<div><span class="p">${k+2}</span>${crest(x)}<span class="n">${esc(x.name)}</span><b class="num">${x.all.P}</b></div>`).join('')}</div>
     <div class="ov-stats"><div><b class="num">${nf2.format(L.avg.gpg)}</b><span>gols/jogo</span></div><div><b class="num">${pct(L.avg.hw)}</b><span>vitórias casa</span></div><div><b class="num">${goals}</b><span>gols</span></div></div>
     <div class="ov-hl">
-      <div>${crest(atk)}<span><small>Melhor ataque</small>${esc(atk.name)}</span><b class="num">${atk.all.GP}</b></div>
-      <div>${crest(dfn)}<span><small>Melhor defesa</small>${esc(dfn.name)}</span><b class="num">${dfn.all.GC}</b></div>
-      ${sc?`<div>${scT?crest(scT):''}<span><small>Artilheiro</small>${esc(sc.n)}</span><b class="num">${sc.g}</b></div>`:''}
+      <div>${crest(atk)}<small class="hl-l"><span class="f">Melhor ataque</span><span class="s">Ataque</span></small><span class="hl-n">${esc(atk.name)}</span><b class="num">${atk.all.GP}<i>gols</i></b></div>
+      <div>${crest(dfn)}<small class="hl-l"><span class="f">Melhor defesa</span><span class="s">Defesa</span></small><span class="hl-n">${esc(dfn.name)}</span><b class="num">${dfn.all.GC}<i class="uf">sofridos</i><i class="us">sofr.</i></b></div>
+      ${sc?`<div>${scT?crest(scT):'<span class="crest"></span>'}<small class="hl-l"><span class="f">Artilheiro</span><span class="s">Artilheiro</span></small><span class="hl-n">${esc(sc.n)}</span><b class="num">${sc.g}<i>gols</i></b></div>`:''}
     </div>
   </button>`;
 }
@@ -3481,7 +3578,7 @@ function render(){
 function go(patch, top=true){ Object.assign(S,patch); document.body.classList.remove('nav-open'); render(); if(top) window.scrollTo({top:0,behavior:'instant'}); }
 
 document.addEventListener('click', e=>{
-  const b = e.target.closest('[data-league],[data-nav],[data-team],[data-mode],[data-round],[data-metric],[data-menu],[data-player],[data-squad],[data-squad-of],[data-pmetric],[data-reload-players],[data-ref],[data-rsort],[data-smet],[data-gteam],[data-gplayer],[data-gref],.scrim');
+  const b = e.target.closest('[data-league],[data-nav],[data-team],[data-mode],[data-round],[data-metric],[data-menu],[data-player],[data-squad],[data-squad-of],[data-pmetric],[data-reload-players],[data-ref],[data-rsort],[data-smet],[data-gteam],[data-gplayer],[data-gref],[data-hround],[data-hgo],.scrim');
   if(!b) return;
   if(b.matches('.scrim')) return document.body.classList.remove('nav-open');
   if(b.dataset.menu!==undefined) return document.body.classList.toggle('nav-open');
@@ -3492,6 +3589,8 @@ document.addEventListener('click', e=>{
   if(b.dataset.ref!==undefined){ S.ref[S.lg]=b.dataset.ref||null; return go({view:'refs'}); }
   if(b.dataset.rsort) return go({rsort:b.dataset.rsort},false);
   if(b.dataset.smet) return go({smet:b.dataset.smet},false);
+  if(b.dataset.hround!==undefined){ if(!S.hround) S.hround = {}; S.hround[S.lg] = +b.dataset.hround; return go({}, false); }
+  if(b.dataset.hgo!==undefined){ S.round[S.lg] = +b.dataset.hgo; return go({view:'matches'}); }
   if(b.dataset.gteam!==undefined){ S.gteam[S.lg]=+b.dataset.gteam; return go({view:'gsquad'},false); }
   if(b.dataset.gplayer!==undefined){ const v=b.dataset.gplayer; S.gplayer[S.lg]= /^\d+$/.test(v) ? +v : v; S.gq=''; return go({view:'gplayer'}); }
   if(b.dataset.gref!==undefined){ S.gref[S.lg]=b.dataset.gref||null; return go({view:'grefs'}); }
