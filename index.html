@@ -1421,6 +1421,29 @@ table.mk td{text-align:left;font-size:14px;padding:8px 6px}
 .tv-a{display:block;border-radius:8px;transition:transform .15s}
 .tv-a:hover{transform:translateY(-1px)}
 .tv-a:hover .tv-logo,.tv-a:hover .tv-chip{border-color:color-mix(in srgb,var(--g1) 60%,transparent);background:rgba(255,255,255,.08)}
+
+/* ---------- simulador: tabela de probabilidades sem rolagem lateral no celular ---------- */
+table.probs th .hs{display:none}
+.probs-legend{display:none}
+@media (max-width:760px){
+  #sim-probs .tbl-wrap{overflow-x:visible}
+  table.probs{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}
+  table.probs th{font-size:11px;padding:6px 1px;white-space:nowrap;letter-spacing:0}
+  table.probs th .hl{display:none}
+  table.probs th .hs{display:inline}
+  table.probs th:first-child{width:34px;font-size:0}
+  table.probs th:nth-child(2){width:28px}
+  table.probs td{padding:3px 2px}
+  table.probs td.l{padding-left:2px}
+  table.probs .club{min-width:0!important;max-width:none!important;justify-content:center}
+  table.probs .club span{display:none}
+  table.probs .club .crest{width:24px;height:24px;margin:0}
+  table.probs td.pts{font-size:14px;text-align:center}
+  .pcell{min-width:0!important;height:26px;border-radius:6px}
+  .pcell span{font-size:12px}
+  .probs-legend{display:block;margin:10px 2px 0;font-size:11.5px;line-height:1.5;color:var(--muted)}
+  .probs-legend b{color:#fff;font-weight:700}
+}
 </style>
 </head>
 <body>
@@ -3181,6 +3204,8 @@ const SIM_COLS = {
   de:[['Campeão',1,1,'#f5c518'],['Champions',1,4,'#3b82f6'],['Europa',5,5,'#f97316'],['Conference',6,6,'#22c55e'],['Playoff',16,16,'#eab308'],['Rebaixa',17,18,'#ef4444']],
   fr:[['Campeão',1,1,'#f5c518'],['Champions',1,4,'#3b82f6'],['Europa',5,5,'#f97316'],['Conference',6,6,'#22c55e'],['Playoff',16,16,'#eab308'],['Rebaixa',17,18,'#ef4444']],
 };
+const SIM_SHORT = {'Campeão':'Camp.','Liberta':'Lib.','Sula':'Sula','Z4':'Z4','Champions':'UCL','Europa':'UEL','Conference':'UECL','Playoff':'Play.','Rebaixa':'Reb.'};
+const SIM_LONG = {'Campeão':'campeão','Liberta':'Libertadores','Sula':'Sul-Americana','Z4':'rebaixamento','Champions':'Champions League','Europa':'Europa League','Conference':'Conference League','Playoff':'playoff de rebaixamento','Rebaixa':'rebaixamento'};
 const SIM_N = 10000, simCache = {};
 const simKey = m => `${m[0]}|${m[3]}|${m[4]}`;
 const simStore = L => { if(!S.sim || typeof S.sim!=='object') S.sim = {}; return S.sim[L.lg] || (S.sim[L.lg] = {}); };
@@ -3241,10 +3266,11 @@ const fmtProb = p => p<=0 ? '0%' : p<.005 ? '<1%' : p>=1 ? '100%' : p>.995 ? '>9
 function simProbsHTML(L, cnt, tbl){
   const cols = SIM_COLS[L.lg] || SIM_COLS.en;
   const pr = (i,a,b) => { let s=0; for(let p=a-1;p<b;p++) s+=cnt[i][p]; return s/SIM_N; };
-  return `<div class="tbl-wrap"><table class="probs" data-lg="${L.lg}"><thead><tr><th class="l">Clube</th><th>PTS</th>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>
+  return `<div class="tbl-wrap"><table class="probs" data-lg="${L.lg}"><thead><tr><th class="l">Clube</th><th>PTS</th>${cols.map(c=>`<th title="${c[0]}"><span class="hl">${c[0]}</span><span class="hs">${SIM_SHORT[c[0]]||c[0]}</span></th>`).join('')}</tr></thead><tbody>
     ${tbl.map(r=>{ const t=L.T[r.i]; return `<tr class="row" data-team="${t.i}"><td class="l"><div class="club">${crest(t)}<span>${esc(t.name)}</span></div></td><td class="pts">${r.P}</td>
       ${cols.map(c=>{ const p = pr(r.i,c[1],c[2]); return `<td><div class="pcell${p<=0?' zero':''}" style="--pc:${c[3]}"><i style="width:${Math.min(100,p*100)}%"></i><span class="num">${fmtProb(p)}</span></div></td>`; }).join('')}</tr>`; }).join('')}
-  </tbody></table></div>`;
+  </tbody></table></div>
+  <p class="probs-legend">${cols.map(c=>`<b>${SIM_SHORT[c[0]]||c[0]}</b> ${SIM_LONG[c[0]]||c[0]}`).join(' · ')}</p>`;
 }
 function simTableHTML(L, tbl){
   const real = {}; L.table.forEach((t,k)=>real[t.i]=k+1);
