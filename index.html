@@ -3402,7 +3402,7 @@ function viewSim(L){
     return `<div class="simrow${p?' fixed':''}${!p&&s[0]!=null&&s[1]!=null?' filled':''}">
       <div class="st h"><span>${esc(h.name)}</span>${crest(h)}</div>
       ${p ? `<div class="simscore num"><b>${m[5]}</b><i>×</i><b>${m[6]}</b><small class="real">resultado real</small></div>`
-          : `<div class="simscore"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" data-simk="${k}" data-side="0" value="${s[0]??''}" placeholder="–" aria-label="Gols do ${esc(h.name)}"><i>×</i><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" data-simk="${k}" data-side="1" value="${s[1]??''}" placeholder="–" aria-label="Gols do ${esc(a.name)}"><small>${when}<span class="prov"> · provável ${mostLikely(lh)}–${mostLikely(la)}</span></small></div>`}
+          : `<div class="simscore"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" data-simk="${k}" data-side="0" value="${s[0]??''}" placeholder="–" aria-label="Gols do ${esc(h.name)}"><i>×</i><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" spellcheck="false" data-simk="${k}" data-side="1" value="${s[1]??''}" placeholder="–" aria-label="Gols do ${esc(a.name)}"><small>${when}${stadiumOf(L,h)?`<span class="prov"> · ${esc(stadiumOf(L,h))}</span>`:''}</small></div>`}
       <div class="st a">${crest(a)}<span>${esc(a.name)}</span></div></div>`; };
   const i = r==='late' ? -1 : rounds.indexOf(r);
   const prevR = r==='late' ? null : rounds[i-1], nextR = r==='late' ? cur : rounds[i+1];
@@ -3919,7 +3919,7 @@ function openPreview(lg, idx){
   const oh = pvRecord(games(h.i), h.i), oa = pvRecord(games(a.i), a.i);
   const per = (v,j) => j ? nf1.format(v/j) : '—';
   const h2h = L.played.filter(x=>x!==m && ((x[3]===h.i&&x[4]===a.i)||(x[3]===a.i&&x[4]===h.i))).sort(byWhen);
-  const st = stadiumOf(L, h), tv = (TV_RIGHTS[L.lg]||[]).filter(k=>TV_LOGOS[k]);
+  const st = stadiumOf(L, h);
   const stat = (lab, vh, va) => `<div class="pv-row"><b class="num">${vh}</b><span>${lab}</span><b class="num">${va}</b></div>`;
   let palpite = '';
   if(!p && m[5]!=='adiado'){ const [w,d,l] = matchProbs(L, m), P = x => Math.round(x*100);
@@ -3933,7 +3933,7 @@ function openPreview(lg, idx){
     <button class="pv-x" data-pvclose aria-label="Fechar">×</button>
     <div class="pv-kick">${esc(L.cfg.name)} · ${m[0]}ª rodada · ${p?'resultado':'prévia'}</div>
     <div class="pv-head">${side(h)}<div class="pv-mid">${center}</div>${side(a)}</div>
-    <div class="pv-meta">${st?`<span>🏟 ${esc(st)}</span>`:''}${!p && tv.length?`<span class="pv-tv">${tv.map(k=>`<img src="${TV_LOGOS[k]}" alt="${TV_NAMES[k]}" title="${TV_NAMES[k]}">`).join('')}</span>`:''}</div>
+    <div class="pv-meta">${st?`<span>🏟 ${esc(st)}</span>`:''}</div>
     ${!p && m[5]!=='adiado' && m[1] ? `<div class="pv-actions"><button class="mchip" data-ics="${lg}:${idx}">📅 Adicionar à agenda</button></div>` : ''}
     ${palpite}
     <section><h3>Forma recente <small>últimos 5 jogos${p?' antes desta partida':''}</small></h3>
@@ -3957,11 +3957,10 @@ function downloadICS(lg, idx){
   if(m[2]){ const [hh,mm] = m[2].split(':').map(Number), s = new Date(Date.UTC(y,mo-1,d,hh+3,mm)), e = new Date(s.getTime()+2*36e5);
     const f = x => `${x.getUTCFullYear()}${z(x.getUTCMonth()+1)}${z(x.getUTCDate())}T${z(x.getUTCHours())}${z(x.getUTCMinutes())}00Z`; start = `DTSTART:${f(s)}`; end = `DTEND:${f(e)}`; }
   else { const n = new Date(Date.UTC(y,mo-1,d+1)); start = `DTSTART;VALUE=DATE:${y}${z(mo)}${z(d)}`; end = `DTEND;VALUE=DATE:${n.getUTCFullYear()}${z(n.getUTCMonth()+1)}${z(n.getUTCDate())}`; }
-  const tv = (TV_RIGHTS[L.lg]||[]).map(k=>TV_NAMES[k]).join(', ');
   const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Radar das Seis//PT-BR','CALSCALE:GREGORIAN','BEGIN:VEVENT',
     `UID:${L.lg}-${m[1]}-${h.abbr}-${a.abbr}@radardasseis`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`, start, end,
     `SUMMARY:${icsEsc(`${h.name} x ${a.name} · ${L.cfg.name}`)}`, stadiumOf(L,h) ? `LOCATION:${icsEsc(stadiumOf(L,h))}` : '',
-    `DESCRIPTION:${icsEsc(`${m[0]}ª rodada · ${L.cfg.full}${tv?`. Emissoras no Brasil: ${tv}`:''}. Radar das Seis.`)}`,
+    `DESCRIPTION:${icsEsc(`${m[0]}ª rodada · ${L.cfg.full}. Radar das Seis.`)}`,
     'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:Jogo em 30 minutos','END:VALARM','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
   const url = URL.createObjectURL(new Blob([ics], {type:'text/calendar;charset=utf-8'}));
   const el = document.createElement('a'); el.href = url; el.download = `${h.abbr}-x-${a.abbr}-${m[1]}.ics`.replace(/\s+/g,''); document.body.appendChild(el); el.click(); el.remove();
