@@ -1538,6 +1538,7 @@ body.pv-open{overflow:hidden}
 /* ================= AVISO DO ROBÔ ================= */
 .robot-warn{margin-bottom:8px;padding:8px 10px;border-radius:10px;background:rgba(220,38,38,.18);border:1px solid rgba(248,113,113,.55);color:#fecaca;font-weight:600}
 .robot-banner{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(220,38,38,.16);border:1px solid rgba(248,113,113,.55);color:#fecaca;font:600 13.5px/1.4 Barlow,system-ui,sans-serif}
+.match[data-pv] .t{cursor:pointer}
 </style>
 </head>
 <body>
@@ -4077,8 +4078,9 @@ document.addEventListener('click', e=>{
   const ics = t.closest('[data-ics]'); if(ics){ const [lg,i] = ics.dataset.ics.split(':'); downloadICS(lg, +i); return; }
   const sh = t.closest('[data-shareimg]'); if(sh){ shareImgFile(sh.dataset.shareimg); return; }
   if(t.closest('.pv')){ const tm = t.closest('.pv [data-team]'); if(tm){ closePreview(); } return; }
-  if(t.closest('a,button,input,select,[data-team]')) return;
-  const mc = t.closest('.match[data-pv]'); if(mc){ const [lg,i] = mc.dataset.pv.split(':'); e.stopPropagation(); openPreview(lg, +i); }
+  if(t.closest('a,button,input,select')) return;
+  const mc = t.closest('.match[data-pv]');
+  if(mc){ const [lg,i] = mc.dataset.pv.split(':'); e.preventDefault(); e.stopImmediatePropagation(); openPreview(lg, +i); }
 }, true);
 function applyTheme(){
   const g=LEAGUES[S.lg].g, r=document.documentElement.style;
