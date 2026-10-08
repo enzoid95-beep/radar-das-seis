@@ -408,6 +408,30 @@ def digest(leagues):
     return hashlib.sha256(json.dumps(leagues, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
+# Correções manuais de placares. Use quando a fonte trouxer um resultado errado ou provisório.
+# Cada item: (liga, data AAAA-MM-DD, mandante, visitante, gols mandante, gols visitante, intervalo mandante, intervalo visitante)
+# O nome dos times deve ser o mesmo da fonte. Remova a linha quando a fonte estiver certa.
+SCORE_OVERRIDES = [
+    ("br", "2026-10-07", "Botafogo", "Vasco da Gama", 1, 2, 0, 1),  # Botafogo 1 x 2 Vasco (fonte trouxe 2 x 2)
+]
+
+def apply_score_overrides(out):
+    """Aplica as correções de SCORE_OVERRIDES sobre os dados já montados."""
+    for lg, date, home_name, away_name, gh, ga, hh, ha in SCORE_OVERRIDES:
+        league = out["leagues"].get(lg)
+        if not league:
+            continue
+        names = [t.get("name") for t in league.get("teams", [])]
+        if home_name not in names or away_name not in names:
+            print(f"  correção ignorada (time não encontrado): {home_name} x {away_name}")
+            continue
+        hi, ai = names.index(home_name), names.index(away_name)
+        for row in league.get("matches", []):
+            if row[1] == date and row[3] == hi and row[4] == ai:
+                row[5:9] = [gh, ga, hh, ha]
+                print(f"  placar corrigido: {home_name} {gh} x {ga} {away_name}")
+                break
+
 def main():
     if not TOKEN:
         sys.exit("Defina a variável FOOTBALL_DATA_TOKEN com a sua chave do football-data.org.")
@@ -436,6 +460,7 @@ def main():
         "source": "football-data.org",
         "leagues": leagues,
     }
+    apply_score_overrides(out)
     extra = update_api_football(out, previous)
     if extra:
         out["extra"] = extra
